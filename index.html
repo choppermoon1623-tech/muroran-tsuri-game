@@ -1,0 +1,1268 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>室蘭沖ボート釣り</title>
+<style>
+:root{--ink:#eaf4f8;--sub:#9fc0cc;--panel:rgba(6,22,34,.74);--line:rgba(160,210,230,.25);--acc:#ffb547;--acc2:#4fd1c5;--bad:#ff6b6b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#061420;color:var(--ink);font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic UI",system-ui,sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+#cv{position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh;display:block}
+.hud{position:fixed;z-index:2}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;backdrop-filter:blur(3px)}
+#info{top:10px;left:10px;padding:8px 12px;font-size:13px;line-height:1.55;min-width:190px}
+#info .big{font-size:22px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+#info .row{display:flex;gap:10px;align-items:baseline}
+#info .muted{color:var(--sub)}
+#tide{display:inline-block;padding:0 6px;border-radius:6px;font-size:12px}
+#topbtns{display:flex;gap:6px;margin-top:6px}
+.sbtn{font:inherit;font-size:12px;color:var(--ink);background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:8px;padding:4px 9px;cursor:pointer}
+.sbtn:hover{background:rgba(255,255,255,.16)}
+#ffBox{top:10px;right:10px;padding:6px;width:clamp(140px,22vw,210px)}
+#ffBox .t{font-size:11px;color:var(--sub);display:flex;justify-content:space-between;padding:0 2px 4px}
+#ff{display:block;width:100%;aspect-ratio:3/4;border-radius:6px;background:#020a14}
+#rodBox{left:10px;bottom:96px;padding:4px 6px 2px;width:clamp(150px,26vw,230px)}
+#rodBox .t{font-size:11px;color:var(--sub)}
+#rod{display:block;width:100%;aspect-ratio:16/9}
+#ctrls{left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:8px;padding:0 10px}
+.cb{font:inherit;color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:14px;min-width:72px;height:68px;padding:4px 10px;font-size:15px;font-weight:700;cursor:pointer;background:rgba(20,60,80,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;touch-action:none}
+.cb small{font-size:10px;font-weight:400;opacity:.7;margin-top:3px}
+.cb:active,.cb.on{transform:translateY(1px);filter:brightness(1.3)}
+.cb:disabled{opacity:.35;cursor:default}
+#bAwase{background:linear-gradient(#ff9d3c,#d9661c);min-width:110px;font-size:19px}
+#bAwase.hot{animation:pulse .5s infinite alternate}
+@keyframes pulse{to{box-shadow:0 0 0 6px rgba(255,180,80,.45);filter:brightness(1.25)}}
+#bReel{background:linear-gradient(#2f8fa8,#1d5f73)}
+#gauge{left:50%;transform:translateX(-50%);bottom:88px;width:min(460px,64vw);padding:6px 10px;display:none}
+#gauge .bar{position:relative;height:16px;border-radius:8px;background:rgba(255,255,255,.1);overflow:hidden}
+#gauge .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#4fd1c5,#ffd35a 70%,#ff5a5a)}
+#gauge .drag{position:absolute;top:-3px;bottom:-3px;width:3px;background:#fff;box-shadow:0 0 4px #000}
+#gauge .lab{display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-top:4px;gap:6px}
+#gauge .lab b{font-variant-numeric:tabular-nums}
+#toast{left:50%;top:24%;transform:translateX(-50%);font-size:clamp(20px,4vw,34px);font-weight:800;text-shadow:0 2px 8px #000,0 0 2px #000;pointer-events:none;opacity:0;transition:opacity .25s;white-space:nowrap;text-align:center}
+#toast small{display:block;font-size:.5em;font-weight:600;opacity:.9}
+.ov{position:fixed;inset:0;z-index:5;background:rgba(2,10,18,.78);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.ov.hide{display:none}
+.card{background:#0c2232;border:1px solid var(--line);border-radius:16px;max-width:860px;width:100%;padding:18px 20px;max-height:100%;overflow:auto}
+h1{margin:0 0 2px;font-size:clamp(24px,4.5vw,36px);letter-spacing:.04em}
+h2{font-size:15px;color:var(--sub);margin:16px 0 8px;font-weight:600}
+.lead{color:var(--sub);margin:0 0 6px;font-size:13px}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.ch{font:inherit;text-align:left;color:var(--ink);background:rgba(255,255,255,.05);border:2px solid transparent;border-radius:12px;padding:9px 11px;cursor:pointer}
+.ch b{display:block;font-size:15px}
+.ch span{display:block;font-size:12px;color:var(--sub);margin-top:2px;line-height:1.45}
+.ch.sel{border-color:var(--acc);background:rgba(255,181,71,.12)}
+.go{font:inherit;font-size:20px;font-weight:800;color:#1b1206;background:linear-gradient(#ffc76a,#ff9d3c);border:0;border-radius:14px;padding:12px 30px;cursor:pointer;margin-top:16px}
+.howto{font-size:12.5px;color:var(--sub);line-height:1.7;margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:0 5px;font-family:inherit;font-size:.95em;color:#fff}
+#catch .card{max-width:700px;text-align:center}
+#catchCv{width:100%;aspect-ratio:2.3/1;display:block;background:radial-gradient(ellipse at center,#173a4e,#0a1c28);border-radius:12px}
+#catchName{font-size:30px;font-weight:800;margin:10px 0 0}
+#catchName small{font-size:15px;color:var(--sub);font-weight:600;margin-left:8px}
+#catchSize{font-size:22px;margin:4px 0;font-variant-numeric:tabular-nums}
+#catchSize .rec{color:var(--acc);font-weight:800;margin-left:8px}
+#catchDesc{font-size:13.5px;color:#cfe2ea;line-height:1.7;text-align:left;margin:8px 4px}
+#catchMeta{font-size:12px;color:var(--sub)}
+.zgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.zc{background:rgba(255,255,255,.05);border-radius:12px;padding:8px;text-align:center;font-size:12px;color:var(--sub)}
+.zc canvas{width:100%;aspect-ratio:2/1;display:block}
+.zc b{display:block;font-size:15px;color:var(--ink)}
+.zc.no b{color:#5d7a86}
+#mmBox{right:10px;bottom:96px;padding:4px 6px 6px;width:clamp(120px,16vw,180px);display:none}
+#mmBox .t{font-size:11px;color:var(--sub);display:flex;justify-content:space-between}
+#mm{display:block;width:100%;aspect-ratio:1;border-radius:6px}
+#mapWrap{position:relative}
+#map{width:100%;height:clamp(240px,44vh,440px);display:block;border-radius:12px;cursor:crosshair;touch-action:none;background:#123}
+.mapbtns{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:4px}
+.mapbtns .sbtn{font-size:18px;width:36px;height:36px;padding:0;background:rgba(6,22,34,.8)}
+#spotInfo{font-size:13px;margin-top:8px;line-height:1.9}
+#spotInfo .muted{color:var(--sub)}
+.sbtn.on{background:rgba(255,181,71,.28);border-color:var(--acc)}
+.dt{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dt input,.dt select{font:inherit;font-size:15px;color:var(--ink);background:#0a1a26;border:1px solid var(--line);border-radius:8px;padding:5px 8px;color-scheme:dark}
+#tideCv{width:100%;height:110px;display:block;margin-top:8px;border-radius:8px;background:#081a26}
+#tideInfo{font-size:12.5px;color:#cfe2ea;margin-top:6px;line-height:1.6}
+.src{font-size:11px;color:var(--sub);margin-top:10px}
+@media (max-width:620px){
+  #mmBox{display:none!important}
+  #info{font-size:11.5px;min-width:0;padding:6px 9px}
+  #info .big{font-size:18px}
+  .cb{min-width:58px;height:62px;font-size:13px;padding:2px 6px}
+  #bAwase{min-width:84px;font-size:16px}
+  #rodBox{bottom:84px}
+  #gauge{bottom:80px;width:calc(100vw - 20px)}
+  .cb small{display:none}
+  #info #topbtns .sbtn{padding:3px 7px}
+}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="info" class="hud panel">
+  <div class="muted" id="iPlace">—</div>
+  <div class="row"><span class="muted">水深</span><span class="big" id="iDepth">0.0</span>m</div>
+  <div class="row"><span class="muted">仕掛け</span><span id="iTana">水面</span></div>
+  <div class="row"><span class="muted">潮</span><span id="tide">—</span><span class="muted">釣果</span><span id="iCount">0</span>匹</div>
+  <div class="row"><span class="muted">時刻</span><span id="iTime">—</span></div>
+  <div id="topbtns"><button class="sbtn" id="bMenu">メニュー</button><button class="sbtn" id="bRedrift">流し直し</button><button class="sbtn" id="bZukan">図鑑</button><button class="sbtn" id="bSound">音：ON</button></div>
+</div>
+
+<div id="ffBox" class="hud panel"><div class="t"><span>魚探</span><span id="ffDepth">—</span></div><canvas id="ff"></canvas></div>
+<div id="mmBox" class="hud panel"><div class="t"><span>航跡 3km</span><span id="mmDir"></span></div><canvas id="mm"></canvas></div>
+<div id="rodBox" class="hud panel"><div class="t">竿先</div><canvas id="rod"></canvas></div>
+
+<div id="gauge" class="hud panel">
+  <div class="bar"><div class="fill" id="gFill"></div><div class="drag" id="gDrag"></div></div>
+  <div class="lab"><span>張り <b id="gTen">0.0</b>kg</span><span><button class="sbtn" id="dMinus">－</button> ドラグ <b id="gDragV">3.0</b>kg <button class="sbtn" id="dPlus">＋</button></span><span>のこり <b id="gLine">0</b>m</span></div>
+</div>
+
+<div id="ctrls" class="hud">
+  <button class="cb" id="bDrop">落とす<small>S / ↓</small></button>
+  <button class="cb" id="bReel">巻く<small>押し続け W / ↑</small></button>
+  <button class="cb" id="bSasou">誘う<small>Z</small></button>
+  <button class="cb" id="bAwase">合わせ<small>スペース</small></button>
+  <button class="cb" id="bKaishu">回収<small>R</small></button>
+</div>
+<div id="toast" class="hud"></div>
+
+<!-- スタートメニュー -->
+<div id="menu" class="ov">
+  <div class="card">
+    <h1>室蘭沖 ボート釣り</h1>
+    <p class="lead">プレジャーボートで室蘭の海へ。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.6）</span></p>
+    <h2>ポイント（地図をタップ。ドラッグで移動、＋－で拡大縮小）</h2>
+    <div id="mapWrap"><canvas id="map"></canvas><div class="mapbtns"><button class="sbtn" id="mzIn">＋</button><button class="sbtn" id="mzOut">－</button></div></div>
+    <div id="spotInfo"></div>
+    <h2>日時（季節・潮・時間帯がこれで決まる）</h2>
+    <div class="dt"><input type="date" id="inDate"><select id="inTime"></select></div>
+    <canvas id="tideCv"></canvas><div id="tideInfo"></div>
+    <h2>仕掛け</h2><div class="choices" id="chRig"></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button class="go" id="bStart">出船！</button>
+      <button class="sbtn" id="bZukan2" style="margin-top:16px">魚図鑑を見る</button>
+    </div>
+    <div class="src">海底地形：GEBCO Compilation Group (2025) GEBCO_2025 Grid（約400m格子のため根や瀬は表現できず、底質に合わせた起伏を足しています）／潮位：気象庁 潮位表「室蘭」</div>
+    <div class="howto">
+      <b>あそび方</b>　①<kbd>落とす</kbd>で仕掛けを沈める（底に着くと「着底」）　②<kbd>巻く</kbd>でタナ（深さ）を調整。魚探の魚の反応に合わせよう　③<kbd>誘う</kbd>で仕掛けを動かす（ジグはしゃくらないと食わない）　④竿先がグッと入ったら<kbd>合わせ</kbd>　⑤やりとりは<kbd>巻く</kbd>を押し続ける。張りがドラグを超えると糸が出る。張りすぎると切れる、ゆるめるとバレる　⑥大物は水面で<kbd>合わせ</kbd>＝タモ入れ。<br>
+      ボートは潮で流され、実際の海底地形（GEBCO）に沿って深さが変わります。浅くなりすぎたら<kbd>流し直し</kbd>。潮がよく動く時間と朝夕のまずめ時は魚の食いが立ちます。ゲームの中では5分で1時間が進みます。岩場で底を引きずると<b>根掛かり</b>。浅くなったら巻き上げ、深くなったら落とし直して「底を取り直す」のが船釣りのコツです。
+    </div>
+  </div>
+</div>
+
+<!-- 釣果カード -->
+<div id="catch" class="ov hide">
+  <div class="card">
+    <canvas id="catchCv"></canvas>
+    <div id="catchName"></div>
+    <div id="catchSize"></div>
+    <div id="catchDesc"></div>
+    <div id="catchMeta"></div>
+    <button class="go" id="bNext">つづける</button>
+  </div>
+</div>
+
+<!-- 図鑑 -->
+<div id="zukan" class="ov hide">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center"><h1 style="font-size:26px">魚図鑑</h1><button class="sbtn" id="bZClose">とじる</button></div>
+    <p class="lead" id="zStat"></p>
+    <div class="zgrid" id="zGrid"></div>
+  </div>
+</div>
+
+<script src="data/bathy-data.js"></script>
+<script src="data/tide-data.js"></script>
+<script>
+'use strict';
+// ============ 基本の道具 ============
+const $ = s => document.querySelector(s);
+const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t, rand=(a,b)=>a+Math.random()*(b-a);
+const randi=(a,b)=>Math.floor(rand(a,b+1));
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function mulberry(s){return function(){s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+function wpick(items,wf){let tot=0;for(const it of items)tot+=Math.max(0,wf(it));if(tot<=0)return null;let r=Math.random()*tot;for(const it of items){r-=Math.max(0,wf(it));if(r<=0)return it;}return items[items.length-1];}
+const hash=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x);};
+
+// ============ データ：ポイント・季節・仕掛け ============
+// 地形は「それらしい形」の作り物。実際の海底地形ではない
+const POINTS=[
+ {id:'gansho',name:'港外の岩礁帯',type:'rock',depthTxt:'水深12〜20m',desc:'海藻の生えた浅い岩場。ソイ・アブラコ・ガヤの宝庫。根掛かりに注意。',start:0,
+  bottom:x=>16+2.8*Math.sin(x*0.07)+1.6*Math.sin(x*0.23+1.3)+0.6*Math.sin(x*0.9+0.4)},
+ {id:'okine',name:'沖の根まわり',type:'rock',depthTxt:'水深30〜45m',desc:'海底から盛り上がった根。大型のソイやホッケの群れ、秋は青物も回る。',start:18,
+  bottom:x=>{const m=((x%80)+80)%80;return 43-11*Math.exp(-(((m-40)/9)**2))+1.2*Math.sin(x*0.5)+0.8*Math.sin(x*1.7);}},
+ {id:'sunachi',name:'砂地のカケアガリ',type:'sand',depthTxt:'水深18〜30m',desc:'ゆるやかな砂の斜面。カレイとヒラメの舞台。根掛かりはほとんどない。',start:0,
+  bottom:x=>24+5*Math.sin(x*0.025)+0.4*Math.sin(x*0.6)},
+ {id:'fukaba',name:'沖の深場',type:'mud',depthTxt:'水深65〜80m',desc:'冷たい泥底。冬はマダラが主役。電動リールで上げ下げ。',start:0,dendou:true,
+  bottom:x=>72+4*Math.sin(x*0.03)+0.5*Math.sin(x*0.5)},
+];
+const SEASONS=[{id:0,name:'春',sub:'3〜5月'},{id:1,name:'夏',sub:'6〜8月'},{id:2,name:'秋',sub:'9〜11月'},{id:3,name:'冬',sub:'12〜2月'}];
+const RIGS={
+ bait:{name:'胴突き（エサ）',desc:'オモリで底を取り、枝バリに切り身やイソメ。根魚・カレイ・タラの基本',fall:1.5,hooks:[.35,.85,1.35],sense:4.5,brk:8,sasou:.3},
+ jig:{name:'メタルジグ',desc:'しゃくって誘う金属ルアー。青物・サクラマス・ヒラメ・ソイ',fall:2.4,hooks:[.1],sense:6.5,brk:9,sasou:1.1},
+ sabiki:{name:'サビキ',desc:'疑似バリが6本。群れで回るホッケ・サバ・ガヤ',fall:1.3,hooks:[.35,.75,1.15,1.55,1.95,2.35],sense:5,brk:6,sasou:.6},
+};
+
+// ============ データ：魚 ============
+// season=[春,夏,秋,冬] の出やすさ。数値はゲーム用の仮の値（実際の釣果に合わせて調整していく）
+const SP=[
+ {id:'kurosoi',photo:'L',night:1.8,name:'クロソイ',habitat:{rock:1,sand:.15,mud:0},dmin:3,dmax:70,zone:{t:'bottom',a:0,b:3.5},season:[.8,1,1,.6],abund:1,school:[1,2],
+  rig:{bait:1,jig:.8,sabiki:.3},size:[20,55],mode:30,lw:[.0155,3.03],power:1,bite:'gon',fight:'dive',spd:.5,
+  look:{kind:'rock',h:.34,back:'#202428',side:'#40464d',belly:'#a8a49a',fin:'#1e2124',pat:['eyelines','mottle']},
+  desc:'北海道の船釣りを代表する根魚。岩礁の底近くにひそみ、夕方から夜によく動く。目の後ろから伸びる3本の黒い線が目印。'},
+ {id:'shimazoi',photo:'L',name:'シマゾイ',habitat:{rock:1,sand:.05,mud:0},dmin:3,dmax:35,zone:{t:'bottom',a:0,b:2.5},season:[.6,1,.9,.4],abund:.45,school:[1,1],
+  rig:{bait:.9,jig:.6,sabiki:.2},size:[18,38],mode:26,lw:[.018,3],power:1.05,bite:'gon',fight:'dive',spd:.45,
+  look:{kind:'rock',h:.36,back:'#3a3016',side:'#d0a838',belly:'#ecdca0',fin:'#6a5420',pat:['stripes3']},
+  desc:'黄色の地に黒い縦じまが走るソイ。浅い岩場の海藻まわりに多い。見た目も味もよく、釣れるとうれしい一尾。'},
+ {id:'gaya',photo:'L',multi:true,name:'エゾメバル',alias:'ガヤ',habitat:{rock:1,sand:.2,mud:0},dmin:2,dmax:50,zone:{t:'bottom',a:.3,b:5},season:[.9,1,.9,.8],abund:1.3,school:[2,4],
+  rig:{bait:1,jig:.35,sabiki:1},size:[13,27],mode:19,lw:[.017,3],power:.9,bite:'gon',fight:'shake',spd:.55,
+  look:{kind:'rock',h:.33,back:'#2a241e',side:'#5a4838',belly:'#b6a68e',fin:'#382e26',pat:['mottle']},
+  desc:'北海道ではガヤと呼ばれる小型の根魚。群れでいて食いがよく、仕掛けを落とせばすぐにアタリ。外道あつかいされがちだが味はよい。'},
+ {id:'ainame',photo:'L',name:'アイナメ',alias:'アブラコ',habitat:{rock:1,sand:.3,mud:0},dmin:2,dmax:40,zone:{t:'bottom',a:0,b:2},season:[.9,.8,1,.5],abund:.85,school:[1,1],
+  rig:{bait:1,jig:.45,sabiki:.25},size:[22,55],mode:34,lw:[.0125,3.03],power:1.1,bite:'gon',fight:'dive',spd:.5,
+  look:{kind:'greenling',h:.24,back:'#46361e',side:'#86663a',belly:'#d8ccb0',fin:'#584224',pat:['mottle','latlines']},
+  desc:'北海道ではアブラコ。体の横に側線が5本走るのが特徴。秋の産卵期になるとオスは黄色っぽい婚姻色に変わる。'},
+ {id:'hokke',photo:'L',pt:{okine:2.5,gansho:.5,sunachi:.5},multi:true,name:'ホッケ',habitat:{rock:1,sand:.6,mud:.3},dmin:8,dmax:150,zone:{t:'bottom',a:1,b:9},season:[1,.5,.9,.6],abund:.7,school:[4,7],
+  rig:{bait:.8,jig:.4,sabiki:1},size:[24,45],mode:33,lw:[.0095,3],power:.95,bite:'gon',fight:'shake',spd:.9,
+  look:{kind:'hokke',h:.22,back:'#46564a',side:'#8a9484',belly:'#e2e2d8',fin:'#8a8460',pat:['bandsFaint']},
+  desc:'群れで回遊し、群れに当たると次々に釣れる。開き干しでおなじみ。春と秋が狙い目。'},
+ {id:'magarei',photo:'R',pt:{sunachi:2,gansho:.15,okine:.15,fukaba:.3},name:'マガレイ',habitat:{rock:.15,sand:1,mud:.5},dmin:5,dmax:100,zone:{t:'flat'},season:[1,.9,.5,.3],abund:1,school:[1,2],
+  rig:{bait:1,jig:.05,sabiki:.25},size:[18,38],mode:26,lw:[.012,3],power:.8,bite:'kotsu',fight:'heavy',spd:.3,
+  look:{kind:'flat',h:.5,dir:'right',back:'#6a5a40',side:'#7a6a4c',fin:'#6a5a40',pat:['mottleFine']},
+  desc:'砂地の代表的なカレイ。目は体の右側にある（左ヒラメに右カレイ）。コツコツと小さなアタリが続いたあと、グーッと食い込む。'},
+ {id:'hirame',photo:'L',pt:{sunachi:1.5,okine:.6,gansho:.6},name:'ヒラメ',habitat:{rock:.35,sand:1,mud:.2},dmin:5,dmax:120,zone:{t:'flat'},season:[.4,.9,1,.4],abund:.35,school:[1,1],
+  rig:{bait:.35,jig:.85,sabiki:.05},size:[35,85],mode:50,lw:[.0115,3],power:1.2,bite:'hirame',fight:'heavy',spd:.4,
+  look:{kind:'flat',h:.42,dir:'left',back:'#58482e',side:'#685636',fin:'#58482e',pat:['spotsRing','mottle'],bigmouth:true},
+  desc:'目は体の左側。大きな口と鋭い歯で小魚を襲う。「ヒラメ40（よんじゅう）」――前アタリがあっても慌てて合わせず、しっかり食い込むまで待つのがコツ。'},
+ {id:'buri',photo:'L',name:'ブリ',habitat:{rock:1,sand:.8,mud:.4},dmin:10,dmax:200,zone:{t:'mid',top:.15,bot:.95},season:[0,.7,1,.15],abund:.2,school:[4,8],
+  rig:{bait:.05,jig:1,sabiki:.1},size:[40,92],mode:58,lw:[.0117,3],power:1.5,bite:'hit',fight:'run',spd:2.2,
+  look:{kind:'yellowtail',h:.24,back:'#2a5868',side:'#98b2ba',belly:'#eef2f2',fin:'#7a8a50',pat:['yline']},
+  desc:'夏から秋に群れで回遊する青物。大きさで呼び名が変わる出世魚で、北海道では小型をフクラギと呼ぶ。ジグに猛スピードで食いつき、横へ強烈に走る。'},
+ {id:'saba',photo:'L',name:'マサバ',habitat:{rock:1,sand:1,mud:.5},dmin:8,dmax:200,zone:{t:'mid',top:.1,bot:.7},season:[.1,.9,1,.2],abund:.5,school:[6,10],multi:true,
+  rig:{bait:.3,jig:.85,sabiki:1},size:[24,42],mode:32,lw:[.0105,3],power:1.25,bite:'hit',fight:'run',spd:1.6,
+  look:{kind:'mackerel',h:.2,back:'#285858',side:'#98aeae',belly:'#f0f2ee',fin:'#4e5e5e',pat:['wavy']},
+  desc:'群れで中層を回る。背中の青緑の波模様が目印。小さくても引きは強い。'},
+ {id:'sakuramasu',photo:'L',name:'サクラマス',habitat:{rock:1,sand:1,mud:.6},dmin:10,dmax:200,zone:{t:'abs',top:4,bot:40},season:[1,0,0,.45],abund:.3,school:[1,2],
+  rig:{bait:.1,jig:1,sabiki:.1},size:[38,68],mode:50,lw:[.0125,3],power:1.35,bite:'hit',fight:'run',spd:1.8,
+  look:{kind:'salmon',h:.25,back:'#384858',side:'#c6ced6',belly:'#f4f6f6',fin:'#58626e',pat:['spots']},
+  desc:'ヤマメが海へ下って大きく育ったもの。冬から春の船釣りで人気の大物。銀色の体に、背中の細かな黒い点。中層でジグに食う。'},
+ {id:'madara',photo:'L',pt:{okine:2,sunachi:.3},name:'マダラ',habitat:{rock:1,sand:.5,mud:1},dmin:25,dmax:500,zone:{t:'bottom',a:0,b:4},season:[.6,.15,.45,1],abund:1.5,school:[1,3],
+  rig:{bait:1,jig:.8,sabiki:.3},size:[40,95],mode:62,lw:[.0105,3],power:.7,bite:'gon',fight:'heavy',spd:.5,
+  look:{kind:'cod',h:.24,back:'#585040',side:'#988868',belly:'#e6e0d0',fin:'#686048',pat:['mottleFine']},
+  desc:'冷たい海の底にすむ大型のタラ。沖の根まわりや深場で釣れる。あごの下に1本のひげ。冬が旬で、大きな口でなんでも食べる。重い引きを電動リールでじっくり。'},
+ {id:'souhachi',photo:'R',pt:{sunachi:1.5,okine:.3,gansho:0},zoneBy:{0:{t:'bottom',a:2,b:12}},schoolBy:{0:[8,14]},multi:true,name:'ソウハチ',habitat:{rock:.1,sand:1,mud:.8},dmin:20,dmax:200,zone:{t:'flat'},season:[3,1,.5,.3],abund:.9,school:[2,4],
+  rig:{bait:1,jig:.05,sabiki:1},size:[20,40],mode:28,lw:[.011,3],power:.8,bite:'kotsu',fight:'heavy',spd:.35,
+  look:{kind:'flat',h:.48,dir:'right',back:'#7a5a44',side:'#8a6a50',fin:'#8a6a50',pat:['mottleFine']},
+  desc:'砂泥の少し深い所にすむカレイ。春先は「浮き宗八（うきそうはち）」と呼ばれ、底から浮いて大群で回り、仕掛けに鈴なりで掛かる。干しガレイでおなじみ。'},
+ {id:'sukesou',photo:'L',multi:true,name:'スケトウダラ',alias:'スケソウ',habitat:{rock:.6,sand:.8,mud:1},dmin:50,dmax:500,zone:{t:'bottom',a:0,b:15},season:[.5,.2,.4,1],abund:.9,school:[4,8],
+  rig:{bait:.9,jig:.5,sabiki:1},size:[35,60],mode:45,lw:[.007,3],power:.8,bite:'gon',fight:'shake',spd:.7,
+  look:{kind:'cod',h:.2,back:'#4a4a40',side:'#a0a090',belly:'#ecece4',fin:'#4a4a40',pat:['mottleFine']},
+  desc:'北海道でスケソウと呼ばれるタラの仲間。深場で大きな群れをつくり、冬が最盛期。卵はたらこ・明太子になる。'},
+ {id:'toubetsu',photo:'R',pt:{okine:2.5,gansho:.6},name:'トウベツカジカ',alias:'ケムシカジカ',habitat:{rock:1,sand:.6,mud:.4},dmin:5,dmax:150,zone:{t:'bottom',a:0,b:.8},season:[.4,.2,.7,1],abund:.35,school:[1,1],
+  rig:{bait:1,jig:.3,sabiki:.1},size:[25,45],mode:33,lw:[.022,3],power:.9,bite:'gon',fight:'heavy',spd:.25,
+  look:{kind:'cod',h:.3,back:'#5a4632',side:'#7a6448',belly:'#cab89a',fin:'#5a4632',pat:['mottle']},
+  desc:'皮にイボのような突起がびっしり並ぶカジカ。見た目はごついが、鍋にするとおいしい。秋から冬に浅場へ寄ってくる。'},
+ {id:'kurogashira',photo:'R',pt:{sunachi:2,gansho:.15,okine:.15,fukaba:.3},name:'クロガシラガレイ',habitat:{rock:.3,sand:1,mud:.3},dmin:3,dmax:50,zone:{t:'flat'},season:[1,.8,.6,.4],abund:.8,school:[1,2],
+  rig:{bait:1,jig:.02,sabiki:.15},size:[22,50],mode:32,lw:[.013,3],power:.95,bite:'kotsu',fight:'heavy',spd:.3,
+  look:{kind:'flat',h:.48,dir:'right',back:'#3e4436',side:'#4e5444',fin:'#5a5040',pat:['mottle']},
+  desc:'北海道で人気のカレイ。ひれに黒い帯もようが並ぶ。浅い砂地で、春に数が出る。'},
+ {id:'anago',photo:'L',night:2.2,name:'マアナゴ',habitat:{rock:.4,sand:1,mud:1},dmin:3,dmax:100,zone:{t:'bottom',a:0,b:.5},season:[.5,1,.9,.3],abund:.4,school:[1,2],wave:.22,
+  rig:{bait:1,jig:.05,sabiki:.1},size:[30,80],mode:50,lw:[.0016,3],power:.9,bite:'kotsu',fight:'shake',spd:.4,
+  look:{kind:'hokke',h:.08,back:'#5a5030',side:'#9a9070',belly:'#e8e6dc',fin:'#5a5030',pat:[]},
+  desc:'細長い体で砂や泥にもぐってくらす。体の横に白い点が一列に並ぶ。夜によく動き、ハリを飲んで仕掛けに巻きつく。'},
+ {id:'yanaginomai',photo:'L',pt:{okine:2.5,gansho:.4},name:'ヤナギノマイ',habitat:{rock:1,sand:.2,mud:0},dmin:10,dmax:100,zone:{t:'bottom',a:.3,b:4},season:[.8,.9,.9,.8],abund:.6,school:[1,3],
+  rig:{bait:1,jig:.5,sabiki:.8},size:[18,35],mode:25,lw:[.016,3],power:.95,bite:'gon',fight:'dive',spd:.5,
+  look:{kind:'rock',h:.34,back:'#7a6a30',side:'#c8a040',belly:'#f0e0b0',fin:'#a09030',pat:['mottle']},
+  desc:'黄色っぽい体に、だいだい色の側線が目立つメバルの仲間。岩礁のやや深い所にすむ北海道の根魚。'},
+ {id:'kasube',photo:'R',name:'カスベ',alias:'ガンギエイの仲間',habitat:{rock:.3,sand:1,mud:1},dmin:15,dmax:300,zone:{t:'flat'},season:[.6,.7,.7,.6],abund:.3,school:[1,1],wave:.03,
+  rig:{bait:1,jig:.1,sabiki:.05},size:[40,90],mode:60,lw:[.006,3],power:1,bite:'gon',fight:'heavy',spd:.3,
+  look:{kind:'flat',h:.7,dir:'right',back:'#7a5a40',side:'#8a6a50',fin:'#8a6a50',pat:['mottle']},
+  desc:'北海道でカスベと呼ばれるエイの仲間。底にべったり張りつき、上げるのに一苦労。煮付けで食べる。'},
+ {id:'sake',photo:'L',name:'サケ',alias:'アキアジ',habitat:{rock:1,sand:1,mud:1},dmin:5,dmax:200,zone:{t:'abs',top:1,bot:20},season:[0,.05,1,0],abund:.22,school:[1,3],
+  rig:{bait:.2,jig:1,sabiki:.05},size:[55,80],mode:67,lw:[.011,3],power:1.6,bite:'hit',fight:'run',spd:1.8,
+  look:{kind:'salmon',h:.24,back:'#4a5a60',side:'#c8ccd0',belly:'#f2f2f0',fin:'#4a5458',pat:['spots']},
+  desc:'北海道ではアキアジ。秋、生まれた川へ帰るために沿岸へ寄ってくる。浅いタナで強烈に引く。河口付近には採捕禁止の区域があるので注意。'},
+ {id:'maika',photo:'R',night:2.5,multi:true,name:'マイカ',alias:'スルメイカ',habitat:{rock:1,sand:1,mud:1},dmin:15,dmax:300,zone:{t:'mid',top:.2,bot:.8},season:[0,.8,1,.1],abund:.5,school:[3,6],wave:0,
+  rig:{bait:.2,jig:.6,sabiki:.9},size:[18,30],mode:24,lw:[.016,3],power:.7,bite:'omoi',fight:'heavy',spd:1.2,
+  look:{kind:'hokke',h:.22,back:'#6a3a2a',side:'#9a5a40',belly:'#d8a888',fin:'#c07040',pat:[]},
+  desc:'北海道でマイカと呼ばれるスルメイカ。夏から秋に群れで回る。サイズは胴の長さ。イカのハリにはカエシがないので、糸をゆるめると外れやすい。'},
+ {id:'hoshizame',photo:'L',night:1.3,name:'ホシザメ',habitat:{rock:.4,sand:1,mud:.8},dmin:5,dmax:150,zone:{t:'bottom',a:0,b:1.5},season:[.3,1,.8,.1],abund:.3,school:[1,2],wave:.12,
+  rig:{bait:1,jig:.2,sabiki:.05},size:[50,110],mode:75,lw:[.0022,3],power:1.2,bite:'gon',fight:'run',spd:.9,
+  look:{kind:'hokke',h:.12,back:'#8a7a70',side:'#b0a098',belly:'#ecebe6',fin:'#8a7a70',pat:['spots']},
+  desc:'体に白い小さな点が並ぶ小型のサメ。おとなしく、人をおそうことはない。砂地の底でカニやエビを食べる。'},
+ {id:'asaba',photo:'R',pt:{sunachi:2,gansho:.15,okine:.15,fukaba:.3},name:'アサバガレイ',habitat:{rock:.1,sand:.8,mud:1},dmin:20,dmax:200,zone:{t:'flat'},season:[.8,.7,.7,.7],abund:.6,school:[1,2],
+  rig:{bait:1,jig:.03,sabiki:.3},size:[20,40],mode:28,lw:[.012,3],power:.85,bite:'kotsu',fight:'heavy',spd:.3,
+  look:{kind:'flat',h:.5,dir:'right',back:'#5a4a38',side:'#6a5a44',fin:'#8a6a50',pat:['mottle']},
+  desc:'やや深い砂泥にすむカレイ。体にまだらもようがある。北海道の船カレイの常連。'},
+ {id:'akagarei',photo:'R',pt:{fukaba:1.5},name:'アカガレイ',habitat:{rock:.1,sand:.5,mud:1},dmin:50,dmax:400,zone:{t:'flat'},season:[.6,.4,.6,1],abund:.7,school:[1,3],
+  rig:{bait:1,jig:.03,sabiki:.3},size:[25,45],mode:32,lw:[.011,3],power:.85,bite:'kotsu',fight:'heavy',spd:.3,
+  look:{kind:'flat',h:.46,dir:'right',back:'#8a5a40',side:'#9a6a48',fin:'#c07050',pat:['mottleFine']},
+  desc:'深場の泥底にすむ赤みのあるカレイ。ひれのふちが赤っぽい。冬に脂がのる。'},
+ {id:'ishigarei',photo:'R',pt:{sunachi:2,gansho:.15,okine:.15,fukaba:.3},name:'イシガレイ',habitat:{rock:.3,sand:1,mud:.2},dmin:3,dmax:40,zone:{t:'flat'},season:[.9,.8,.6,.4],abund:.45,school:[1,1],
+  rig:{bait:1,jig:.03,sabiki:.1},size:[25,55],mode:36,lw:[.013,3],power:1,bite:'kotsu',fight:'heavy',spd:.3,
+  look:{kind:'flat',h:.44,dir:'right',back:'#2e2e26',side:'#3e3e34',fin:'#6a5032',pat:['mottle']},
+  desc:'うろこがなく、体の表に石のようなかたい粒が並ぶのが名前の由来。浅い砂地にすみ、大型になる。'},
+ {id:'hitode',photo:'L',name:'ヒトデ',habitat:{rock:.8,sand:1,mud:.8},dmin:1,dmax:500,zone:{t:'flat'},season:[1,1,1,1],abund:.4,school:[1,1],wave:0,trash:true,
+  rig:{bait:.8,jig:0,sabiki:.1},size:[10,25],mode:16,lw:[.05,2.5],power:.25,bite:'omoi',fight:'heavy',spd:.02,
+  look:{kind:'flat',h:.9,dir:'right',back:'#a07040',side:'#c08850',fin:'#c08850',pat:['mottleFine']},
+  desc:'エサに抱きついて上がってくる外道。引きはなく、じわっと重くなるだけ。大きさは腕の端から端まで。'},
+ {id:'hakkaku',photo:'L',name:'ハッカク',alias:'トクビレ',habitat:{rock:.2,sand:1,mud:1},dmin:20,dmax:200,zone:{t:'bottom',a:0,b:.6},season:[.5,.3,.5,.9],abund:.35,school:[1,2],
+  rig:{bait:1,jig:.1,sabiki:.3},size:[25,45],mode:32,lw:[.006,3],power:.7,bite:'gon',fight:'heavy',spd:.3,
+  look:{kind:'cod',h:.16,back:'#5a5048',side:'#9a9088',belly:'#e0dcd4',fin:'#4a4440',pat:['mottleFine']},
+  desc:'正式名はトクビレ。オスは背びれとしりびれが帆のように大きい。体は硬い骨の板でおおわれ、断面が八角形に見えるのが名前の由来。軍艦焼きで有名。'},
+ {id:'fugu',photo:'L',name:'フグ',habitat:{rock:1,sand:1,mud:.3},dmin:2,dmax:60,zone:{t:'bottom',a:0,b:6},season:[.2,1,1,.1],abund:.6,school:[2,4],thief:true,
+  rig:{bait:1,jig:.2,sabiki:.4},size:[15,35],mode:22,lw:[.03,3],power:.6,bite:'kotsu',fight:'shake',spd:.5,
+  look:{kind:'hokke',h:.3,back:'#6a6a40',side:'#b0a870',belly:'#f4f2ea',fin:'#8a8a40',pat:['spots']},
+  desc:'エサ取りの名人。するどい歯でエサをかじり取り、ときにはハリスまで切っていく。毒があるので、素人の調理は絶対にしない。'},
+];
+const SPI=Object.fromEntries(SP.map(s=>[s.id,s]));
+function dispName(sp,size){ if(sp.id==='buri') return size<60?'フクラギ':'ブリ'; return sp.name; }
+function weightG(sp,cm){ return sp.lw[0]*Math.pow(cm,sp.lw[1]); }
+function rollSize(sp){ const [a,b]=sp.size; let s=sp.mode+Math.abs(gauss())*(b-sp.mode)*0.38*(Math.random()<.5?1:-0.55)*1.0; if(Math.random()<.04) s=sp.mode+(b-sp.mode)*rand(.6,1); return Math.round(clamp(s,a,b)*10)/10; }
+
+// ============ 魚の絵（キャンバスで描く） ============
+const FINS={
+ rock:{dor:[[.38,.75,.55,1],[.19,.38,.48,0]],ana:[[.18,.31,.42,0]],pect:[.71,.46],tail:'round',eye:.075,eu:.86,mouth:'big',noseY:-.15,hp:.58,ped:.11,snout:2},
+ greenling:{dor:[[.46,.77,.42,1],[.18,.46,.44,0]],ana:[[.17,.48,.36,0]],pect:[.72,.42],tail:'trunc',eye:.05,eu:.88,mouth:'small',noseY:0,hp:.55,ped:.09,snout:1.5},
+ hokke:{dor:[[.2,.74,.36,0]],ana:[[.17,.47,.34,0]],pect:[.74,.38],tail:'fork',eye:.065,eu:.88,mouth:'small',noseY:-.05,hp:.55,ped:.075,snout:1.6},
+ mackerel:{dor:[[.57,.68,.55,1],[.37,.45,.42,0]],ana:[[.34,.42,.36,0]],finlets:[.2,.34],pect:[.75,.3],tail:'deep',eye:.055,eu:.9,mouth:'small',noseY:0,hp:.55,ped:.045,snout:1.3},
+ yellowtail:{dor:[[.62,.7,.26,1],[.3,.6,.32,0]],ana:[[.28,.44,.3,0]],pect:[.76,.28],tail:'deep',eye:.045,eu:.9,mouth:'small',noseY:0,hp:.55,ped:.05,snout:1.35},
+ salmon:{dor:[[.47,.58,.5,0]],adip:.23,ana:[[.26,.34,.38,0]],pect:[.77,.3],tail:'emarg',eye:.045,eu:.9,mouth:'small',noseY:.05,hp:.55,ped:.09,snout:1.45},
+ cod:{dor:[[.62,.73,.45,0],[.44,.58,.4,0],[.24,.4,.38,0]],ana:[[.44,.58,.35,0],[.24,.4,.33,0]],pect:[.72,.38],tail:'trunc',eye:.05,eu:.88,mouth:'big',noseY:.06,barbel:1,hp:.6,ped:.07,snout:1.7},
+};
+function shade(hex,k){ const n=parseInt(hex.slice(1),16); let r=n>>16,g=n>>8&255,b=n&255; if(k<0){r*=1+k;g*=1+k;b*=1+k;} else {r+=(255-r)*k;g+=(255-g)*k;b+=(255-b)*k;} return `rgb(${r|0},${g|0},${b|0})`; }
+function rgba(hex,a){ const n=parseInt(hex.slice(1),16); return `rgba(${n>>16},${n>>8&255},${n&255},${a})`; }
+
+// 写真（fish/<id>.webp）。読めなければキャンバスの手描きに戻る
+const PH={}; for(const sp of SP){ if(!sp.photo) continue; const img=new Image(); const ph={img,head:sp.photo,ok:false}; img.onload=()=>{ph.ok=true;}; img.src='fish/'+sp.id+'.webp'; PH[sp.id]=ph; }
+function photoOf(sp){ const p=PH[sp.id]; return p&&p.ok?p:null; }
+// 写真を縦の短冊に切り、尾ほど大きく揺らして泳がせる。頭は +x 向き
+function drawPhoto(c,L,fish,ph,o){ const img=ph.img, sw=img.naturalWidth, sh=img.naturalHeight, Hh=L*sh/sw;
+  c.save(); c.scale((ph.head==='L'?-1:1)*(o.flip?-1:1),1); if(o.squash) c.scale(1,o.squash);
+  const amp=o.swim===undefined?0:(fish.sp.wave??.06)*Hh*(o.hooked?1.8:1), N=amp?14:1;
+  for(let i=0;i<N;i++){ const xm=(i+.5)/N, t=ph.head==='L'?xm:1-xm, dy=amp?Math.sin(o.swim-t*3)*Math.pow(t,1.6)*amp:0;
+    c.drawImage(img,i/N*sw,0,sw/N+(i<N-1?1:0),sh,-L/2+i/N*L,-Hh/2+dy,L/N+(i<N-1?.8:0),Hh); }
+  c.restore(); }
+// fish: {sp, seed, nuptial}  L:全長px  頭は +x 向き
+function drawFish(c,L,fish,o={}){
+  const sp=fish.sp, lk=Object.assign({},sp.look);
+  const ph=photoOf(sp); if(ph) return drawPhoto(c,L,fish,ph,o);
+  if(fish.nuptial){ lk.back='#6a4c12'; lk.side='#c99a2a'; lk.belly='#e8d088'; lk.fin='#8a6418'; }
+  if(lk.kind==='flat') return drawFlat(c,L,fish,lk,o);
+  const F=FINS[lk.kind], R=mulberry(fish.seed||1);
+  const Hm=lk.h*L/2, pedH=F.ped*L/2, uT=.16, X=u=>-L/2+u*L;
+  const yc=u=>F.noseY*Hm*Math.max(0,(u-.7)/.3);
+  const hh=u=>{ if(u<=uT) return pedH; if(u<=F.hp){const s=(u-uT)/(F.hp-uT);return lerp(pedH,Hm,Math.pow(Math.sin(s*Math.PI/2),1.25));}
+    const s=(u-F.hp)/(1-F.hp); return Hm*Math.pow(Math.max(0,1-Math.pow(s,F.snout)),.5)+ (s>.98?0:Hm*.04*(1-s)); };
+  const top=u=>yc(u)-hh(u), bot=u=>yc(u)+hh(u)*.93;
+  const sw=o.swim||0, ta=Math.sin(sw)*.28;
+  c.save();
+  if(o.flip) c.scale(-1,1);
+  // --- 尾びれ
+  const th=Hm*(F.tail==='deep'?1.05:F.tail==='round'?.82:.9), lt=uT*L;
+  c.save(); c.translate(X(uT),yc(uT)); c.rotate(ta);
+  c.fillStyle=rgba(lk.fin,.92); c.beginPath(); c.moveTo(0,-pedH);
+  if(F.tail==='round'){ c.bezierCurveTo(-lt*.5,-th*1.1,-lt*1.2,-th*.8,-lt*1.15,0); c.bezierCurveTo(-lt*1.2,th*.8,-lt*.5,th*1.1,0,pedH); }
+  else if(F.tail==='trunc'){ c.quadraticCurveTo(-lt*.6,-th,-lt*1.05,-th); c.quadraticCurveTo(-lt*.95,0,-lt*1.05,th); c.quadraticCurveTo(-lt*.6,th,0,pedH); }
+  else if(F.tail==='emarg'){ c.quadraticCurveTo(-lt*.6,-th*.9,-lt*1.1,-th); c.quadraticCurveTo(-lt*.82,0,-lt*1.1,th); c.quadraticCurveTo(-lt*.6,th*.9,0,pedH); }
+  else { const d=F.tail==='deep', tip=d?1.3:1.12, notch=d?.42:.66; c.quadraticCurveTo(-lt*.5,-th*.55,-lt*tip,-th); c.quadraticCurveTo(-lt*(notch+.15),-th*.25,-lt*notch,0); c.quadraticCurveTo(-lt*(notch+.15),th*.25,-lt*tip,th); c.quadraticCurveTo(-lt*.5,th*.55,0,pedH); }
+  c.closePath(); c.fill();
+  c.strokeStyle=rgba('#000000',.18); c.lineWidth=Math.max(.5,L/260);
+  for(let k=-3;k<=3;k++){ c.beginPath(); c.moveTo(0,k/3*pedH*.7); c.lineTo(-lt*1.02,k/3*th*.88); c.stroke(); }
+  c.restore();
+  // --- 背びれ・しりびれ（体の後ろ側に描く）
+  const finPath=(u0,u1,h,spiny,up)=>{ const n=spiny?Math.max(5,Math.round((u1-u0)*30)):10, base=up?top:bot, sg=up?-1:1;
+    c.beginPath(); c.moveTo(X(u1),base(u1)+sg*-1);
+    for(let k=0;k<=n;k++){ const t=k/n, u=lerp(u1,u0,t); let hh2=h*Hm*(spiny?(1-.35*t)*(.85+.15*Math.sin(t*Math.PI)):(.55+.45*Math.sin(Math.min(1,t*1.6)*Math.PI*.5))*(1-.35*t*t));
+      if(spiny){ c.lineTo(X(u)+L*.004,base(u)+sg*hh2); if(k<n) c.lineTo(X(u-(u1-u0)/n*.5),base(u-(u1-u0)/n*.5)+sg*hh2*.62); }
+      else c.lineTo(X(u),base(u)+sg*hh2); }
+    c.lineTo(X(u0),base(u0)); c.closePath(); };
+  c.fillStyle=rgba(lk.fin,.88);
+  for(const d of F.dor){ finPath(d[0],d[1],d[2],d[3],true); c.fill(); }
+  for(const d of F.ana){ finPath(d[0],d[1],d[2],0,false); c.fill(); }
+  if(F.adip){ c.beginPath(); c.ellipse(X(F.adip),top(F.adip)-Hm*.08,L*.022,Hm*.12,-.2,0,Math.PI*2); c.fill(); }
+  if(F.finlets){ for(let k=0;k<5;k++){ const u=lerp(F.finlets[0],F.finlets[1],k/4), s=L*.012; c.beginPath(); c.moveTo(X(u)+s,top(u)); c.lineTo(X(u)-s*.6,top(u)-s*1.4); c.lineTo(X(u)-s,top(u)); c.fill(); c.beginPath(); c.moveTo(X(u)+s,bot(u)); c.lineTo(X(u)-s*.6,bot(u)+s*1.4); c.lineTo(X(u)-s,bot(u)); c.fill(); } }
+  // はら びれ
+  c.beginPath(); const pu=.66; c.moveTo(X(pu+.04),bot(pu+.04)-1); c.lineTo(X(pu-.06),bot(pu-.04)+Hm*.38); c.lineTo(X(pu-.04),bot(pu-.03)); c.closePath(); c.fill();
+  // --- 体
+  const body=new Path2D(); const N=30;
+  body.moveTo(X(uT),top(uT));
+  for(let i=1;i<=N;i++){ const u=lerp(uT,1,i/N); body.lineTo(X(u),top(u)); }
+  for(let i=N;i>=0;i--){ const u=lerp(uT,1,i/N); body.lineTo(X(u),bot(u)); }
+  body.closePath();
+  const g=c.createLinearGradient(0,-Hm,0,Hm); g.addColorStop(0,lk.back); g.addColorStop(.42,lk.side); g.addColorStop(.62,shade(lk.side,.15)); g.addColorStop(1,lk.belly);
+  c.fillStyle=g; c.fill(body);
+  // --- 模様
+  c.save(); c.clip(body);
+  for(const p of lk.pat){
+    if(p==='mottle'||p==='mottleFine'){ const n=p==='mottle'?16:34; for(let i=0;i<n;i++){ const u=lerp(.18,.95,R()), yy=lerp(-Hm,Hm*.6,R()), r=(p==='mottle'?rand2(R,.03,.07):rand2(R,.012,.03))*L;
+      c.fillStyle=R()<.65?`rgba(0,0,0,${.12+R()*.2})`:`rgba(255,240,210,${.08+R()*.1})`; c.beginPath(); c.ellipse(X(u),yy,r*1.3,r*.8,R()*3,0,Math.PI*2); c.fill(); } }
+    if(p==='eyelines'){ c.strokeStyle='rgba(0,0,0,.55)'; c.lineWidth=L*.012; c.lineCap='round'; const ex=X(F.eu), ey=yc(F.eu)-Hm*.32;
+      for(const [dx,dy] of [[-.1,-.28],[-.13,.12],[-.11,.45]]){ c.beginPath(); c.moveTo(ex-L*.03,ey+Hm*dy*.3); c.lineTo(ex+dx*L,ey+Hm*dy); c.stroke(); } }
+    if(p==='stripes3'){ c.strokeStyle='rgba(18,14,6,.82)'; c.lineCap='round'; for(const [f,w] of [[-.58,.09],[-.12,.1],[.32,.08]]){ c.lineWidth=Hm*w*2; c.beginPath(); for(let i=0;i<=20;i++){ const u=lerp(.17,.84,i/20); const y=yc(u)+hh(u)*f; i?c.lineTo(X(u),y):c.moveTo(X(u),y);} c.stroke(); } }
+    if(p==='bandsFaint'){ c.fillStyle='rgba(20,30,20,.18)'; for(let k=0;k<6;k++){ const u=lerp(.24,.7,k/5); c.beginPath(); c.ellipse(X(u),-Hm*.35,L*.025,Hm*.75,.15,0,Math.PI*2); c.fill(); } }
+    if(p==='wavy'){ c.strokeStyle='rgba(10,30,30,.75)'; c.lineWidth=L*.007; for(let k=0;k<13;k++){ const u0=lerp(.2,.78,k/12); c.beginPath(); for(let i=0;i<=10;i++){ const t=i/10; const y=-Hm*1.05+t*Hm*.95; const x=X(u0)+Math.sin(t*Math.PI*2.2+k)*L*.018-t*L*.03; i?c.lineTo(x,y):c.moveTo(x,y);} c.stroke(); } }
+    if(p==='yline'){ c.strokeStyle='rgba(235,200,60,.85)'; c.lineWidth=Hm*.16; c.beginPath(); for(let i=0;i<=20;i++){ const u=lerp(.16,.9,i/20); const y=yc(u)-hh(u)*.08; i?c.lineTo(X(u),y):c.moveTo(X(u),y);} c.stroke(); }
+    if(p==='spots'){ c.fillStyle='rgba(20,24,30,.7)'; for(let i=0;i<46;i++){ const u=lerp(.18,.9,R()), y=-Hm*lerp(.95,.25,R()); c.beginPath(); c.arc(X(u),y,L*rand2(R,.004,.008),0,Math.PI*2); c.fill(); } }
+    if(p==='latlines'){ c.strokeStyle='rgba(250,240,210,.4)'; c.lineWidth=Math.max(.6,L*.004); for(const f of [-.75,-.42,-.08,.28,.62]){ c.beginPath(); for(let i=0;i<=20;i++){ const u=lerp(.17,.76,i/20); const y=yc(u)+hh(u)*f; i?c.lineTo(X(u),y):c.moveTo(X(u),y);} c.stroke(); } }
+  }
+  if(!lk.pat.includes('latlines')){ c.strokeStyle='rgba(255,255,255,.22)'; c.lineWidth=Math.max(.6,L*.004); c.beginPath(); for(let i=0;i<=20;i++){ const u=lerp(.17,.75,i/20); const y=yc(u)-hh(u)*(.45-.25*(1-i/20)); i?c.lineTo(X(u),y):c.moveTo(X(u),y);} c.stroke(); }
+  // 背中の光沢
+  const sh=c.createLinearGradient(0,-Hm,0,0); sh.addColorStop(0,'rgba(255,255,255,0)'); sh.addColorStop(.5,'rgba(255,255,255,.10)'); sh.addColorStop(1,'rgba(255,255,255,0)'); c.fillStyle=sh; c.fillRect(-L,-Hm,2*L,Hm);
+  c.restore();
+  c.strokeStyle='rgba(0,0,0,.35)'; c.lineWidth=Math.max(.6,L/220); c.stroke(body);
+  // えらぶた
+  const gu=F.eu-.12; c.strokeStyle='rgba(0,0,0,.35)'; c.beginPath(); c.moveTo(X(gu+.02),top(gu+.02)+Hm*.12); c.quadraticCurveTo(X(gu-.035),yc(gu),X(gu+.02),bot(gu+.02)-Hm*.1); c.stroke();
+  // むなびれ
+  const [pu2,pl]=F.pect, px=X(pu2), py=yc(pu2)+Hm*.12;
+  const pr=pl*L*.42; c.fillStyle=rgba(lk.fin,.5); c.beginPath(); c.moveTo(px,py-Hm*.08);
+  c.quadraticCurveTo(px-pr*.7,py-Hm*.22,px-pr,py-Hm*.02); c.quadraticCurveTo(px-pr*1.05,py+Hm*.25,px-pr*.7,py+Hm*.42); c.quadraticCurveTo(px-pr*.3,py+Hm*.3,px,py+Hm*.08); c.closePath(); c.fill();
+  c.strokeStyle=rgba(lk.fin,.6); c.lineWidth=Math.max(.5,L/300); for(let k=0;k<6;k++){ const a=-.15+k*.17; c.beginPath(); c.moveTo(px,py); c.lineTo(px-pr*Math.cos(a)*.95,py+pr*Math.sin(a)*.95*Hm/pr*1.6); c.stroke(); }
+  // 目
+  const er=F.eye*L, ex=X(F.eu), ey=yc(F.eu)-Hm*.32;
+  c.fillStyle=sp.id==='kurosoi'||lk.kind==='rock'?'#b89a3a':'#cfd6d8'; c.beginPath(); c.arc(ex,ey,er,0,Math.PI*2); c.fill();
+  c.fillStyle='#050505'; c.beginPath(); c.arc(ex+er*.08,ey,er*.62,0,Math.PI*2); c.fill();
+  c.fillStyle='rgba(255,255,255,.85)'; c.beginPath(); c.arc(ex+er*.3,ey-er*.3,er*.18,0,Math.PI*2); c.fill();
+  // 口
+  c.strokeStyle='rgba(0,0,0,.55)'; c.lineWidth=Math.max(.7,L/180); c.beginPath();
+  const ny=yc(1)+Hm*.02; if(F.mouth==='big'){ c.moveTo(X(1)-L*.005,ny); c.quadraticCurveTo(X(.95),ny+Hm*.12,X(.9),ny+Hm*.1); } else { c.moveTo(X(1)-L*.003,ny); c.lineTo(X(.955),ny+Hm*.05); } c.stroke();
+  if(F.barbel){ c.strokeStyle=rgba(lk.belly,.9); c.lineWidth=Math.max(1,L/160); c.beginPath(); c.moveTo(X(.96),bot(.96)); c.quadraticCurveTo(X(.955),bot(.96)+Hm*.25,X(.94),bot(.96)+Hm*.32); c.stroke(); }
+  c.restore();
+}
+function rand2(R,a,b){ return a+R()*(b-a); }
+function drawFlat(c,L,fish,lk,o){
+  const R=mulberry(fish.seed||1), Wd=lk.h*L/2, uT=.15, X=u=>-L/2+u*L;
+  const hw=u=>{ if(u<=uT) return Wd*.13; const s=(u-uT)/(1-uT); return Wd*Math.pow(Math.sin(Math.min(1,s*1.05)*Math.PI),.62)*(s<.2?lerp(.6,1,s/.2):1)+Wd*.13*(1-s); };
+  const sw=o.swim||0;
+  c.save();
+  let flip=lk.dir==='left'; if(o.flip) flip=!flip; if(flip) c.scale(-1,1);
+  if(o.squash) c.scale(1,o.squash);
+  // ひれ（体のまわりのフリンジ）
+  c.fillStyle=rgba(lk.fin,.85);
+  const fr=(u0,u1,sg)=>{ c.beginPath(); for(let i=0;i<=24;i++){ const u=lerp(u0,u1,i/24); const w=Math.sin(i/24*Math.PI); const y=sg*(hw(u)+L*.055*Math.pow(w,.7)+Math.sin(sw*1.4+i*.8)*L*.004); i?c.lineTo(X(u),y):c.moveTo(X(u),y);} for(let i=24;i>=0;i--){ const u=lerp(u0,u1,i/24); c.lineTo(X(u),sg*hw(u)*.92);} c.closePath(); c.fill(); };
+  fr(.2,.93,-1); fr(.2,.72,1);
+  // 尾
+  c.beginPath(); c.moveTo(X(uT+.02),-Wd*.15); c.quadraticCurveTo(X(.03),-Wd*.55,X(-.01),-Wd*.05); c.quadraticCurveTo(X(.03),Wd*.55,X(uT+.02),Wd*.15); c.closePath(); c.fill();
+  // 体
+  const body=new Path2D(); const N=30; body.moveTo(X(uT),-hw(uT));
+  for(let i=1;i<=N;i++){ const u=lerp(uT,1,i/N); body.lineTo(X(u),-hw(u)); }
+  for(let i=N;i>=0;i--){ const u=lerp(uT,1,i/N); body.lineTo(X(u),hw(u)); } body.closePath();
+  const g=c.createRadialGradient(X(.55),-Wd*.2,Wd*.2,X(.5),0,L*.55); g.addColorStop(0,shade(lk.side,.12)); g.addColorStop(1,shade(lk.back,-.2));
+  c.fillStyle=g; c.fill(body);
+  c.save(); c.clip(body);
+  for(const p of lk.pat){
+    if(p==='mottle'||p==='mottleFine'){ const n=p==='mottle'?22:46; for(let i=0;i<n;i++){ const u=lerp(.18,.92,R()), y=lerp(-Wd,Wd,R()), r=(p==='mottle'?rand2(R,.025,.055):rand2(R,.01,.025))*L;
+      c.fillStyle=R()<.6?`rgba(0,0,0,${.1+R()*.18})`:`rgba(255,240,210,${.06+R()*.1})`; c.beginPath(); c.ellipse(X(u),y,r*1.2,r,R()*3,0,Math.PI*2); c.fill(); } }
+    if(p==='spotsRing'){ for(let i=0;i<12;i++){ const u=lerp(.25,.85,R()), y=lerp(-Wd*.7,Wd*.7,R()), r=rand2(R,.012,.022)*L; c.fillStyle='rgba(240,230,200,.35)'; c.beginPath(); c.arc(X(u),y,r*1.5,0,Math.PI*2); c.fill(); c.fillStyle='rgba(20,14,6,.55)'; c.beginPath(); c.arc(X(u),y,r,0,Math.PI*2); c.fill(); } }
+  }
+  c.restore();
+  c.strokeStyle='rgba(0,0,0,.35)'; c.lineWidth=Math.max(.6,L/220); c.stroke(body);
+  // 側線
+  c.strokeStyle='rgba(255,255,255,.25)'; c.lineWidth=Math.max(.6,L/300); c.beginPath(); c.moveTo(X(.18),0); c.lineTo(X(.62),0);
+  if(lk.bigmouth) c.bezierCurveTo(X(.7),0,X(.72),-Wd*.35,X(.82),-Wd*.3); else c.quadraticCurveTo(X(.74),-Wd*.12,X(.8),-Wd*.2); c.stroke();
+  // えら
+  c.strokeStyle='rgba(0,0,0,.3)'; c.beginPath(); c.moveTo(X(.8),-hw(.8)*.85); c.quadraticCurveTo(X(.74),0,X(.8),hw(.8)*.85); c.stroke();
+  // 胸びれ
+  c.fillStyle=rgba(lk.fin,.75); c.beginPath(); c.moveTo(X(.76),-Wd*.05); c.quadraticCurveTo(X(.66),-Wd*.3,X(.64),-Wd*.05); c.closePath(); c.fill();
+  // 目（ふたつとも上側）
+  for(const [u,y] of [[.9,-Wd*.24],[.86,Wd*.02]]){ const er=L*.026; c.fillStyle='#6a7a50'; c.beginPath(); c.arc(X(u),y,er,0,Math.PI*2); c.fill(); c.fillStyle='#050505'; c.beginPath(); c.arc(X(u),y,er*.6,0,Math.PI*2); c.fill(); c.fillStyle='rgba(255,255,255,.8)'; c.beginPath(); c.arc(X(u)+er*.25,y-er*.25,er*.18,0,Math.PI*2); c.fill(); }
+  // 口
+  c.strokeStyle='rgba(0,0,0,.6)'; c.lineWidth=Math.max(.8,L/170); c.beginPath();
+  if(lk.bigmouth){ c.moveTo(X(.995),Wd*.08); c.quadraticCurveTo(X(.95),Wd*.28,X(.86),Wd*.24); c.stroke(); c.fillStyle='#eee'; for(let k=0;k<5;k++){ const u=lerp(.97,.88,k/4); c.beginPath(); c.moveTo(X(u),Wd*.2); c.lineTo(X(u)-L*.004,Wd*.26); c.lineTo(X(u)-L*.008,Wd*.2); c.fill(); } }
+  else { c.moveTo(X(.995),Wd*.04); c.quadraticCurveTo(X(.98),Wd*.12,X(.955),Wd*.1); c.stroke(); }
+  c.restore();
+}
+
+// ============ 記録（ブラウザ内） ============
+const STORE='muroran-tsuri-game.v1';
+let REC={zukan:{},log:[],sound:true};
+try{ const s=JSON.parse(localStorage.getItem(STORE)||'null'); if(s) REC=Object.assign(REC,s); }catch(e){}
+function saveRec(){ try{ localStorage.setItem(STORE,JSON.stringify(REC)); }catch(e){} }
+
+// ============ 音（WebAudioで合成） ============
+const SND={ac:null,master:null,amb:null,
+  init(){ if(this.ac) return; try{ const AC=window.AudioContext||window.webkitAudioContext; this.ac=new AC(); this.master=this.ac.createGain(); this.master.gain.value=REC.sound?0.7:0; this.master.connect(this.ac.destination); this.ambient(); }catch(e){ this.ac=null; } },
+  setOn(on){ if(this.master) this.master.gain.value=on?0.7:0; },
+  noiseBuf(sec){ const ac=this.ac, b=ac.createBuffer(1,ac.sampleRate*sec,ac.sampleRate), d=b.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; return b; },
+  ambient(){ const ac=this.ac, src=ac.createBufferSource(); src.buffer=this.noiseBuf(4); src.loop=true; const f=ac.createBiquadFilter(); f.type='lowpass'; f.frequency.value=380; const g=ac.createGain(); g.gain.value=.05;
+    const lfo=ac.createOscillator(), lg=ac.createGain(); lfo.frequency.value=.13; lg.gain.value=.035; lfo.connect(lg); lg.connect(g.gain); lfo.start(); src.connect(f); f.connect(g); g.connect(this.master); src.start(); this.amb=g; },
+  burst(freq,q,dur,vol,type='bandpass'){ if(!this.ac) return; const ac=this.ac, s=ac.createBufferSource(); s.buffer=this.noiseBuf(dur+.05); const f=ac.createBiquadFilter(); f.type=type; f.frequency.value=freq; f.Q.value=q; const g=ac.createGain(); const t=ac.currentTime; g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.001,t+dur); s.connect(f); f.connect(g); g.connect(this.master); s.start(t); s.stop(t+dur+.05); },
+  tone(freq,dur,vol,type='sine',slide){ if(!this.ac) return; const ac=this.ac, o=ac.createOscillator(), g=ac.createGain(), t=ac.currentTime; o.type=type; o.frequency.setValueAtTime(freq,t); if(slide) o.frequency.exponentialRampToValueAtTime(slide,t+dur); g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.001,t+dur); o.connect(g); g.connect(this.master); o.start(t); o.stop(t+dur+.02); },
+  tick(){ this.burst(1400,6,.04,.5); },
+  gon(){ this.tone(110,.18,.6,'sine',60); this.burst(500,2,.08,.4); },
+  click(){ this.burst(3200,8,.015,.18); },
+  drag(){ this.burst(2400,4,.02,.22); },
+  splash(){ this.burst(900,.7,.45,.5,'lowpass'); },
+  snap(){ this.burst(5000,1,.12,.6,'highpass'); this.tone(900,.15,.25,'square',200); },
+  swish(){ this.burst(1800,1.2,.18,.25); },
+  plop(){ this.tone(420,.12,.3,'sine',160); },
+  fanfare(){ if(!this.ac) return; [523,659,784,1047].forEach((f,i)=>setTimeout(()=>this.tone(f,.32,.22,'triangle'),i*110)); },
+};
+
+// ============ ゲームの状態 ============
+const cv=$('#cv'), ctx=cv.getContext('2d'), ffc=$('#ff'), ffx=ffc.getContext('2d'), rodc=$('#rod'), rodx=rodc.getContext('2d');
+let W=0,H=0,DPR=1;
+const G={
+  mode:'menu', point:POINTS[0], season:[3,3,0,0,0,1,1,1,2,2,2,3][new Date().getMonth()], rigId:'bait',
+  t:0, drift:0, driftV:.15, state:'surface', rig:{y:.3,anchor:.3,off:0,lastAct:-99,baitGone:false,onBottom:false,prevBot:0}, fishes:[],
+  bite:null, fight:null, snag:null, landing:null, rooted:null, drag:3, reel:false, auto:false, rodKick:0, rodHold:0,
+  camY:0, camX:0, tidePh:Math.random()*6.28, count:0, lost:0, ffAcc:0, hudAcc:0, parts:[], lastCatch:null,
+};
+const ui={toastT:0};
+function rigDef(){ return RIGS[G.rigId]; }
+function bottomAt(x){ return G.point.bottom(x); }
+function rigRel(){ return 2.38-Math.min(2.5,G.rig.y*.04); } // 竿先の真下あたり
+function rigX(){ return G.drift+rigRel(); }
+function activity(){ return G.act??.6; }
+function reelSpeed(fast){ const k=G.point.dendou?2.2:1; return (fast?3:.9)*k; }
+
+// ============ 本物の室蘭沖：海底地形（GEBCO_2025）と潮汐（気象庁 潮位表 室蘭） ============
+// data/bathy-data.js と data/tide-data.js は釣りナビ（muroran-boat-tsuri）と同じもの
+const bathyZ=(()=>{ try{ const b=atob(BATHY.z), u=new Uint8Array(b.length); for(let i=0;i<b.length;i++) u[i]=b.charCodeAt(i); return new Int16Array(u.buffer); }catch(e){ return null; } })();
+// 標高(m)。負＝水深。範囲外は null（4つの格子点の重み付き平均）
+function bathyAt(lat,lon){ if(!bathyZ) return null;
+  const y=(lat-BATHY.lat0)/BATHY.step, x=(lon-BATHY.lon0)/BATHY.step;
+  if(y<0||x<0||y>BATHY.nlat-1||x>BATHY.nlon-1) return null;
+  const i=Math.min(Math.floor(y),BATHY.nlat-2), j=Math.min(Math.floor(x),BATHY.nlon-2), fy=y-i, fx=x-j, Z=(a,b)=>bathyZ[a*BATHY.nlon+b];
+  return (Z(i,j)*(1-fx)+Z(i,j+1)*fx)*(1-fy)+(Z(i+1,j)*(1-fx)+Z(i+1,j+1)*fx)*fy; }
+const M_LAT=111320, mLon=lat=>111320*Math.cos(lat*Math.PI/180);
+function offsetLL(lat,lon,hdg,dist){ const r=hdg*Math.PI/180; return [lat+Math.cos(r)*dist/M_LAT, lon+Math.sin(r)*dist/mLon(lat)]; }
+function depthLL(lat,lon){ const z=bathyAt(lat,lon); return z==null?null:-z; }
+// 底質の推定（GEBCO は約400m格子なので根や瀬は出ない。あくまで目安。本人が選び直せる）
+function guessBottom(lat,lon){ const d=depthLL(lat,lon); if(d==null||d<2) return null; if(d>=55) return 'mud';
+  let s=0,s2=0,n=0,land=false; for(let i=-2;i<=2;i++) for(let j=-2;j<=2;j++){ const z=bathyAt(lat+i*BATHY.step,lon+j*BATHY.step); if(z==null) continue; if(z>-1){ land=true; continue; } s+=-z; s2+=z*z; n++; }
+  const m=s/n, sd=Math.sqrt(Math.max(0,s2/n-m*m));
+  return (sd/(m+5)>.3||(land&&d<25))?'rock':'sand'; }
+// 釣れる魚の傾向（pt）を決めるポイントの種類
+function pointClass(type,d){ if(type==='rock') return d<25?'gansho':'okine'; return d<50?'sunachi':'fukaba'; }
+const BOTTOM_NAME={rock:'岩礁・根',sand:'砂地',mud:'泥（深場）'};
+const CLASS_NOTE={gansho:'浅い岩場（ソイ・アブラコ・ガヤ）',okine:'沖の根（ホッケ・ヤナギノマイ・カジカ・マダラ）',sunachi:'カレイ場（カレイ・ソウハチ・ヒラメ）',fukaba:'深場（スケソウ・マダラ・アカガレイ）'};
+// 格子より細かい起伏は底質に合わせて足す（岩礁は小さな根が点々とある）
+function microRelief(type,x,seed){
+  if(type==='rock'){ let v=1.5*Math.sin(x*.21+seed)+.9*Math.sin(x*.57+seed*2)+.4*Math.sin(x*1.6+seed*3); const k=Math.floor(x/35);
+    for(let j=k-1;j<=k+1;j++){ const h=hash(j*7.3+seed); if(h<.45) continue; const c=j*35+hash(j+seed)*35, w=4+hash(j+3+seed)*5; v-=(h-.45)*12*Math.exp(-(((x-c)/w)**2)); } return v; }
+  if(type==='sand') return .35*Math.sin(x*.4+seed)+.15*Math.sin(x*1.3);
+  return .15*Math.sin(x*.3+seed); }
+function makeRealPoint(sp){ const d0=depthLL(sp.lat,sp.lon)||20, seed=hash(sp.lat*977+sp.lon*131)*100;
+  return {id:pointClass(sp.type,d0), real:true, type:sp.type, name:sp.name||llText(sp.lat,sp.lon), depthTxt:`${BOTTOM_NAME[sp.type]}・約${Math.round(d0)}m`, start:0, dendou:d0>55, spot:sp,
+    bottom:x=>{ const [la,lo]=offsetLL(sp.lat,sp.lon,G.hdg,x); let d=depthLL(la,lo); if(d==null) d=150; return Math.max(1.2,d+(G.tideM||0)+microRelief(sp.type,x,seed)); } }; }
+const llText=(lat,lon)=>`N${lat.toFixed(3)} E${lon.toFixed(3)}`;
+// 流す向き：400m先まで水深5m以上を保てる向きを選ぶ
+function chooseHeading(lat,lon,prefer){ const cand=[]; for(let h=0;h<360;h+=15) cand.push(h); cand.sort(()=>Math.random()-.5); if(prefer!=null) cand.unshift(prefer);
+  for(const h of cand){ let ok=true; for(let d=50;d<=400;d+=50){ const [a,b]=offsetLL(lat,lon,h,d), z=depthLL(a,b); if(z==null||z<5){ ok=false; break; } } if(ok) return h; }
+  return cand[0]; }
+const DIR8=['北','北東','東','南東','南','南西','西','北西'], dir8=h=>DIR8[Math.round(((h%360)+360)%360/45)%8];
+
+// ----- 潮汐・月齢・日の出入り（釣りナビと同じ計算） -----
+const TIDE=window.TIDE_A8||{};
+const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+function tideCm(d){ const day=TIDE[ymd(d)]; if(!day) return null; const h=d.getHours()+d.getMinutes()/60, i=Math.floor(h);
+  const nd=TIDE[ymd(new Date(d.getTime()+864e5))]; const nx=i<23?day[0][i+1]:(nd||day)[0][0]; return day[0][i]+(nx-day[0][i])*(h-i); }
+function tideMean(d){ const day=TIDE[ymd(d)]; return day?day[0].reduce((a,b)=>a+b,0)/24:0; }
+function tideEvents(d){ const out=[]; for(let k=-1;k<2;k++){ const dd=new Date(d.getTime()+k*864e5), day=TIDE[ymd(dd)]; if(!day) continue;
+  day[1].forEach(e=>out.push({t:new Date(`${ymd(dd)}T${e[0]}:00`),cm:e[1],hi:true})); day[2].forEach(e=>out.push({t:new Date(`${ymd(dd)}T${e[0]}:00`),cm:e[1],hi:false})); }
+  return out.sort((a,b)=>a.t-b.t); }
+function tideStage(d){ const ev=tideEvents(d), prev=[...ev].reverse().find(e=>e.t<=d), next=ev.find(e=>e.t>d); if(!prev||!next) return null;
+  const a=(d-prev.t)/6e4, b=(next.t-d)/6e4; if(a<45||b<45) return {label:'潮止まり前後',slack:true};
+  const f=a/(a+b), dir=prev.hi?'下げ':'上げ'; return {label:dir+(f<.34?'はじめ':f<.67?'中盤':'終盤')}; }
+function moonAge(d){ const ref=Date.UTC(2000,0,6,18,14), syn=29.530588853; return (((d-ref)/864e5)%syn+syn)%syn; }
+const SHIO=['','大潮','大潮','中潮','中潮','中潮','中潮','小潮','小潮','小潮','長潮','若潮','中潮','中潮','大潮','大潮','大潮','大潮','中潮','中潮','中潮','中潮','小潮','小潮','小潮','長潮','若潮','中潮','中潮','大潮','大潮'];
+function shioName(d){ const n=new Date(d); n.setHours(12,0,0,0); return SHIO[Math.min(30,Math.floor(moonAge(n))+1)]; }
+function sunTimes(date,lat,lon){ const r=Math.PI/180, n=Math.ceil((Date.UTC(date.getFullYear(),date.getMonth(),date.getDate())-Date.UTC(2000,0,1,12))/864e5);
+  const Js=n-lon/360, M=(357.5291+.98560028*Js)%360, C=1.9148*Math.sin(M*r)+.02*Math.sin(2*M*r)+.0003*Math.sin(3*M*r), L=(M+C+180+102.9372)%360;
+  const Jt=2451545+Js+.0053*Math.sin(M*r)-.0069*Math.sin(2*L*r), dec=Math.asin(Math.sin(L*r)*Math.sin(23.44*r));
+  const w=Math.acos((Math.sin(-.833*r)-Math.sin(lat*r)*Math.sin(dec))/(Math.cos(lat*r)*Math.cos(dec)))/r, toD=J=>new Date((J-2440587.5)*864e5);
+  return {rise:toD(Jt-w/360),set:toD(Jt+w/360)}; }
+function timeBand(d){ const s=sunTimes(d,42.32,140.97), t=d.getTime();
+  if(Math.abs(t-s.rise)<90*6e4) return '朝まずめ'; if(Math.abs(t-s.set)<90*6e4) return '夕まずめ'; if(t>s.rise&&t<s.set) return '日中'; return '夜'; }
+const monthSeason=m=>[3,3,0,0,0,1,1,1,2,2,2,3][m];
+const hm=d=>`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+const TIME_SCALE=12; // ゲームの1秒＝海の12秒（5分で1時間進む）
+// 1秒ごとに潮・時間帯・流れの速さを更新
+function updateSea(){ if(!G.clock){ G.act=clamp(.55+.45*Math.sin(G.t*2*Math.PI/240+G.tidePh),.08,1); G.band='日中'; G.light=1; return; }
+  const d=new Date(G.clock), cm=tideCm(d);
+  G.band=timeBand(d); G.light={日中:1,朝まずめ:.62,夕まずめ:.62,夜:.22}[G.band];
+  if(cm==null){ G.act=clamp(.55+.45*Math.sin(G.t*2*Math.PI/240+G.tidePh),.08,1); G.tideTxt='潮位データなし'; return; }
+  const rate=Math.abs(tideCm(new Date(G.clock+9e5))-tideCm(new Date(G.clock-9e5)))*2; // cm/時
+  G.tideM=(cm-tideMean(d))/100; G.tideRate=rate;
+  let a=.2+.8*clamp(rate/25,0,1); if(G.band==='朝まずめ'||G.band==='夕まずめ') a=Math.min(1,a*1.25+.1);
+  G.act=a; G.driftV=.12+.23*clamp(rate/30,0,1); // 約0.25〜0.7ノット
+  const st=tideStage(d); G.tideTxt=`${st?st.label:''} ${Math.round(cm)}cm`; }
+
+// ============ 魚の発生 ============
+function zoneFor(sp){ return (sp.zoneBy&&sp.zoneBy[G.season])||sp.zone; }   // 季節でタナが変わる魚（浮き宗八など）
+function schoolFor(sp){ return (sp.schoolBy&&sp.schoolBy[G.season])||sp.school; }
+function ptW(sp){ return sp.pt&&sp.pt[G.point.id]!=null?sp.pt[G.point.id]:1; }  // ポイントごとの釣れやすさ
+function prefY(sp,x){ const b=bottomAt(x), z=zoneFor(sp);
+  if(z.t==='bottom') return b-rand(z.a,z.b);
+  if(z.t==='flat') return b-.06;
+  if(z.t==='mid') return clamp(b*rand(z.top,z.bot),1.5,b-1);
+  return clamp(rand(z.top,z.bot),1.5,b-2); }
+function spWeight(sp,x){ const b=bottomAt(x); if(b<sp.dmin||b>sp.dmax) return 0; return sp.abund*sp.season[G.season]*(sp.habitat[G.point.type]||0)*ptW(sp)*(G.band==='夜'?(sp.night||1):1); }
+function makeFish(sp,x,y){ const size=rollSize(sp); return {sp,x,y,tx:x,ty:y,vx:0,vy:0,size,w:weightG(sp,size)/1000,seed:(Math.random()*1e9)|0,
+  nuptial:sp.id==='ainame'&&G.season===2&&Math.random()<.5, face:Math.random()<.5?1:-1, state:'wander', tt:rand(0,3), ck:rand(0,.5), cool:0, swim:Math.random()*6, leader:null}; }
+function spawnAt(x){ const sp=wpick(SP,s=>spWeight(s,x)); if(!sp) return; const sc=schoolFor(sp), n=randi(sc[0],sc[1]); let lead=null;
+  for(let i=0;i<n;i++){ const fx=x+rand(-2,2), f=makeFish(sp,fx,prefY(sp,fx)+rand(-.6,.6)); f.y=Math.min(f.y,bottomAt(fx)-.05); if(lead) f.leader=lead; else lead=f; G.fishes.push(f); } }
+function populate(){ G.fishes=[]; let guard=0; while(G.fishes.length<18&&guard++<60) spawnAt(rigX()+rand(-20,20)); }
+function maintainFish(){ const rx=rigX();
+  for(let i=G.fishes.length-1;i>=0;i--){ const f=G.fishes[i]; if(f.state==='hooked') continue; const dx=f.x-rx; if(dx<-24||dx>26||f.gone){ G.fishes.splice(i,1); for(const o of G.fishes) if(o.leader===f) o.leader=null; } }
+  let guard=0; while(G.fishes.length<18&&guard++<6) spawnAt(rx+(Math.random()<.75?rand(16,22):rand(-22,-16))); }
+
+// ============ 魚の動き・食いつき ============
+function hookBand(){ const r=G.rig, hk=rigDef().hooks; return {x:rigX(), y0:r.y-hk[hk.length-1], y1:r.y-hk[0]+.05}; }
+function attraction(){ const r=G.rig; if(!(G.state==='idle'||G.state==='falling')) return 0; if(r.baitGone) return .1;
+  const since=G.t-r.lastAct;
+  if(G.rigId==='jig') return G.state==='falling'?1:since<2.5?1:(G.reel||G.auto)?.7:.15;
+  if(G.rigId==='sabiki') return since<3?1.2:.75;
+  return 1; }
+function updateFish(dt){
+  const hb=hookBand(), att=attraction(), act=activity();
+  for(const f of G.fishes){
+    if(f.state==='hooked') continue;
+    const sp=f.sp; f.swim+=dt*(4+sp.spd*4); f.cool=Math.max(0,f.cool-dt);
+    if(G.bite&&G.bite.fish===f){ // 食いついている最中は仕掛けにくっつく
+      f.x=lerp(f.x,hb.x+.15*f.face,.3); f.y=lerp(f.y,(hb.y0+hb.y1)/2+(zoneFor(sp).t==='flat'?.3:0),.3); continue; }
+    if(f.state==='approach'){ const ty=clamp(f.y,hb.y0,hb.y1), dx=hb.x-f.x, dy=ty-f.y, d=Math.hypot(dx,dy), s=sp.spd*1.3*dt;
+      if(att<=0||G.bite){ f.state='wander'; f.cool=4; continue; }
+      if(d<.3){ startBite(f); continue; }
+      f.x+=dx/d*Math.min(s,d); f.y+=dy/d*Math.min(s,d); f.face=dx>0?1:-1; continue; }
+    if(f.state==='flee'){ f.x+=f.face*sp.spd*1.6*dt; f.y+=(f.ty-f.y)*dt; f.tt-=dt; if(f.tt<=0){ f.state='wander'; f.cool=12; } continue; }
+    // ぶらぶら泳ぐ
+    f.tt-=dt;
+    if(f.tt<=0){ if(f.leader&&!f.leader.gone&&f.leader.state!=='hooked'){ f.tx=f.leader.tx+rand(-1.5,1.5); f.ty=f.leader.ty+rand(-.8,.8); }
+      else { const rng=zoneFor(sp).t==='flat'?(Math.random()<.6?0:rand(-1.5,1.5)):rand(-4,4)*(sp.spd>1?2:1); f.tx=f.x+rng; f.ty=prefY(sp,f.tx); }
+      f.tt=rand(2,6); }
+    const b=bottomAt(f.x); f.ty=Math.min(f.ty,bottomAt(f.tx)-.05);
+    const sp0=sp.spd*(zoneFor(sp).t==='flat'?.25:.4), dx=f.tx-f.x, dy=f.ty-f.y, d=Math.hypot(dx,dy);
+    if(d>.05){ f.vx=lerp(f.vx,dx/d*sp0,1-Math.exp(-dt*2)); f.vy=lerp(f.vy,dy/d*sp0*.6,1-Math.exp(-dt*2)); } else { f.vx*=.95; f.vy*=.95; }
+    f.x+=f.vx*dt; f.y=Math.min(f.y+f.vy*dt,b-.05); if(Math.abs(f.vx)>.03) f.face=f.vx>0?1:-1;
+    // 仕掛けに気づく？
+    f.ck-=dt; if(f.ck<=0){ f.ck=.4;
+      if(att>0&&!G.bite&&f.cool<=0){ const dy2=f.y<hb.y0?hb.y0-f.y:f.y>hb.y1?f.y-hb.y1:0, dist=Math.hypot(f.x-hb.x,dy2), sense=rigDef().sense*(sp.bite==='hit'?1.25:1);
+        let ok=dist<sense; if(zoneFor(sp).t==='flat'&&G.rig.y<bottomAt(hb.x)-(sp.id==='hirame'?4:2.2)) ok=false;
+        if(ok){ let a=sp.rig[G.rigId]*att; if(zoneFor(sp).t==='flat'&&G.rigId==='bait'&&G.t-G.rig.lastAct<3&&G.rig.onBottom) a*=1.6;
+          const p=.3*a*act*(1-dist/sense); if(Math.random()<p){ f.state='approach'; } else if(Math.random()<.04){ f.cool=6; } } } }
+  }
+}
+function startBite(f){ const sp=f.sp; const ev=[]; let t=0;
+  const style=(G.state==='falling'&&sp.bite!=='hit')?'gon':sp.bite;
+  if(G.state==='falling'){ G.state='idle'; G.rig.anchor=G.rig.y; }
+  if(style==='gon'){ ev.push({t:0,k:'tick'}); t=rand(.35,.7); ev.push({t,k:'tick'}); if(Math.random()<.5){t+=rand(.3,.6);ev.push({t,k:'tick'});} t+=rand(.4,.9); ev.push({t,k:'pull',win:.9}); }
+  else if(style==='kotsu'){ const n=randi(3,6); for(let i=0;i<n;i++){ ev.push({t,k:'tick'}); t+=rand(.35,.75); } t+=rand(.2,.6); ev.push({t,k:'pull',win:1.2}); }
+  else if(style==='hirame'){ ev.push({t:0,k:'tick'}); ev.push({t:.5,k:'tick'}); ev.push({t:.6,k:'mae'}); t=.6+rand(3,5); for(let s=1.4;s<t-.3;s+=rand(.7,1.1)) ev.push({t:s,k:'tick'}); ev.push({t,k:'pull',win:1.3}); }
+  else if(style==='omoi'){ ev.push({t:0,k:'mae'}); t=rand(1.5,3); ev.push({t,k:'heavy',win:2.5}); }
+  else { ev.push({t:0,k:'hit',win:.8}); }
+  ev.sort((a,b)=>a.t-b.t);
+  G.bite={fish:f,style,ev,i:0,t:0,win:null,mae:false};
+}
+function updateBite(dt){ const b=G.bite; if(!b) return; b.t+=dt;
+  while(b.i<b.ev.length&&b.ev[b.i].t<=b.t){ const e=b.ev[b.i++];
+    if(e.k==='tick'){ G.rodKick+=.16; SND.tick(); if(b.i<=1) toast('…コツ'); }
+    else if(e.k==='mae'){ b.mae=true; if(b.style==='hirame') toast('前アタリ…まだ待て',1400); }
+    else if(e.k==='heavy'){ b.mae=false; b.win={s:b.t,e:b.t+e.win}; G.rodHold=.45; SND.tick(); toast('…じわっと重くなった',1100); }
+    else if(e.k==='pull'){ b.mae=false; b.win={s:b.t,e:b.t+e.win}; G.rodKick+=.75; G.rodHold=.55; SND.gon(); toast('グググッ！ 合わせろ！',900,'hot'); }
+    else if(e.k==='hit'){ b.win={s:b.t,e:b.t+e.win}; G.rodKick+=1; G.rodHold=.6; SND.gon(); toast(G.rig.y<bottomAt(rigX())-1?'ガツン！ 合わせろ！':'ゴンッ！ 合わせろ！',800,'hot'); }
+  }
+  if(b.mae) G.rodHold=Math.max(G.rodHold,.18+.05*Math.sin(G.t*9));
+  if(b.win&&b.t>b.win.e){ // 合わせなかった
+    const self={gon:.45,hit:.62,kotsu:.2,hirame:.12,omoi:.85}[b.style];
+    if(Math.random()<self){ toast('向こう合わせで掛かった！',1000); hookFish(rand(.4,.6)); }
+    else missBite('エサだけ取られた…');
+  }
+}
+function missBite(msg){ const b=G.bite; if(!b) return; const f=b.fish; f.state='flee'; f.tt=rand(2,4); f.face=Math.random()<.5?1:-1; f.ty=f.y+rand(-2,1);
+  G.bite=null; G.rodHold=0; const thief=f.sp.thief;
+  if(thief&&G.rigId!=='jig'&&Math.random()<.15){ G.lost++; G.state='lost'; G.lostT=1.6; toast('ハリスを切られた！',1600,'','犯人はフグ…'); return; }
+  if(G.rigId==='bait'&&Math.random()<(thief?.95:.55)){ G.rig.baitGone=true; } toast(thief?'エサをかじり取られた…':msg,1300); }
+
+// ============ 操作 ============
+function awase(){
+  SND.init();
+  if(G.state==='landing'){ tamo(); return; }
+  if(!(G.state==='idle'||G.state==='falling')) return;
+  SND.swish(); G.rodKick-=.4;
+  const b=G.bite;
+  if(!b){ if(G.rigId==='jig') sasou(); else toast('空合わせ',600); return; }
+  if(b.win&&b.t>=b.win.s&&b.t<=b.win.e){ const q=clamp(1-.45*(b.t-b.win.s)/(b.win.e-b.win.s),.55,1); hookFish(q); }
+  else { const pr={gon:.45,kotsu:.3,hirame:.08,hit:.5,omoi:.7}[b.style];
+    if(Math.random()<pr) hookFish(rand(.4,.6)); else missBite(b.style==='hirame'?'早合わせ！ ヒラメは待つのがコツ':'早すぎた…'); }
+}
+function clutch(){ SND.init(); if(G.mode!=='play') return;
+  if(G.state==='surface'){ G.state='falling'; G.rig.y=.3; G.rig.anchor=.3; G.auto=false; SND.plop(); toast('投入！',600); }
+  else if(G.state==='idle'){ G.state='falling'; G.auto=false; G.rig.anchor=G.rig.y; G.rig.off=0; }
+  else if(G.state==='falling'){ G.state='idle'; G.rig.anchor=G.rig.y; toast('ストップ',500); } }
+function sasou(){ SND.init(); if(G.state!=='idle') return; const r=G.rig; r.lastAct=G.t; G.bub=G.bub||[]; for(let i=0;i<4;i++) G.bub.push({x:rigX()+rand(-.1,.1),y:r.y-rand(0,.4),r:rand(.6,1.4),v:rand(.35,.6)}); r.off=-rigDef().sasou*(r.onBottom||G.rigId==='jig'?1:.6); SND.click(); }
+function kaishu(){ SND.init(); if(G.state==='idle'||G.state==='falling'){ G.state='idle'; G.rig.anchor=G.rig.y; G.auto=!G.auto; if(G.auto) toast('回収中…',700); } }
+function setDrag(d){ G.drag=clamp(Math.round(d*2)/2,.5,10); }
+
+// ============ やりとり ============
+function hookFish(q){ const f=G.bite.fish; G.bite=null; f.state='hooked'; G.state='fight'; G.auto=false;
+  const L=Math.max(1.5,G.rig.y);
+  const F=G.fight={f,q,len:L,stam:1,phase:'run',pt:rand(1.2,2.4),mul:f.sp.fight==='dive'?1.7:1.4,dir:Math.random()<.5?1:-1,pull:0,ten:0,slack:0,t:0,ang:0,ft:0,extra:[]};
+  const hk=rigDef().hooks.length, sp=f.sp;
+  if(sp.multi&&hk>1){ const pr=(sp.id==='souhachi'&&G.season===0)?.7:.45;
+    for(const m of G.fishes){ if(F.extra.length>=hk-1) break; if(m===f||m.sp!==sp||m.gone||m.state==='hooked') continue;
+      if(Math.hypot(m.x-f.x,m.y-f.y)>4.5) continue; if(Math.random()<pr){ m.state='hooked'; F.extra.push(m); } } }
+  for(const m of [f,...F.extra]) m.hookY=m.y;
+  G.rodHold=0; SND.gon(); toast(F.extra.length?`追い食い！ ×${F.extra.length+1}`:'ヒット！',1000,'hot'); }
+function releaseExtras(F){ if(!F) return; for(const m of F.extra||[]){ m.state='flee'; m.tt=3; m.ty=m.y+1; } }
+function nextPhase(F){ const sp=F.f.sp, r=Math.random();
+  if(sp.fight==='run'&&r<.14&&F.len>6){ F.phase='charge'; F.pt=rand(.8,1.4); return; }
+  if(r<.22+.5*F.stam){ F.phase='run'; F.mul=rand(1.1,1.7)*(sp.fight==='run'?1.15:1); F.pt=rand(.8,2.4); F.dir=Math.random()<.5?1:-1; }
+  else { F.phase='rest'; F.mul=rand(.3,.6); F.pt=rand(.8,2); } }
+function updateFight(dt){
+  const F=G.fight, f=F.f, sp=f.sp, w=f.w+F.extra.reduce((a,m)=>a+m.w,0)*.85, brk=rigDef().brk;
+  F.t+=dt; F.pt-=dt; if(F.pt<=0) nextPhase(F);
+  const target=F.phase==='charge'?0:(w*sp.power*F.mul*(.3+.7*F.stam)+.12*w+.1);
+  F.pull=lerp(F.pull,target,1-Math.exp(-dt*6));
+  const hs=(sp.fight==='shake'||sp.fight==='dive')?.18*w*Math.sin(F.t*13)*Math.sin(F.t*2.3):0;
+  const pe=Math.max(0,F.pull+hs), reel=G.reel;
+  let t=reel?pe*1.2+.35:pe*.85, out=0;
+  if(F.phase==='charge'){ F.len-=1.6*dt; t=reel?.5:.03; }
+  if(t>G.drag){ out=Math.min(4,(t-G.drag)*1.1+.3); t=G.drag+(t-G.drag)*.2; F.dragSnd=(F.dragSnd||0)+dt*out*6; if(F.dragSnd>1){F.dragSnd=0;SND.drag();} }
+  F.ten=lerp(F.ten,t,1-Math.exp(-dt*10));
+  F.len+=out*dt;
+  if(reel&&out===0){ const k=G.point.dendou?2.6:1; F.len-=1.5*k*(1-.55*clamp(pe/G.drag,0,1))*dt; F.clk=(F.clk||0)+dt; if(F.clk>.07){F.clk=0;SND.click();} }
+  F.len=Math.max(.5,F.len);
+  // スタミナ
+  const den=.7+.6*sp.power*Math.sqrt(w)/2;
+  F.stam=Math.max(0,F.stam-dt*(.03+.06*clamp(F.ten/(w*sp.power+.3),0,2))*(F.phase==='run'?1.5:1)/den);
+  // 位置
+  const angT=sp.fight==='run'?(F.phase==='run'?F.dir*.75:F.dir*.25):(F.phase==='run'?F.dir*.2:F.dir*.08);
+  F.ang=lerp(F.ang,angT,1-Math.exp(-dt*1.2));
+  const fx=rigX()+Math.sin(F.ang)*F.len*.8, bot=bottomAt(fx);
+  let fy=F.len*Math.cos(F.ang);
+  if(fy>bot-.25){ fy=bot-.25;
+    if(G.point.type==='rock'&&sp.fight==='dive'&&F.phase==='run'&&!G.rooted&&F.t>.3){ startRooted(); } }
+  const nx=fx-f.x; f.x=fx; f.y=fy; if(Math.abs(nx)>.002) f.face=nx>0?1:-1; f.swim+=dt*(6+F.ten*2);
+  F.extra.forEach((m,i)=>{ m.x=f.x+(i%2?.35:-.35); m.y=f.y-.42*(i+1); m.face=f.face; m.swim+=dt*(7+i); });
+  G.rig.y=fy; G.rig.anchor=fy;
+  // 切れる・バレる
+  if(F.ten>brk){ lineBreak('ラインブレイク！','ドラグを緩めよう'); return; }
+  if(F.ten<.12) F.slack+=dt; else F.slack=Math.max(0,F.slack-dt*2);
+  if(F.slack>1){ F.slack=0; if(Math.random()<.25+(1-F.q)*.6){ lose('糸がたるんでバレた…','魚が向かってきたら巻き続けよう'); return; } }
+  if(Math.random()<(1-F.q)*.012*dt*(hs?1.5:1)*60/60){ lose('フックアウト…',''); return; }
+  if(F.len<=1.1){ if(w>=1.5){ G.state='landing'; G.landing={t:0,lim:2.8}; SND.splash(); toast('タモ入れ！ いまだ！',1200,'hot'); }
+    else { if(Math.random()<(1-F.q)*.3){ lose('抜き上げでポロリ…',''); return; } landFish(); } }
+}
+function startRooted(){ G.state='rooted'; G.rooted={t:0,lim:rand(2.5,5),pull:0}; G.reel=G.reel; toast('根に潜られた！',1200); setTimeout(()=>{ if(G.state==='rooted') toast('巻かずに少し待って…',1400); },1000); }
+function updateRooted(dt){ const R=G.rooted; R.t+=dt; const F=G.fight;
+  if(G.reel){ R.pull+=dt; F.ten=lerp(F.ten,rigDef().brk*.9,1-Math.exp(-dt*4)); if(R.pull>1){ R.pull=0; if(Math.random()<.35){ lineBreak('根ズレで切れた…','根に入ったら少し待つ'); return; } } }
+  else F.ten=lerp(F.ten,.2,1-Math.exp(-dt*4));
+  if(R.t>R.lim){ if(Math.random()<.6){ G.state='fight'; G.rooted=null; F.phase='rest'; F.pt=1.5; F.len-=.8; toast('出てきた！ 一気に巻け！',1000,'hot'); } else lineBreak('根ズレで切れた…','根に入ったら少し待つ'); } }
+function updateLanding(dt){ const L=G.landing; L.t+=dt; const F=G.fight; F.f.swim+=dt*14; F.ten=lerp(F.ten,F.f.w*.6,.1);
+  if(L.t>L.lim){ G.state='fight'; G.landing=null; F.len=4; F.phase='run'; F.pt=1.5; F.mul=1.3; SND.splash(); toast('タモ入れ失敗！ 潜られた',1100); } }
+function tamo(){ SND.splash(); landFish(); }
+function lose(msg,sub){ const F=G.fight; releaseExtras(F); if(F){ const f=F.f; f.state='flee'; f.tt=3; f.ty=f.y+2; G.rig.y=f.y; G.rig.anchor=f.y; }
+  G.fight=null; G.rooted=null; G.landing=null; G.state='idle'; if(G.rigId==='bait'&&Math.random()<.7) G.rig.baitGone=true; G.rodHold=0; toast(msg,1600,'',sub); }
+function lineBreak(msg,sub){ SND.snap(); const F=G.fight; releaseExtras(F); if(F){ F.f.state='flee'; F.f.tt=3; }
+  G.fight=null; G.rooted=null; G.landing=null; G.snag=null; G.lost++; G.state='lost'; G.lostT=1.6; G.rodHold=0; toast(msg,1800,'',sub); }
+function landFish(){ const F=G.fight, all=[F.f,...(F.extra||[])]; G.fight=null; G.landing=null; G.rooted=null; G.state='card';
+  const sp=F.f.sp, z=REC.zukan[sp.id]||(REC.zukan[sp.id]={n:0,best:0}), first=z.n===0, prev=z.best; 
+  for(const m of all){ m.gone=true; m.state='landed'; G.count++; z.n++; if(m.size>z.best) z.best=m.size;
+    REC.log.unshift({id:sp.id,size:m.size,w:Math.round(m.w*1000),p:G.point.id,s:G.season,r:G.rigId,at:Date.now()}); }
+  REC.log=REC.log.slice(0,100); saveRec();
+  const big=all.reduce((a,m)=>m.size>a.size?m:a,all[0]); const isRec=!first&&big.size>prev;
+  SND.fanfare(); showCatch(big,isRec,all,first); if(sp.id==='maika') toast('墨をはいた！',1400); }
+function resetRig(){ G.state='surface'; G.rig.y=.3; G.rig.anchor=.3; G.rig.off=0; G.rig.baitGone=false; G.auto=false; G.bite=null; }
+
+// 根掛かり
+function startSnag(){ G.state='snag'; G.snag={tries:0,hold:0}; G.auto=false; G.rodHold=.7; SND.gon(); toast('根掛かり！',1200,'',`<kbd>巻く</kbd>を押して外そう`); }
+function updateSnag(dt){ const S=G.snag; if(G.reel){ S.hold+=dt; G.rodHold=.7+S.hold*.3;
+  if(S.hold>1.1){ S.hold=0; S.tries++; if(Math.random()<.38){ G.state='idle'; G.snag=null; G.rig.anchor-=.6; G.rodHold=0; toast('外れた！',900); SND.click(); }
+    else if(S.tries>=3){ lineBreak('仕掛けロスト…','岩場では底を引きずらない'); } else { SND.tick(); toast(`ダメだ…（${S.tries}/3）`,700); } } }
+  else { S.hold=Math.max(0,S.hold-dt); G.rodHold=.7; } }
+
+// ============ 仕掛けの動き ============
+function updateRig(dt){ const r=G.rig, rd=rigDef(), bot=bottomAt(rigX());
+  if(G.state==='lost'){ G.lostT-=dt; if(G.lostT<=0){ resetRig(); toast('仕掛けを付け直した',900); } return; }
+  if(G.state==='falling'){ r.y+=rd.fall*(G.point.dendou?1.4:1)*dt; r.anchor=r.y; r.off=0; r.lastAct=G.t;
+    if(r.y>=bot){ r.y=bot; r.anchor=bot; G.state='idle'; r.onBottom=true; SND.tick(); toast(`着底　水深${bot.toFixed(1)}m`,900);
+      if(G.point.type==='rock'&&Math.random()<(G.rigId==='jig'?.06:.03)) startSnag(); } return; }
+  if(G.state!=='idle') return;
+  if(G.reel||G.auto){ r.anchor-=reelSpeed(G.auto&&!G.reel)*dt; if(!G.auto){ r.clk=(r.clk||0)+dt; if(r.clk>.09){r.clk=0;SND.click();} } }
+  let pushed=false; if(r.anchor>bot){ pushed=r.anchor-bot>.02; r.anchor=bot; }
+  r.off*=Math.exp(-dt*(G.rigId==='jig'?2.6:4));
+  r.y=Math.min(bot,r.anchor+r.off);
+  r.onBottom=r.anchor>=bot-.05;
+  if(r.anchor<=.3){ resetRig(); toast(G.rig.baitGone?'回収':'回収',600); return; }
+  if(G.point.type==='rock'&&r.onBottom&&!G.bite){ const rate=(G.rigId==='jig'?.035:.012)+(pushed?.5:0); if(Math.random()<rate*dt) startSnag(); }
+  if(r.baitGone&&!r.hinted&&G.t-r.lastAct>8){ r.hinted=true; toast('エサが無いかも？','',0,'回収して付け直そう'); }
+}
+
+// ============ 画面：海の中 ============
+function resize(){ DPR=Math.min(2,window.devicePixelRatio||1); W=innerWidth; H=innerHeight; cv.width=W*DPR|0; cv.height=H*DPR|0;
+  for(const c of [ffc,rodc]){ const r=c.getBoundingClientRect(); c.width=Math.max(10,r.width*DPR|0); c.height=Math.max(10,r.height*DPR|0); } ffBg=null; }
+addEventListener('resize',resize);
+let ffBg=null; const FISHX=3.4; // 魚は見やすいよう実寸の3.4倍で描く
+function view(){ const sc=Math.min(H/(H<560?11:13),W/12)*(G.zoom||1), vh=H/sc; let top=G.camY-vh*.45; top=Math.max(top,-vh*.33); const maxB=bottomAt(rigX())+3; top=Math.min(top,Math.max(-vh*.33,maxB-vh)); return {vh,sc,top,cx:W*.42}; }
+const sx=(V,x)=>V.cx+(x-G.camX)*V.sc, sy=(V,y)=>(y-V.top)*V.sc;
+function waterCol(d,a=1){ const k=1-Math.exp(-Math.max(0,d)/22); return `rgba(${lerp(40,3,k)|0},${lerp(122,16,k)|0},${lerp(150,30,k)|0},${a})`; }
+function initParts(){ G.parts=[]; for(let i=0;i<80;i++) G.parts.push({x:rand(-20,20),y:rand(0,90),r:rand(.6,1.8),v:rand(.02,.08)}); }
+function drawScene(){
+  const V=view(), c=ctx; c.setTransform(DPR,0,0,DPR,0,0);
+  const y0=sy(V,0), yB=H;
+  // 空
+  if(y0>0) drawSky(V,y0);
+  // 水
+  const top=Math.max(0,y0), dTop=V.top+top/V.sc, dBot=V.top+V.vh;
+  const g=c.createLinearGradient(0,top,0,yB); g.addColorStop(0,waterCol(dTop)); g.addColorStop(1,waterCol(dBot)); c.fillStyle=g; c.fillRect(0,top,W,yB-top);
+  // 光の筋
+  if(dTop<14&&(G.light??1)>.3){ c.save(); c.globalCompositeOperation='lighter'; c.globalAlpha=G.light??1; for(let i=0;i<6;i++){ const x=((i*W/5+G.t*8*(i%2?1:-1)-G.drift*V.sc*.5)%(W*1.2)+W*1.2)%(W*1.2)-W*.1, w=V.sc*rand2(()=>hash(i),.6,1.6);
+      const lg=c.createLinearGradient(0,y0,0,y0+V.sc*14); lg.addColorStop(0,'rgba(180,230,255,.10)'); lg.addColorStop(1,'rgba(180,230,255,0)'); c.fillStyle=lg;
+      c.beginPath(); c.moveTo(x,y0); c.lineTo(x+w,y0); c.lineTo(x+w*2.2+V.sc*3,y0+V.sc*14); c.lineTo(x+V.sc*3,y0+V.sc*14); c.fill(); } c.restore(); }
+  // 浮遊物
+  c.fillStyle='rgba(220,240,240,.35)'; for(const p of G.parts){ p.y+=p.v*.016; let px=((p.x-(G.drift-20))%40+40)%40+G.drift-20; let py=((p.y-V.top)%V.vh+V.vh)%V.vh+V.top; if(py<0) continue; c.fillRect(sx(V,px),sy(V,py),p.r,p.r); }
+  drawFloor(V);
+  // 暗さ（深いほど暗く）。魚と仕掛けは水中ライトで見ている想定で、暗さの上に描く
+  if(dBot>8){ const dg=c.createLinearGradient(0,top,0,yB); dg.addColorStop(0,`rgba(0,6,14,${clamp((dTop-5)/90,0,.55)})`); dg.addColorStop(1,`rgba(0,6,14,${clamp((dBot-5)/90,0,.55)})`); c.fillStyle=dg; c.fillRect(0,top,W,yB-top); }
+  if((G.light??1)<1){ c.fillStyle=`rgba(1,4,14,${(1-G.light)*.82})`; c.fillRect(0,top,W,H-top); }
+  // 魚
+  const FX=FISHX;
+  for(const f of G.fishes){ if(f.gone) continue; const X=sx(V,f.x), Y=sy(V,f.y), L=f.size/100*V.sc*FX; if(X<-L||X>W+L||Y<-L||Y>H+L) continue;
+    c.save(); c.translate(X,Y); const flat=zoneFor(f.sp).t==='flat'; const hooked=f.state==='hooked';
+    if(!flat){ const tilt=hooked?-.35*Math.sign(f.face):clamp(f.vy*.6,-.4,.4)*f.face; c.rotate(tilt); }
+    drawFish(c,L,f,{flip:f.face<0,swim:f.swim,hooked,squash:flat&&!hooked?.3:hooked&&flat?.55:undefined});
+    c.restore(); }
+  drawRigAndLine(V); drawBubbles(V);
+  // 水面とボート
+  if(y0>-5&&y0<H+V.sc*3){ drawBoat(V,y0); drawSurface(V,y0); }
+  if((G.light??1)<1&&y0>0){ c.fillStyle=`rgba(2,6,22,${(1-G.light)*.45})`; c.fillRect(0,0,W,y0+6); }
+  drawNightLights(V,y0);
+}
+function drawFloor(V){ const c=ctx, t=G.point.type; const pts=[];
+  for(let X=-8;X<=W+8;X+=6){ const wx=G.camX+(X-V.cx)/V.sc; pts.push([X,sy(V,bottomAt(wx)),wx]); }
+  if(pts.every(p=>p[1]>H+20)) return;
+  const col={rock:['#3b3a33','#1c1b17'],sand:['#a89670','#5a4e38'],mud:['#3e4234','#1e2018']}[t];
+  c.beginPath(); c.moveTo(pts[0][0],H+10); for(const p of pts) c.lineTo(p[0],p[1]); c.lineTo(W+8,H+10); c.closePath();
+  const minY=Math.min(...pts.map(p=>p[1])); const g=c.createLinearGradient(0,minY,0,minY+V.sc*6); g.addColorStop(0,col[0]); g.addColorStop(1,col[1]); c.fillStyle=g; c.fill();
+  const x0=Math.floor(G.camX+(-V.cx)/V.sc)-2, x1=Math.ceil(G.camX+(W-V.cx)/V.sc)+2;
+  if(t==='rock'){ for(let i=x0*2;i<=x1*2;i++){ const wx=i*.5, h=hash(i); if(h<.35) continue; const b=bottomAt(wx), r=(.25+hash(i+7)*.7)*V.sc;
+      const X=sx(V,wx), Y=sy(V,b)+r*.35, n=7; const rg=c.createLinearGradient(0,Y-r,0,Y+r*.3); const k=hash(i+3);
+      rg.addColorStop(0,`rgb(${78+k*30|0},${74+k*24|0},${62+k*18|0})`); rg.addColorStop(1,`rgb(${34+k*10|0},${32+k*8|0},${28+k*6|0})`); c.fillStyle=rg; c.beginPath();
+      for(let j=0;j<=n;j++){ const a=Math.PI+j/n*Math.PI, rr=r*(.75+hash(i*13+j)*.45); const px=X+Math.cos(a)*rr*1.25, py=Y+Math.sin(a)*rr*(.65+hash(i+j)*.25); j?c.lineTo(px,py):c.moveTo(px,py); }
+      c.closePath(); c.fill();
+      if(b<26&&hash(i+21)<.5){ c.fillStyle='rgba(150,90,110,.35)'; c.beginPath(); c.ellipse(X-r*.3,Y-r*.55,r*.35,r*.12,0,0,Math.PI*2); c.fill(); } }
+    // 海藻（浅い所だけ）
+    for(let i=x0;i<=x1;i++){ if(hash(i+50)<.55) continue; const b=bottomAt(i); if(b>24) continue; const hgt=(1+hash(i+9)*2.2)*V.sc, X=sx(V,i), Y=sy(V,b);
+      c.strokeStyle=hash(i+11)<.5?'rgba(110,90,40,.9)':'rgba(60,100,50,.85)'; c.lineWidth=Math.max(2,V.sc*.09); c.lineCap='round'; c.beginPath(); c.moveTo(X,Y);
+      for(let k=1;k<=8;k++){ const yy=Y-hgt*k/8, xx=X+Math.sin(G.t*.9+k*.6+i)*V.sc*.18*k/8; c.lineTo(xx,yy);} c.stroke(); } }
+  else if(t==='sand'){ c.strokeStyle='rgba(255,240,200,.18)'; c.lineWidth=1.2; for(let i=x0*3;i<=x1*3;i++){ const wx=i/3, b=bottomAt(wx); if(hash(i)<.4) continue; const X=sx(V,wx), Y=sy(V,b)+V.sc*(.15+hash(i+2)*.6); c.beginPath(); c.moveTo(X-V.sc*.15,Y); c.quadraticCurveTo(X,Y-V.sc*.06,X+V.sc*.15,Y); c.stroke(); }
+    for(let i=x0;i<=x1;i++){ if(hash(i+70)<.8) continue; const b=bottomAt(i); c.fillStyle='rgba(240,230,210,.6)'; c.beginPath(); c.ellipse(sx(V,i),sy(V,b)+2,V.sc*.06,V.sc*.04,0,0,Math.PI*2); c.fill(); } }
+  else { c.fillStyle='rgba(90,100,70,.25)'; for(let i=x0*2;i<=x1*2;i++){ if(hash(i)<.5) continue; const wx=i/2; c.fillRect(sx(V,wx),sy(V,bottomAt(wx))+V.sc*.2*hash(i+1),V.sc*.3,2); } }
+}
+// ============ 空・船・水面・仕掛け（v0.5 で描き直し） ============
+const SKY={日中:['#5d9ed2','#d6e9f2','#9fb6c2','#7d97a3'],朝まずめ:['#27406e','#f3b27c','#6b6a80','#4c4e66'],夕まずめ:['#2c3768','#ef8f5e','#6a5a72','#4a4058'],夜:['#02060e','#13223a','#0c1624','#070d18']};
+function drawSky(V,y0){ const c=ctx, col=SKY[G.band||'日中'], s=V.sc;
+  const g=c.createLinearGradient(0,0,0,y0); g.addColorStop(0,col[0]); g.addColorStop(1,col[1]); c.fillStyle=g; c.fillRect(0,0,W,y0);
+  // 太陽（昼・まずめ）
+  if(G.band==='日中'||!G.band){ const sxp=W*.8, syp=Math.max(20,y0*.22); const sg=c.createRadialGradient(sxp,syp,0,sxp,syp,60); sg.addColorStop(0,'rgba(255,255,240,.95)'); sg.addColorStop(.25,'rgba(255,250,220,.5)'); sg.addColorStop(1,'rgba(255,250,220,0)'); c.fillStyle=sg; c.fillRect(sxp-60,syp-60,120,120); }
+  else if(G.band!=='夜'){ const sxp=G.band==='朝まずめ'?W*.86:W*.14, syp=y0-s*1.2; const sg=c.createRadialGradient(sxp,syp,0,sxp,syp,W*.35); sg.addColorStop(0,'rgba(255,220,150,.95)'); sg.addColorStop(.06,'rgba(255,190,120,.7)'); sg.addColorStop(1,'rgba(255,160,100,0)'); c.fillStyle=sg; c.fillRect(0,0,W,y0); }
+  // 雲
+  for(let i=0;i<6;i++){ const cxp=((hash(i)*W*1.4+G.t*(2+hash(i+9)*3)-G.drift*s*.02)%(W*1.4)+W*1.4)%(W*1.4)-W*.2, cyp=y0*(.12+hash(i+3)*.45), cw=W*(.08+hash(i+5)*.1);
+    c.fillStyle=G.band==='夜'?'rgba(40,50,70,.5)':G.band&&G.band!=='日中'?'rgba(255,200,170,.45)':'rgba(255,255,255,.6)';
+    for(let j=0;j<5;j++){ c.beginPath(); c.ellipse(cxp+(j-2)*cw*.28,cyp+Math.abs(j-2)*cw*.03,cw*(.28-Math.abs(j-2)*.04),cw*.11,0,0,Math.PI*2); c.fill(); } }
+  // 遠くの山なみと岬（イメージ）
+  const ph=-G.drift*s*.03, hb=y0;
+  c.fillStyle=col[2]; c.beginPath(); c.moveTo(-10,hb); for(let x=-10;x<=W*.62;x+=W/40){ c.lineTo(x,hb-s*(.45+.35*Math.sin(x*.012+1)+.15*Math.sin(x*.05))); } c.lineTo(W*.62,hb); c.fill();
+  c.fillStyle=col[3]; c.beginPath(); c.moveTo(W*.5+ph,hb); c.bezierCurveTo(W*.58+ph,hb-s*.4,W*.6+ph,hb-s*1.3,W*.7+ph,hb-s*1.35); c.bezierCurveTo(W*.78+ph,hb-s*1.42,W*.86+ph,hb-s*1.38,W*.92+ph,hb-s*1.45); c.bezierCurveTo(W*.98+ph,hb-s*1.5,W*1.05+ph,hb-s*1.25,W*1.3+ph,hb-s*1.2); c.lineTo(W*1.3+ph,hb); c.fill();
+  const cg=c.createLinearGradient(0,hb-s*1.45,0,hb); cg.addColorStop(0,'rgba(0,0,0,0)'); cg.addColorStop(1,'rgba(0,0,0,.25)'); c.fillStyle=cg; c.fillRect(W*.5+ph,hb-s*1.45,W*.8,s*1.45);
+  c.fillStyle=G.band==='夜'?'rgba(20,40,30,.6)':'rgba(70,100,70,.45)'; c.beginPath(); c.moveTo(W*.68+ph,hb-s*1.33); for(let x=W*.68;x<=W*1.3;x+=W/60){ c.lineTo(x+ph,hb-s*(1.42+.06*Math.sin(x*.2))); } c.lineTo(W*1.3+ph,hb-s*1.2); c.lineTo(W*.68+ph,hb-s*1.25); c.fill(); // 岬の上の木々
+  const lx=W*.86+ph, ly=hb-s*1.42; c.fillStyle=G.band==='夜'?'#556':'#f4f4f0'; c.fillRect(lx-s*.07,ly-s*.55,s*.14,s*.55); c.fillStyle='#c33'; c.fillRect(lx-s*.1,ly-s*.62,s*.2,s*.08);
+  G.lighthouse={x:lx,y:ly-s*.58}; }
+// 夜の明かり（暗さを重ねたあとに描く）
+function drawNightLights(V,y0){ const c=ctx; if(y0<=0) return; const s=V.sc;
+  if(G.band==='夜'){ for(let i=0;i<60;i++){ const x=hash(i*3.1)*W, y=hash(i*7.7)*y0*.85; const a=.4+.4*Math.sin(G.t*2+i); c.fillStyle=`rgba(255,255,240,${a})`; c.fillRect(x,y,1.4,1.4); }
+    // 月（月齢で欠ける）
+    const age=G.clock?moonAge(new Date(G.clock)):10, ph=age/29.53, mx=W*.68, my=y0*.25, r=13;
+    const k=Math.cos(ph*2*Math.PI); c.fillStyle='rgba(60,70,90,.5)'; c.beginPath(); c.arc(mx,my,r,0,Math.PI*2); c.fill();
+    c.fillStyle='rgba(255,250,220,.95)'; for(let y=-r;y<r;y+=.5){ const hw=Math.sqrt(r*r-(y+.25)**2), a=ph<.5?hw*k:-hw, b=ph<.5?hw:-hw*k; if(b>a) c.fillRect(mx+a,my+y,b-a,.6); } }
+  if(G.band==='夜'||G.band==='朝まずめ'||G.band==='夕まずめ'){ const L=G.lighthouse; if(L){ const f=Math.max(0,Math.sin(G.t*.63)); if(f>.85){ const a=(f-.85)/.15; const g=c.createRadialGradient(L.x,L.y,0,L.x,L.y,40); g.addColorStop(0,`rgba(255,255,220,${a})`); g.addColorStop(1,'rgba(255,255,220,0)'); c.fillStyle=g; c.fillRect(L.x-40,L.y-40,80,80); } }
+    // 船の作業灯
+    if(G.deckLight){ const D=G.deckLight; const g=c.createRadialGradient(D.x,D.y,0,D.x,D.y,s*3.2); g.addColorStop(0,'rgba(255,240,200,.55)'); g.addColorStop(1,'rgba(255,240,200,0)'); c.fillStyle=g; c.fillRect(D.x-s*3.2,D.y-s*3.2,s*6.4,s*6.4);
+      c.fillStyle='#fff8d0'; c.beginPath(); c.arc(D.x,D.y,Math.max(2,s*.07),0,Math.PI*2); c.fill(); } } }
+
+// 船：ボートの座標（m。x は流れに合わせた位置、y は上が負）で描き、波で上下・前後にゆれる
+const ROD={bx:.32,by:-1.32,ang:-.56,len:2.3};
+// 船の絵（img/boat.webp・H.M Works）。へさき先端 -5.35m〜船尾 1.62m、喫水線 0m に合わせて置く。読めなければ下の手描きに戻る
+const BOAT={ok:false,cv:null,x:-5.35,y:-2.9226,w:6.97,h:3.2547,wl:660/735};
+{ const img=new Image(); img.onload=()=>{ const cv=document.createElement('canvas'); cv.width=img.naturalWidth; cv.height=img.naturalHeight; const x=cv.getContext('2d');
+    x.drawImage(img,0,0); x.globalCompositeOperation='source-atop'; x.fillStyle=waterCol(.5,.8); const y=cv.height*BOAT.wl+cv.height*.03/BOAT.h; x.fillRect(0,y,cv.width,cv.height-y); // 水面下は海の色に沈める
+    const u=document.createElement('canvas'); u.width=cv.width; u.height=cv.height; const ux=u.getContext('2d'); // 水面下の船底の形（夜に水中と同じ暗さをかける）
+    ux.drawImage(img,0,0); ux.globalCompositeOperation='source-in'; ux.fillStyle='rgb(1,4,14)'; ux.fillRect(0,y,u.width,u.height-y); ux.globalCompositeOperation='destination-in'; ux.fillRect(0,y,u.width,u.height-y);
+    BOAT.cv=cv; BOAT.under=u; BOAT.ok=true; }; img.src='img/boat.webp'; }
+function boatXf(V,y0){ const bob=Math.sin(G.t*1.1)*.07+Math.sin(G.t*.47)*.04, pitch=Math.sin(G.t*.9)*.022, px=-1.8;
+  const ox=sx(V,G.drift+px), oy=y0+bob*V.sc, cs=Math.cos(pitch), sn=Math.sin(pitch);
+  return {ox,oy,pitch,px,P:(x,y)=>[ox+((x-px)*cs-y*sn)*V.sc, oy+((x-px)*sn+y*cs)*V.sc]}; }
+function rodPts(){ const b=rodBend(), d=[Math.cos(ROD.ang),Math.sin(ROD.ang)];
+  const B=[ROD.bx,ROD.by], C=[B[0]+d[0]*1.25,B[1]+d[1]*1.25+b*.15], T=[B[0]+d[0]*ROD.len+b*.18,B[1]+d[1]*ROD.len+b*1.15]; return {B,C,T}; }
+function drawBoat(V,y0){ const c=ctx, s=V.sc, X=boatXf(V,y0);
+  c.save(); c.translate(X.ox,X.oy); c.rotate(X.pitch); c.scale(s,s); c.translate(-X.px,0); const lw=1/s;
+  if(BOAT.ok){
+    G.deckLight=null; if((G.light??1)<.7){ const [lx,ly]=X.P(-1.545,-2.14); G.deckLight={x:lx,y:ly}; }
+    drawAngler(c); // 釣り人の脚は舷に隠れる
+    c.drawImage(BOAT.cv,BOAT.x,BOAT.y,BOAT.w,BOAT.h);
+    if((G.light??1)<1){ c.globalAlpha=(1-G.light)*.82; c.drawImage(BOAT.under,BOAT.x,BOAT.y,BOAT.w,BOAT.h); c.globalAlpha=1; }
+    if((G.light??1)<.7){ c.fillStyle='#ff4040'; c.beginPath(); c.arc(-3.91,-.98,.05,0,Math.PI*2); c.fill(); }
+  } else {
+  // キャビン
+  const cab=new Path2D(); cab.moveTo(-3.95,-.92); cab.lineTo(-3.45,-2.22); cab.quadraticCurveTo(-3.4,-2.3,-3.3,-2.3); cab.lineTo(-1.5,-2.3); cab.lineTo(-1.32,-.9); cab.closePath();
+  let g=c.createLinearGradient(0,-2.3,0,-.9); g.addColorStop(0,'#ffffff'); g.addColorStop(1,'#dfe5e8'); c.fillStyle=g; c.fill(cab); c.strokeStyle='rgba(0,0,0,.25)'; c.lineWidth=lw; c.stroke(cab);
+  g=c.createLinearGradient(-3.6,-2.2,-3,-1.4); g.addColorStop(0,'#1d3348'); g.addColorStop(.55,'#3c6f8f'); g.addColorStop(1,'#1d3348'); c.fillStyle=g;
+  c.beginPath(); c.moveTo(-3.75,-1.5); c.lineTo(-3.42,-2.16); c.lineTo(-3.05,-2.16); c.lineTo(-3.05,-1.5); c.closePath(); c.fill();
+  c.beginPath(); c.roundRect?c.roundRect(-2.9,-2.12,1.25,.55,.06):c.rect(-2.9,-2.12,1.25,.55); c.fill();
+  c.strokeStyle='rgba(255,255,255,.35)'; c.lineWidth=.03; c.beginPath(); c.moveTo(-3.6,-1.6); c.lineTo(-3.3,-2.05); c.moveTo(-2.7,-1.65); c.lineTo(-2.4,-2.05); c.stroke();
+  // 屋根の上：レーダードーム・アンテナ・マスト灯
+  c.fillStyle='#f6f7f7'; c.beginPath(); c.ellipse(-2.35,-2.38,.32,.12,0,Math.PI,0); c.fill(); c.fillRect(-2.67,-2.38,.64,.08);
+  c.strokeStyle='#555'; c.lineWidth=.025; c.beginPath(); c.moveTo(-1.62,-2.3); c.lineTo(-1.45,-4.1); c.stroke();
+  c.strokeStyle='#bbb'; c.lineWidth=.05; c.beginPath(); c.moveTo(-3.05,-2.3); c.lineTo(-3.05,-2.95); c.stroke(); c.fillStyle='#fff'; c.fillRect(-3.1,-3.02,.1,.08);
+  G.deckLight=null; if((G.light??1)<.7){ const [lx,ly]=X.P(-1.45,-2.25); G.deckLight={x:lx,y:ly}; }
+  // 予備の竿（竿立て）とクーラーボックス
+  c.strokeStyle='#2a2a2a'; c.lineWidth=.03; for(const [x0,a] of [[-.95,-1.35],[-.75,-1.25]]){ c.beginPath(); c.moveTo(x0,-.7); c.lineTo(x0+Math.cos(a)*2.4,-.7+Math.sin(a)*2.4); c.stroke(); }
+  c.fillStyle='#e9eef0'; c.fillRect(-.65,-1.08,.6,.4); c.fillStyle='#2f6fa8'; c.fillRect(-.67,-1.12,.64,.08);
+  // 釣り人（右向き・救命胴衣）
+  drawAngler(c);
+  // 船体
+  const hull=new Path2D(); hull.moveTo(-5.35,-1.28); hull.quadraticCurveTo(-2.4,-.86,1.62,-.8); hull.lineTo(1.55,.34); hull.quadraticCurveTo(1.25,.5,.6,.5); hull.lineTo(-3.2,.5); hull.quadraticCurveTo(-4.55,.46,-5.0,-.2); hull.quadraticCurveTo(-5.22,-.72,-5.35,-1.28); hull.closePath();
+  g=c.createLinearGradient(0,-1.2,0,.5); g.addColorStop(0,'#ffffff'); g.addColorStop(.6,'#e6ebee'); g.addColorStop(1,'#c4ccd2'); c.fillStyle=g; c.fill(hull);
+  c.save(); c.clip(hull); c.fillStyle='#1f4e79'; c.fillRect(-6,-.16,8,.14); c.fillStyle='#8c2f2a'; c.fillRect(-6,-.02,8,.7); c.fillStyle=waterCol(.5,.5); c.fillRect(-6,.03,8,.7);
+  c.fillStyle='rgba(255,255,255,.35)'; c.fillRect(-6,-.75,8,.04); c.fillStyle='rgba(0,0,0,.08)'; c.beginPath(); c.moveTo(-5,.5); c.quadraticCurveTo(-4.5,-.4,-5.4,-1.3); c.lineTo(-6,-1.3); c.lineTo(-6,.6); c.fill();
+  c.restore();
+  c.strokeStyle='#9aa3a8'; c.lineWidth=.06; c.beginPath(); c.moveTo(-5.35,-1.28); c.quadraticCurveTo(-2.4,-.86,1.62,-.8); c.stroke();
+  c.strokeStyle='rgba(0,0,0,.3)'; c.lineWidth=lw; c.stroke(hull);
+  // バウレール
+  c.strokeStyle='#c9d1d6'; c.lineWidth=.035; c.beginPath(); c.moveTo(-5.1,-1.7); c.quadraticCurveTo(-4.5,-1.62,-3.95,-1.5);
+  for(const x of [-5.05,-4.55,-4.05]){ const yb=-1.28+(x+5.35)*.1; c.moveTo(x,yb); c.lineTo(x,yb-.42); } c.stroke();
+  // 航海灯（夜）
+  if((G.light??1)<.7){ c.fillStyle='#ff4040'; c.beginPath(); c.arc(-3.9,-1.05,.05,0,Math.PI*2); c.fill(); }
+  }
+  // 竿・リール
+  const R=rodPts(), N=28; c.lineCap='round'; let p0=R.B;
+  for(let i=1;i<=N;i++){ const t=i/N, u=1-t, x=u*u*R.B[0]+2*u*t*R.C[0]+t*t*R.T[0], y=u*u*R.B[1]+2*u*t*R.C[1]+t*t*R.T[1];
+    c.strokeStyle=t>.9?(i%2?'#ff7b2c':'#fff'):t<.18?'#3a3a3a':'#16191c'; c.lineWidth=lerp(.05,.012,t); c.beginPath(); c.moveTo(p0[0],p0[1]); c.lineTo(x,y); c.stroke(); p0=[x,y];
+    if([7,12,16,20,23,26].includes(i)){ c.strokeStyle='#c8ced2'; c.lineWidth=.012; c.beginPath(); c.arc(x,y+.035,.022,0,Math.PI*2); c.stroke(); } }
+  const rt=.13, rx=(1-rt)**2*R.B[0]+2*(1-rt)*rt*R.C[0]+rt*rt*R.T[0], ry=(1-rt)**2*R.B[1]+2*(1-rt)*rt*R.C[1]+rt*rt*R.T[1];
+  c.fillStyle='#2b2f33'; c.beginPath(); c.ellipse(rx,ry-.07,.1,.07,ROD.ang,0,Math.PI*2); c.fill(); c.fillStyle='#b8c0c6'; c.beginPath(); c.ellipse(rx+.02,ry-.07,.04,.06,ROD.ang,0,Math.PI*2); c.fill();
+  c.strokeStyle='#222'; c.lineWidth=.02; c.beginPath(); c.moveTo(rx,ry-.07); c.lineTo(rx+.04,ry+.06); c.stroke();
+  // 前の手（竿を持つ手）
+  c.fillStyle='#e8c2a0'; const ht=.2, hx2=(1-ht)**2*R.B[0]+2*(1-ht)*ht*R.C[0]+ht*ht*R.T[0], hy2=(1-ht)**2*R.B[1]+2*(1-ht)*ht*R.C[1]+ht*ht*R.T[1]; c.beginPath(); c.arc(hx2,hy2,.045,0,Math.PI*2); c.fill();
+  c.restore();
+  const [tx,ty]=X.P(R.T[0],R.T[1]); G.tip={x:tx,y:ty};
+}
+function drawAngler(c){ const x=.52;
+  // 脚（舷の陰になる）・胴・救命胴衣・腕・頭・帽子
+  c.fillStyle='#2c3440'; c.beginPath(); c.roundRect?c.roundRect(x-.16,-1.2,.32,.85,.06):c.rect(x-.16,-1.2,.32,.85); c.fill();
+  c.fillStyle='#24364f'; c.beginPath(); c.moveTo(x-.2,-1.22); c.quadraticCurveTo(x-.24,-1.6,x-.12,-1.78); c.lineTo(x+.14,-1.78); c.quadraticCurveTo(x+.24,-1.55,x+.2,-1.22); c.closePath(); c.fill();
+  c.fillStyle='#ff6a1a'; c.beginPath(); c.moveTo(x-.19,-1.3); c.quadraticCurveTo(x-.22,-1.62,x-.1,-1.76); c.lineTo(x+.12,-1.76); c.quadraticCurveTo(x+.21,-1.55,x+.18,-1.3); c.closePath(); c.fill();
+  c.fillStyle='#d8f0ff'; c.fillRect(x-.19,-1.45,.37,.035); c.fillStyle='rgba(0,0,0,.25)'; c.fillRect(x-.01,-1.75,.02,.45);
+  c.strokeStyle='#24364f'; c.lineWidth=.09; c.lineCap='round'; c.beginPath(); c.moveTo(x+.02,-1.68); c.quadraticCurveTo(x+.12,-1.42,x+.32,-1.42); c.stroke();
+  c.beginPath(); c.moveTo(x+.08,-1.7); c.quadraticCurveTo(x+.3,-1.62,x+.47,-1.6); c.stroke();
+  c.fillStyle='#e8c2a0'; c.beginPath(); c.ellipse(x+.03,-1.92,.11,.13,0,0,Math.PI*2); c.fill();
+  c.fillStyle='#1d2a3a'; c.beginPath(); c.ellipse(x+.02,-2.02,.12,.07,0,Math.PI,0); c.fill(); c.fillRect(x+.02,-2.03,.2,.035);
+  c.fillStyle='#222'; c.fillRect(x+.08,-1.95,.05,.02); }
+function drawSurface(V,y0){ const c=ctx, s=V.sc;
+  const wv=x=>y0+Math.sin(x*.025+G.t*1.6)*3+Math.sin(x*.07-G.t*2.3)*1.5+Math.sin(x*.013-G.t*.7)*2;
+  c.beginPath(); c.moveTo(0,wv(0)); for(let x=8;x<=W+8;x+=8) c.lineTo(x,wv(x)); c.lineTo(W,y0+14); c.lineTo(0,y0+14); c.closePath();
+  const g=c.createLinearGradient(0,y0-6,0,y0+14); g.addColorStop(0,G.band==='夜'?'rgba(30,60,80,.9)':'rgba(120,190,210,.85)'); g.addColorStop(1,'rgba(40,122,150,0)'); c.fillStyle=g; c.fill();
+  c.strokeStyle=G.band==='夜'?'rgba(200,220,255,.25)':'rgba(255,255,255,.7)'; c.lineWidth=1.6; c.beginPath(); for(let x=0;x<=W+8;x+=8){ x?c.lineTo(x,wv(x)):c.moveTo(x,wv(x)); } c.stroke();
+  // きらめき
+  if(G.band!=='夜'){ c.fillStyle='rgba(255,255,255,.7)'; for(let i=0;i<14;i++){ const x=((hash(i)*W+G.t*14*(hash(i+1)-.5))%W+W)%W; if(Math.sin(G.t*3+i*2)>.6) c.fillRect(x,wv(x)-1,s*.25,1.5); } }
+  // 船まわりの白波
+  const X=boatXf(V,y0); for(const [bxm,n] of [[1.55,4],[-5,3]]){ const [px,py]=X.P(bxm,0); for(let i=0;i<n;i++){ c.fillStyle=`rgba(255,255,255,${.35+.25*Math.sin(G.t*3+i)})`; c.beginPath(); c.ellipse(px+(i-n/2)*s*.2+Math.sin(G.t*2+i)*3,py+2,s*.16,s*.04,0,0,Math.PI*2); c.fill(); } } }
+
+// ----- 仕掛け -----
+function drawHook(c,x,y,k,dir){ c.strokeStyle='#dfe4e8'; c.lineWidth=Math.max(1,k*.32); c.lineCap='round'; c.beginPath(); c.moveTo(x,y); c.lineTo(x,y+k*2.4);
+  if(dir>0) c.arc(x+k*.85,y+k*2.4,k*.85,Math.PI,0,true); else c.arc(x-k*.85,y+k*2.4,k*.85,0,Math.PI,false); c.lineTo(x+dir*k*1.7,y+k*1.7); c.stroke(); }
+function drawSinker(c,X,Y,k){ // ナス型オモリ（Yが底）
+  const g=c.createRadialGradient(X-k*.8,Y-k*3,k*.3,X,Y-k*2,k*3.5); g.addColorStop(0,'#c9cdd1'); g.addColorStop(.5,'#7d8287'); g.addColorStop(1,'#3e4246'); c.fillStyle=g;
+  c.beginPath(); c.moveTo(X,Y-k*6.2); c.bezierCurveTo(X+k*.9,Y-k*5.6,X+k*2.6,Y-k*2.8,X+k*2.3,Y-k*1.1); c.quadraticCurveTo(X+k*1.8,Y,X,Y); c.quadraticCurveTo(X-k*1.8,Y,X-k*2.3,Y-k*1.1); c.bezierCurveTo(X-k*2.6,Y-k*2.8,X-k*.9,Y-k*5.6,X,Y-k*6.2); c.fill();
+  c.strokeStyle='#9aa0a5'; c.lineWidth=Math.max(1,k*.35); c.beginPath(); c.arc(X,Y-k*6.8,k*.6,0,Math.PI*2); c.stroke();
+  c.strokeStyle='#c8a050'; c.beginPath(); c.ellipse(X,Y-k*8.2,k*.45,k*.9,0,0,Math.PI*2); c.stroke(); } // スナップ付きサルカン
+function drawRigAndLine(V){ const c=ctx, r=G.rig, s=V.sc, k=s*FISHX*.0115; // 1cmあたりのpx（魚と同じく大きめに描く）
+  const y0=sy(V,0); const tip=G.tip&&y0>-5?G.tip:{x:sx(V,G.drift+2.3),y:y0-s*2.4};
+  let ex,ey; if(G.fight&&G.fight.f){ ex=sx(V,G.fight.f.x+.45*G.fight.f.size/100*FISHX*G.fight.f.face); ey=sy(V,G.fight.f.y); } else { ex=sx(V,rigX()); ey=sy(V,r.y); }
+  const ent=tip.x+s*.08;
+  c.strokeStyle='rgba(255,240,140,.85)'; c.lineWidth=1.1; c.beginPath(); c.moveTo(tip.x,tip.y); c.quadraticCurveTo(tip.x+s*.05,(tip.y+y0)/2,ent,y0); c.stroke();
+  c.strokeStyle='rgba(255,240,140,.6)'; c.beginPath(); c.moveTo(ent,y0); c.quadraticCurveTo(ent+(ex-ent)*.2+Math.sin(G.t*.7)*6,(y0+ey)/2,ex,ey); c.stroke();
+  if(G.fight) return;
+  const X=ex, Y=ey;
+  if(G.rigId==='jig'){ const fall=G.state==='falling', jerk=G.t-r.lastAct<.9; const ang=fall?Math.sin(G.t*8)*.55:jerk?Math.sin(G.t*13)*.4:Math.sin(G.t*1.6)*.1;
+    const L=k*15, w=L*.13; c.save(); c.translate(X,Y-L*.5); c.rotate(ang);
+    // リーダー・ソリッドリング・アシストフック
+    c.strokeStyle='#c8ced2'; c.lineWidth=Math.max(1,k*.3); c.beginPath(); c.arc(0,-L/2-k*1.1,k*.7,0,Math.PI*2); c.stroke();
+    c.strokeStyle='#e8732c'; c.lineWidth=Math.max(1,k*.4); c.beginPath(); c.moveTo(0,-L/2-k*.6); c.quadraticCurveTo(-k*1.4,-L/2+k*.6,-k*1.6,-L/2+k*2.2); c.moveTo(0,-L/2-k*.6); c.quadraticCurveTo(k*1.4,-L/2+k*.6,k*1.6,-L/2+k*2.2); c.stroke();
+    drawHook(c,-k*1.6,-L/2+k*2,k*.8,-1); drawHook(c,k*1.6,-L/2+k*2,k*.8,1);
+    const body=new Path2D(); body.moveTo(0,-L/2); body.bezierCurveTo(w*1.1,-L*.46,w*1.15,-L*.08,w*.8,L*.25); body.quadraticCurveTo(w*.4,L*.47,0,L/2); body.quadraticCurveTo(-w*.4,L*.47,-w*.8,L*.25); body.bezierCurveTo(-w*1.15,-L*.08,-w*1.1,-L*.46,0,-L/2);
+    const g=c.createLinearGradient(-w,0,w,0); g.addColorStop(0,'#1b4fae'); g.addColorStop(.45,'#e9eff5'); g.addColorStop(.7,'#d8e4ee'); g.addColorStop(1,'#f07fac'); c.fillStyle=g; c.fill(body);
+    c.save(); c.clip(body); c.globalCompositeOperation='lighter'; for(let i=-6;i<8;i++){ const o=i*L*.09+((G.t*30)%(L*.09)); const hue=(i*40+G.t*120)%360; c.strokeStyle=`hsla(${hue},90%,70%,.35)`; c.lineWidth=k*.6; c.beginPath(); c.moveTo(-w,o); c.lineTo(w,o-L*.15); c.stroke(); } c.restore();
+    c.fillStyle='#ffd23a'; c.beginPath(); c.arc(0,-L*.36,w*.42,0,Math.PI*2); c.fill(); c.fillStyle='#111'; c.beginPath(); c.arc(0,-L*.36,w*.22,0,Math.PI*2); c.fill();
+    c.restore(); return; }
+  // 胴突き・サビキ：幹糸・枝ス・ハリ・エサ／スキン・オモリ
+  const hk=rigDef().hooks, topY=sy(V,r.y-hk[hk.length-1]-.35);
+  c.strokeStyle='rgba(235,245,255,.55)'; c.lineWidth=1; c.beginPath(); c.moveTo(X,Y-k*8.8); c.lineTo(X,topY); c.stroke();
+  c.strokeStyle='#c8a050'; c.lineWidth=Math.max(1,k*.35); c.beginPath(); c.ellipse(X,topY,k*.45,k*.9,0,0,Math.PI*2); c.stroke(); // 上のサルカン
+  hk.forEach((h,i)=>{ const hy=sy(V,r.y-h), dir=i%2?1:-1, sw=Math.sin(G.t*1.8+i)*.15, len=(G.rigId==='bait'?.28:.13)*s, hx=X+dir*len*(.9+sw*.3), hyy=hy+len*.35;
+    c.strokeStyle='rgba(235,245,255,.5)'; c.lineWidth=1; c.beginPath(); c.moveTo(X,hy); c.quadraticCurveTo(X+dir*len*.5,hy+len*.05,hx,hyy); c.stroke();
+    if(G.rigId==='bait'){ c.fillStyle=i%2?'#ff4d6a':'#4dff7a'; c.beginPath(); c.arc(hx,hyy,k*.55,0,Math.PI*2); c.fill();
+      drawHook(c,hx,hyy+k*.5,k*.8,dir);
+      if(!r.baitGone){ c.save(); c.translate(hx+dir*k*.7,hyy+k*2.2); c.rotate(Math.sin(G.t*3+i)*.35+dir*.2); const bw=k*1.3, bl=k*4.6;
+        const bg=c.createLinearGradient(-bw,0,bw,0); bg.addColorStop(0,'#5c7a99'); bg.addColorStop(.35,'#d6e0ea'); bg.addColorStop(.55,'#e9a090'); bg.addColorStop(1,'#c46a5e'); c.fillStyle=bg;
+        c.beginPath(); c.moveTo(-bw*.8,-bl*.15); c.lineTo(bw*.8,-bl*.2); c.lineTo(bw,bl*.8); c.lineTo(-bw*.6,bl); c.closePath(); c.fill(); c.restore(); } }
+    else { const col=['#ff8fb0','#f4f4f4','#8fffc0'][i%3]; c.save(); c.translate(hx,hyy); c.rotate(Math.sin(G.t*2.5+i)*.3);
+      c.fillStyle=col; c.beginPath(); c.ellipse(0,k*1.8,k*.75,k*2.2,0,0,Math.PI*2); c.fill();
+      if(Math.sin(G.t*4+i*1.7)>.75){ c.fillStyle='rgba(255,255,255,.95)'; c.beginPath(); c.arc(0,k*1.2,k*.6,0,Math.PI*2); c.fill(); }
+      drawHook(c,0,k*.2,k*.7,dir); c.restore(); } });
+  drawSinker(c,X,Y,k);
+}
+// 泡（仕掛けが落ちるときと誘ったとき）
+function updateBubbles(dt){ G.bub=G.bub||[]; const r=G.rig;
+  if(G.state==='falling'&&Math.random()<dt*6) G.bub.push({x:rigX()+rand(-.05,.05),y:r.y,r:rand(.6,1.6),v:rand(.35,.6)});
+  for(const b of G.bub){ b.y-=b.v*dt; b.x+=Math.sin(G.t*4+b.r*9)*.004; } G.bub=G.bub.filter(b=>b.y>0); }
+function drawBubbles(V){ const c=ctx; c.strokeStyle='rgba(220,245,255,.6)'; c.lineWidth=1; for(const b of G.bub||[]){ c.beginPath(); c.arc(sx(V,b.x),sy(V,b.y),b.r*1.4,0,Math.PI*2); c.stroke(); } }
+
+// ============ 竿先パネル ============
+function rodBend(){ let b=.1+.03*Math.sin(G.t*1.3)+G.rodKick+G.rodHold; if(G.fight) b+=G.fight.ten/rigDef().brk*.95; if(G.state==='snag') b=Math.max(b,.75); if(G.state==='falling') b=.04; return clamp(b,0,1.15); }
+function drawRod(){ const c=rodx, w=rodc.width, h=rodc.height; c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,w,h);
+  const sk=SKY[G.band||'日中']; const g=c.createLinearGradient(0,0,0,h); g.addColorStop(0,sk[0]); g.addColorStop(1,sk[1]); c.fillStyle=g; c.fillRect(0,0,w,h);
+  const b=rodBend(), jitter=G.bite&&G.bite.mae?Math.sin(G.t*40)*.01:0;
+  const hx=w*.02, hy=h*.95, tx=w*(.94-b*.22), ty=h*(.12+b*.62+jitter);
+  // 元から先へ細くなる1本の曲線。先端の2割はオレンジの穂先
+  const cx1=w*.5, cy1=h*(.08+b*.05), N=32; c.lineCap='round'; let px=hx, py=hy;
+  for(let i=1;i<=N;i++){ const t=i/N, u=1-t, x=u*u*hx+2*u*t*cx1+t*t*tx, y=u*u*hy+2*u*t*cy1+t*t*ty;
+    c.strokeStyle=t>.86?(i%2?'#ff7b2c':'#fff'):'#1f262c'; c.lineWidth=lerp(h*.065,h*.014,t); c.beginPath(); c.moveTo(px,py); c.lineTo(x,y); c.stroke(); px=x; py=y;
+    if(i%6===0&&t<.95){ c.strokeStyle='#c8ced2'; c.lineWidth=Math.max(1,h*.008); c.beginPath(); c.arc(x,y+h*.03,h*.022,0,Math.PI*2); c.stroke(); } }
+  c.strokeStyle='rgba(255,240,140,.95)'; c.lineWidth=Math.max(1,DPR*.8); c.beginPath(); c.moveTo(tx,ty); c.lineTo(tx+(b>.5?-w*.02:0),h); c.stroke();
+  // 目盛り
+  c.fillStyle='rgba(0,0,0,.25)'; for(let i=1;i<5;i++) c.fillRect(w*.9,h*i/5,w*.08,1);
+}
+
+// ============ 魚探 ============
+function ffRange(){ if(G.ffR) return G.ffR; const b=G.point.bottom(G.point.start); return Math.ceil((b+12)/10)*10; }
+function updateFF(){ const c=ffx, w=ffc.width, h=ffc.height; if(!ffBg){ ffBg=document.createElement('canvas'); ffBg.width=w; ffBg.height=h; const bc=ffBg.getContext('2d'); bc.fillStyle='#04102a'; bc.fillRect(0,0,w,h); }
+  const bc=ffBg.getContext('2d'); const step=Math.max(1,DPR|0);
+  bc.drawImage(ffBg,-step,0); const X=w-step, rng=ffRange(), py=d=>d/rng*h, rx=rigX(), bot=bottomAt(rx);
+  bc.fillStyle='#04102a'; bc.fillRect(X,0,step,h);
+  for(let i=0;i<3;i++){ const y=Math.random()*h; bc.fillStyle='rgba(40,90,160,.5)'; bc.fillRect(X,y,step,1); }
+  bc.fillStyle='rgba(80,140,220,.5)'; bc.fillRect(X,0,step,py(1.2));
+  for(const f of G.fishes){ if(f.gone) continue; const dx=Math.abs(f.x-rx); const R=1+f.y*.1; if(dx>R) continue; const it=(1-dx/R)*(.45+f.size/55);
+    bc.fillStyle=it>.95?'#ff3a2a':it>.6?'#ffb02a':it>.3?'#ffe94a':'#7fd0ff'; const hh=Math.max(2*DPR,f.size/100*h/rng*3); bc.fillRect(X,py(Math.hypot(f.y,dx))-hh/2,step,hh); }
+  const by=py(bot); const bg=bc.createLinearGradient(0,by,0,by+h*.18); bg.addColorStop(0,'#ff2a1a'); bg.addColorStop(.12,'#ff8a1a'); bg.addColorStop(.35,'#c8a020'); bg.addColorStop(1,'#203a7a');
+  bc.fillStyle=bg; bc.fillRect(X,by,step,h-by);
+  if(G.state!=='surface'&&G.state!=='lost'){ bc.fillStyle='#7dff9a'; bc.fillRect(X,py(G.rig.y)-1,step,2); }
+}
+function drawFF(){ const c=ffx, w=ffc.width, h=ffc.height; if(!ffBg) return; c.drawImage(ffBg,0,0); const rng=ffRange();
+  c.font=`${11*DPR}px sans-serif`; c.fillStyle='rgba(200,230,255,.8)'; c.textAlign='left';
+  for(let d=10;d<rng;d+=10){ const y=d/rng*h; c.fillStyle='rgba(200,230,255,.18)'; c.fillRect(0,y,w,1); c.fillStyle='rgba(200,230,255,.75)'; c.fillText(d,3*DPR,y-2*DPR); }
+  const bot=bottomAt(rigX()); c.font=`bold ${16*DPR}px sans-serif`; c.textAlign='right'; c.fillStyle='#fff'; c.fillText(bot.toFixed(1),w-4*DPR,18*DPR);
+  if(G.state!=='surface'&&G.state!=='lost'){ const y=G.rig.y/rng*h; c.fillStyle='#7dff9a'; c.beginPath(); c.moveTo(w,y); c.lineTo(w-8*DPR,y-5*DPR); c.lineTo(w-8*DPR,y+5*DPR); c.fill(); }
+}
+
+// ============ HUD ============
+function toast(msg,ms=1000,cls='',sub=''){ const el=$('#toast'); el.innerHTML=msg+(sub?`<small>${sub}</small>`:''); el.style.color=cls==='hot'?'#ffd36a':'#fff'; el.style.opacity=1; ui.toastT=(ms||1400)/1000; }
+function updateHUD(){
+  const bot=bottomAt(rigX()), r=G.rig;
+  $('#iDepth').textContent=bot.toFixed(1);
+  let tana='水面'; if(G.state==='fight'||G.state==='landing'||G.state==='rooted') tana='やりとり中'; else if(G.state==='snag') tana='根掛かり'; else if(G.state==='lost') tana='付け直し中';
+  else if(G.state!=='surface'){ const above=bot-r.anchor; tana=(above<.1?'底':`底から ${above.toFixed(1)}m`)+`（${r.y.toFixed(1)}m）`; if(G.state==='falling') tana='落下中 '+r.y.toFixed(1)+'m'; if(r.baitGone) tana+=' ・エサなし?'; }
+  $('#iTana').textContent=tana;
+  const a=activity(), tl=a>.78?['時合！','#ff9d3c']:a>.42?['ふつう','#3f8f8a']:['渋い','#556'];
+  const te=$('#tide'); te.textContent=tl[0]; te.style.background=tl[1];
+  $('#iCount').textContent=G.count;
+  $('#iTime').textContent=G.clock?`${hm(new Date(G.clock))} ${G.band}・${G.tideTxt||''}`:'—';
+  $('#mmDir').textContent=G.point&&G.point.real?dir8(G.hdg)+'へ '+(G.driftV*1.944).toFixed(1)+'kt':'';
+  $('#ffDepth').textContent=G.point.depthTxt;
+  // ボタン
+  const st=G.state, fighting=st==='fight'||st==='rooted'||st==='landing';
+  const bd=$('#bDrop'); bd.firstChild.textContent=st==='falling'?'止める':'落とす'; bd.disabled=!(st==='surface'||st==='idle'||st==='falling');
+  $('#bSasou').disabled=st!=='idle'; $('#bKaishu').disabled=!(st==='idle'||st==='falling'); $('#bKaishu').classList.toggle('on',G.auto);
+  const aw=$('#bAwase'); aw.firstChild.textContent=st==='landing'?'タモ入れ':'合わせ'; aw.classList.toggle('hot',st==='landing');
+  $('#bReel').classList.toggle('on',G.reel);
+  const gg=$('#gauge'); gg.style.display=fighting||st==='snag'?'block':'none';
+  if(G.fight||st==='snag'){ const brk=rigDef().brk, ten=G.fight?G.fight.ten:(G.snag&&G.reel?brk*.6:.3);
+    $('#gFill').style.width=clamp(ten/brk*100,0,100)+'%'; $('#gDrag').style.left=clamp(G.drag/brk*100,0,100)+'%';
+    $('#gTen').textContent=ten.toFixed(1); $('#gDragV').textContent=G.drag.toFixed(1); $('#gLine').textContent=G.fight?G.fight.len.toFixed(0):'-'; }
+}
+// ============ 釣果カード・図鑑 ============
+function showCatch(f,isRec,all=[f],first=false){ const sp=f.sp; $('#catch').classList.remove('hide');
+  const c=$('#catchCv'), r=c.getBoundingClientRect(); c.width=r.width*DPR; c.height=r.height*DPR; const x=c.getContext('2d'); x.setTransform(DPR,0,0,DPR,0,0);
+  const w=r.width, h=r.height, L=sp.zone.t==='flat'?Math.min(w*.78,h*.7/(sp.look.h+.16)):w*.78; drawCard(x,w,h,f,L);
+  const name=dispName(sp,f.size); $('#catchName').innerHTML=name+(sp.alias?`<small>（${sp.alias}）</small>`:'')+(f.nuptial?'<small>婚姻色のオス</small>':'');
+  const wt=f.w>=1?(f.w).toFixed(2)+'kg':Math.round(f.w*1000)+'g';
+  const multi=all.length>1?`<br><span class="rec">${all.length}匹の多点掛け！</span>　${all.map(m=>m.size.toFixed(0)).join('・')}cm　合計${all.reduce((a,m)=>a+m.w,0).toFixed(2)}kg`:'';
+  $('#catchSize').innerHTML=`${all.length>1?'最大 ':''}${f.size.toFixed(1)}cm ／ ${wt}`+(isRec?'<span class="rec">自己記録更新！</span>':'')+(first?'<span class="rec">図鑑に登録！</span>':'')+multi;
+  $('#catchDesc').textContent=sp.desc;
+  $('#catchMeta').textContent=`${G.point.name}・${G.clock?ymd(new Date(G.clock)).slice(5).replace('-','/')+' '+hm(new Date(G.clock)):SEASONS[G.season].name}・${RIGS[G.rigId].name}・水深${(f.hookY??f.y).toFixed(0)}m付近`;
+}
+function drawCard(x,w,h,f,L){ x.clearRect(0,0,w,h); const ph=photoOf(f.sp), flat=f.sp.zone.t==='flat'; let headLeft=!(flat&&f.sp.look.dir==='right');
+  if(ph){ headLeft=ph.head==='L'; const a=ph.img.naturalWidth/ph.img.naturalHeight; L=Math.min(w*.8,h*.7*a); x.save(); x.translate(w/2,h*.43); x.drawImage(ph.img,-L/2,-L/a/2,L,L/a); x.restore(); }
+  else { x.save(); x.translate(w/2,h*.44); drawFish(x,L,f,{flip:flat?false:true,swim:0}); x.restore(); }
+  // メジャー（全長の目安）
+  const pxcm=L/f.size, y=h*.86, len=Math.ceil(f.size/10)*10+5, x0=headLeft?w/2-L/2:w/2+L/2, dir=headLeft?1:-1;
+  x.fillStyle='#f2d24a'; const rx=headLeft?x0:x0-len*pxcm; x.fillRect(Math.max(4,rx),y,Math.min(w-8,len*pxcm),h*.09);
+  x.fillStyle='#222'; x.font=`${Math.max(9,h*.045)}px sans-serif`; x.textAlign='center';
+  for(let cm=0;cm<=len;cm++){ const X=x0+dir*cm*pxcm; if(X<4||X>w-4) continue; const tall=cm%10===0?.06:cm%5===0?.04:.022; x.fillRect(X,y,1,h*tall); if(cm%10===0&&cm>0) x.fillText(cm,X,y+h*.085); } }
+function openZukan(){ $('#zukan').classList.remove('hide'); const grid=$('#zGrid'); grid.innerHTML=''; let got=0;
+  for(const sp of SP){ const z=REC.zukan[sp.id]; if(z) got++; const d=document.createElement('div'); d.className='zc'+(z?'':' no');
+    const cnv=document.createElement('canvas'); d.appendChild(cnv);
+    const lab=document.createElement('div'); lab.innerHTML=z?`<b>${sp.name}${sp.alias?'（'+sp.alias+'）':''}</b>最大 ${z.best.toFixed(1)}cm・${z.n}匹`:`<b>？？？</b>${hint(sp)}`; d.appendChild(lab); grid.appendChild(d);
+    requestAnimationFrame(()=>{ const r=cnv.getBoundingClientRect(); cnv.width=r.width*DPR; cnv.height=r.height*DPR; const x=cnv.getContext('2d'); x.setTransform(DPR,0,0,DPR,0,0); x.translate(r.width/2,r.height/2);
+      const f={sp,seed:7,nuptial:false}; if(!z){ x.filter='brightness(0) opacity(.45)'; } const ph=photoOf(sp);
+      if(ph){ const a=ph.img.naturalWidth/ph.img.naturalHeight, L=Math.min(r.width*.86,r.height*.86*a); x.drawImage(ph.img,-L/2,-L/a/2,L,L/a); }
+      else drawFish(x,r.width*.78,f,{flip:sp.zone.t!=='flat'}); }); }
+  $('#zStat').textContent=`${got} / ${SP.length} 種　・　これまでの釣果 ${REC.log.length}匹（最新100件まで記録）`; }
+function hint(sp){ const s=['春','夏','秋','冬'].filter((_,i)=>sp.season[i]>=.8*Math.max(1,Math.max(...sp.season)/1.5)).join('・')||'—'; const best=sp.pt?POINTS.reduce((a,p)=>(sp.pt[p.id]??1)>(sp.pt[a.id]??1)?p:a):null; const hab=best&&(sp.pt[best.id]??1)>1?best.name:sp.zone.t==='flat'?'砂地の底':sp.zone.t==='bottom'?(sp.dmin>=50?'深場の底':'岩場の底近く'):'中層'; const rig=Object.entries(sp.rig).sort((a,b)=>b[1]-a[1])[0][0]; return `${hab}・${s}・${RIGS[rig].name}`; }
+
+// ============ 出船前の地図（ポイント選び）・潮のグラフ・航跡の小地図 ============
+const MAP={clat:42.315,clon:140.965,mpp:28};
+const DEPTH_STOPS=[[0,[196,232,242]],[10,[140,205,232]],[20,[98,176,222]],[30,[72,146,206]],[50,[52,112,186]],[80,[36,82,160]],[120,[26,58,132]],[250,[14,34,98]]];
+function depthRGB(d){ for(let i=1;i<DEPTH_STOPS.length;i++){ const [d1,c1]=DEPTH_STOPS[i], [d0,c0]=DEPTH_STOPS[i-1]; if(d<=d1){ const t=(d-d0)/(d1-d0); return c0.map((v,k)=>v+(c1[k]-v)*t); } } return DEPTH_STOPS[DEPTH_STOPS.length-1][1]; }
+const BANDS=[5,10,15,20,25,30,40,50,60,70,80,100,120,150,200,300];
+const bandOf=d=>{ let i=0; while(i<BANDS.length&&d>BANDS[i]) i++; return i; };
+const mapLL=(px,py,w,h)=>[MAP.clat-(py-h/2)*MAP.mpp/M_LAT, MAP.clon+(px-w/2)*MAP.mpp/mLon(MAP.clat)];
+const llMap=(lat,lon,w,h)=>[w/2+(lon-MAP.clon)*mLon(MAP.clat)/MAP.mpp, h/2-(lat-MAP.clat)*M_LAT/MAP.mpp];
+// 水深の色・等深線・岸線を画像にする（k:何pxごとに1点調べるか）
+function bathyImage(w,h,ll,k){ const iw=Math.ceil(w/k), ih=Math.ceil(h/k), cv2=document.createElement('canvas'); cv2.width=iw; cv2.height=ih;
+  const x=cv2.getContext('2d'), img=x.createImageData(iw,ih), band=new Int16Array(iw*ih);
+  for(let py=0;py<ih;py++) for(let px=0;px<iw;px++){ const [la,lo]=ll((px+.5)*k,(py+.5)*k), z=bathyAt(la,lo); let c,b;
+    if(z==null){ c=[34,44,54]; b=-2; } else if(z>-1){ c=[214,206,170]; b=-1; } else { c=depthRGB(-z); b=bandOf(-z); }
+    band[py*iw+px]=b; const o=(py*iw+px)*4; img.data[o]=c[0]; img.data[o+1]=c[1]; img.data[o+2]=c[2]; img.data[o+3]=255; }
+  for(let py=1;py<ih;py++) for(let px=1;px<iw;px++){ const i=py*iw+px, b=band[i], l=band[i-1], u=band[i-iw]; if(b===l&&b===u) continue; const o=i*4;
+    const coast=(b===-1)!==(l===-1)||(b===-1)!==(u===-1); const f=coast?.45:.78; img.data[o]*=f; img.data[o+1]*=f; img.data[o+2]*=f; }
+  x.putImageData(img,0,0); return cv2; }
+let mapBusy=false;
+function renderMap(){ const cv=$('#map'); if(!cv) return; const r=cv.getBoundingClientRect(); if(!r.width) return; const w=Math.round(r.width), h=Math.round(r.height);
+  cv.width=w*DPR; cv.height=h*DPR; const x=cv.getContext('2d'); x.setTransform(DPR,0,0,DPR,0,0);
+  if(!bathyZ){ x.fillStyle='#234'; x.fillRect(0,0,w,h); x.fillStyle='#fff'; x.fillText('海底地形のデータを読めません（data/bathy-data.js）',12,24); return; }
+  const im=bathyImage(w,h,(px,py)=>mapLL(px,py,w,h),2); x.imageSmoothingEnabled=true; x.drawImage(im,0,0,w,h);
+  // 前に行った地点
+  for(const s of REC.spots||[]){ const [px,py]=llMap(s.lat,s.lon,w,h); x.fillStyle='rgba(255,255,255,.75)'; x.beginPath(); x.arc(px,py,4,0,Math.PI*2); x.fill(); }
+  // 選んだ地点
+  if(G.spot){ const [px,py]=llMap(G.spot.lat,G.spot.lon,w,h); x.fillStyle='#ff7b2c'; x.strokeStyle='#fff'; x.lineWidth=2;
+    x.beginPath(); x.moveTo(px,py); x.bezierCurveTo(px-10,py-14,px-9,py-26,px,py-26); x.bezierCurveTo(px+9,py-26,px+10,py-14,px,py); x.fill(); x.stroke();
+    x.fillStyle='#fff'; x.beginPath(); x.arc(px,py-17,3.5,0,Math.PI*2); x.fill(); }
+  // 縮尺と方位
+  const nice=[100,200,500,1000,2000,5000,10000], len=nice.find(v=>v/MAP.mpp>70)||10000, L=len/MAP.mpp;
+  x.fillStyle='rgba(0,0,0,.45)'; x.fillRect(8,h-28,L+16,20); x.fillStyle='#fff'; x.fillRect(16,h-14,L,3); x.font='11px sans-serif'; x.fillText(len>=1000?len/1000+'km':len+'m',18+L/2-12,h-17);
+  x.fillStyle='rgba(0,0,0,.45)'; x.fillRect(8,8,22,26); x.fillStyle='#fff'; x.font='bold 12px sans-serif'; x.fillText('N',14,22); x.beginPath(); x.moveTo(19,10); x.lineTo(15,15); x.lineTo(23,15); x.fill();
+  x.fillStyle='rgba(255,255,255,.75)'; x.font='10px sans-serif'; x.fillText('GEBCO_2025・約400m格子の目安（根や瀬は出ません）',8,h-34); }
+function setSpot(lat,lon,keepType){ const d=depthLL(lat,lon); if(d==null||d<3){ $('#spotInfo').innerHTML='<span style="color:#ffb547">そこは陸か岸ぎわです。海の上を選んでください。</span>'; return; }
+  const guess=guessBottom(lat,lon)||'sand'; G.spot={lat,lon,type:keepType||guess,guess}; spotInfo(); renderMap(); }
+function spotInfo(){ const s=G.spot, el=$('#spotInfo'); if(!s){ el.textContent='地図をタップして釣り場を選んでください。'; return; }
+  const d=depthLL(s.lat,s.lon), cls=pointClass(s.type,d);
+  el.innerHTML=`<b>${llText(s.lat,s.lon)}</b>　水深 約${Math.round(d)}m　底質：`+['rock','sand','mud'].map(t=>`<button class="sbtn${t===s.type?' on':''}" data-bt="${t}">${BOTTOM_NAME[t]}${t===s.guess?'（推定）':''}</button>`).join(' ')+`<br><span class="muted">→ ${CLASS_NOTE[cls]}${d>55?'・電動リール':''}</span>`;
+  el.querySelectorAll('[data-bt]').forEach(b=>b.onclick=()=>{ s.type=b.dataset.bt; spotInfo(); }); }
+function initMapUI(){ const cv=$('#map'); let drag=null;
+  cv.addEventListener('pointerdown',e=>{ cv.setPointerCapture(e.pointerId); drag={x:e.clientX,y:e.clientY,lat:MAP.clat,lon:MAP.clon,moved:false}; });
+  cv.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; if(Math.hypot(dx,dy)>6) drag.moved=true;
+    if(drag.moved&&!mapBusy){ MAP.clat=drag.lat+dy*MAP.mpp/M_LAT; MAP.clon=drag.lon-dx*MAP.mpp/mLon(MAP.clat); mapBusy=true; requestAnimationFrame(()=>{ renderMap(); mapBusy=false; }); } });
+  cv.addEventListener('pointerup',e=>{ if(drag&&!drag.moved){ const r=cv.getBoundingClientRect(); const [la,lo]=mapLL(e.clientX-r.left,e.clientY-r.top,r.width,r.height);
+      // 前に行った地点の近くを押したらそこを選ぶ
+      const near=(REC.spots||[]).find(s=>{ const [px,py]=llMap(s.lat,s.lon,r.width,r.height); return Math.hypot(px-(e.clientX-r.left),py-(e.clientY-r.top))<10; });
+      if(near) setSpot(near.lat,near.lon,near.type); else setSpot(la,lo); } drag=null; });
+  cv.addEventListener('wheel',e=>{ e.preventDefault(); zoomMap(e.deltaY>0?1.25:.8); },{passive:false});
+  $('#mzIn').onclick=()=>zoomMap(.7); $('#mzOut').onclick=()=>zoomMap(1.4);
+  // 日時
+  const days=Object.keys(TIDE).sort(); const di=$('#inDate'); if(days.length){ di.min=days[0]; di.max=days[days.length-1]; }
+  const ts=$('#inTime'); for(let m=0;m<24*60;m+=30){ const o=document.createElement('option'); o.value=m; o.textContent=`${String(m/60|0).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; ts.appendChild(o); }
+  const now=new Date(); di.value=ymd(now); ts.value=Math.min(23*60+30,Math.round((now.getHours()*60+now.getMinutes())/30)*30);
+  di.onchange=ts.onchange=()=>{ readClock(); drawTide(); }; readClock();
+  if(!G.spot){ const s=(REC.spots||[])[0]; if(s) setSpot(s.lat,s.lon,s.type); else setSpot(42.300,140.960); } }
+function zoomMap(f){ MAP.mpp=clamp(MAP.mpp*f,6,160); renderMap(); }
+function readClock(){ const v=$('#inDate').value; if(!v) return; const [y,m,d]=v.split('-').map(Number), min=+$('#inTime').value; G.startClock=new Date(y,m-1,d,min/60|0,min%60).getTime(); }
+function drawTide(){ const cv=$('#tideCv'), r=cv.getBoundingClientRect(); if(!r.width||!G.startClock) return; const w=r.width, h=r.height; cv.width=w*DPR; cv.height=h*DPR;
+  const x=cv.getContext('2d'); x.setTransform(DPR,0,0,DPR,0,0); x.clearRect(0,0,w,h); const d=new Date(G.startClock), day=TIDE[ymd(d)];
+  const info=$('#tideInfo'), sun=sunTimes(d,42.32,140.97);
+  if(!day){ info.textContent='この日の潮位データはありません（2026〜2027年のみ）。潮は作り物で動きます。'; return; }
+  const pad=26, X=hh=>pad+(w-pad-8)*hh/24, vals=day[0], mn=Math.min(...vals)-10, mx=Math.max(...vals)+10, Y=v=>h-16-(h-30)*(v-mn)/(mx-mn);
+  // 夜は暗く
+  const rh=sun.rise.getHours()+sun.rise.getMinutes()/60, sh=sun.set.getHours()+sun.set.getMinutes()/60;
+  x.fillStyle='rgba(0,0,0,.35)'; x.fillRect(X(0),0,X(rh)-X(0),h-14); x.fillRect(X(sh),0,X(24)-X(sh),h-14);
+  x.strokeStyle='rgba(255,255,255,.12)'; x.fillStyle='rgba(200,230,255,.6)'; x.font='10px sans-serif';
+  for(let hh=0;hh<=24;hh+=3){ x.beginPath(); x.moveTo(X(hh),4); x.lineTo(X(hh),h-14); x.stroke(); x.fillText(hh,X(hh)-4,h-3); }
+  x.strokeStyle='#4fd1c5'; x.lineWidth=2; x.beginPath(); for(let i=0;i<=24*4;i++){ const t=new Date(d); t.setHours(0,i*15,0,0); const v=tideCm(t); if(v==null) continue; i?x.lineTo(X(i/4),Y(v)):x.moveTo(X(i/4),Y(v)); } x.stroke();
+  x.fillStyle='#fff'; for(const [tm,cm] of [...day[1],...day[2]]){ const [a,b]=tm.split(':').map(Number); x.beginPath(); x.arc(X(a+b/60),Y(cm),2.5,0,Math.PI*2); x.fill(); x.fillText(tm,X(a+b/60)-12,Y(cm)+(day[1].some(e=>e[0]===tm)?-6:14)); }
+  const hh=d.getHours()+d.getMinutes()/60, cm=tideCm(d); x.strokeStyle='#ff7b2c'; x.lineWidth=2; x.beginPath(); x.moveTo(X(hh),4); x.lineTo(X(hh),h-14); x.stroke();
+  x.fillStyle='#ff7b2c'; x.beginPath(); x.arc(X(hh),Y(cm),4,0,Math.PI*2); x.fill();
+  const st=tideStage(d), band=timeBand(d), rate=Math.abs(tideCm(new Date(G.startClock+9e5))-tideCm(new Date(G.startClock-9e5)))*2;
+  info.innerHTML=`<b>${shioName(d)}</b>　日の出 ${hm(sun.rise)}・日の入 ${hm(sun.set)}　｜　${hm(d)} は <b>${st?st.label:''}</b>（${Math.round(cm)}cm・${band}）　潮の動き：${rate>20?'よく動く':rate>10?'ふつう':'ゆるい'}`; }
+// ----- 小地図（ゲーム中）：出発点のまわり約3km、航跡と船 -----
+let mmBase=null;
+function drawMini(){ const cv=$('#mm'); if(!cv||!G.point||!G.point.real){ return; } const r=cv.getBoundingClientRect(); if(!r.width) return; const w=r.width, h=r.height, sp=G.point.spot, mpp=3000/w;
+  const ll=(px,py)=>[sp.lat-(py-h/2)*mpp/M_LAT, sp.lon+(px-w/2)*mpp/mLon(sp.lat)], toP=(la,lo)=>[w/2+(lo-sp.lon)*mLon(sp.lat)/mpp, h/2-(la-sp.lat)*M_LAT/mpp];
+  if(!mmBase||mmBase.key!==sp.lat+','+sp.lon+','+w){ mmBase=bathyImage(w,h,ll,2); mmBase.key=sp.lat+','+sp.lon+','+w; }
+  if(cv.width!==Math.round(w*DPR)){ cv.width=w*DPR; cv.height=h*DPR; }
+  const x=cv.getContext('2d'); x.setTransform(DPR,0,0,DPR,0,0); x.drawImage(mmBase,0,0,w,h);
+  const [sx0,sy0]=toP(sp.lat,sp.lon); x.strokeStyle='#fff'; x.lineWidth=1.5; x.beginPath(); x.arc(sx0,sy0,4,0,Math.PI*2); x.stroke();
+  const [la,lo]=offsetLL(sp.lat,sp.lon,G.hdg,G.drift), [bx,by]=toP(la,lo);
+  x.strokeStyle='#ffd35a'; x.lineWidth=2; x.beginPath(); x.moveTo(sx0,sy0); x.lineTo(bx,by); x.stroke();
+  x.save(); x.translate(bx,by); x.rotate(G.hdg*Math.PI/180); x.fillStyle='#ff7b2c'; x.strokeStyle='#fff'; x.lineWidth=1; x.beginPath(); x.moveTo(0,-7); x.lineTo(5,6); x.lineTo(-5,6); x.closePath(); x.fill(); x.stroke(); x.restore(); }
+function calcFFR(){ let mx=10; for(let xx=0;xx<=900;xx+=15) mx=Math.max(mx,bottomAt(xx)); return Math.ceil((mx+8)/10)*10; }
+function redrift(msg){ const sp=G.point&&G.point.spot; if(!sp) return; G.hdg=chooseHeading(sp.lat,sp.lon,(G.hdg+rand(-30,30)+360)%360);
+  G.drift=0; G.camX=0; ffBg=null; G.ffR=calcFFR(); resetRig(); populate(); toast(msg||'流し直し',1400,'',`${dir8(G.hdg)}へ流れています`); }
+function saveSpot(s){ REC.spots=[{lat:s.lat,lon:s.lon,type:s.type},...(REC.spots||[]).filter(o=>Math.hypot(o.lat-s.lat,o.lon-s.lon)>.0005)].slice(0,8); saveRec(); }
+
+// ============ メニュー ============
+function buildMenu(){
+  const mk=(box,items,isSel,onSel,lab)=>{ const el=$(box); el.innerHTML=''; for(const it of items){ const b=document.createElement('button'); b.className='ch'+(isSel(it)?' sel':''); b.innerHTML=lab(it); b.onclick=()=>{ onSel(it); buildMenu(); }; el.appendChild(b);} };
+  mk('#chRig',Object.keys(RIGS),k=>k===G.rigId,k=>G.rigId=k,k=>`<b>${RIGS[k].name}</b><span>${RIGS[k].desc}</span>`);
+}
+function startGame(){ SND.init();
+  if(G.useReal&&G.spot){ readClock(); G.hdg=chooseHeading(G.spot.lat,G.spot.lon); G.point=makeRealPoint(G.spot); G.clock=G.startClock; G.season=monthSeason(new Date(G.clock).getMonth()); saveSpot(G.spot); mmBase=null; $('#mmBox').style.display='block'; }
+  else { G.clock=null; G.ffR=null; $('#mmBox').style.display='none'; }
+  updateSea(); $('#menu').classList.add('hide'); G.mode='play'; G.drift=G.point.start; G.camX=G.drift; G.t=0; G.count=0; G.fight=null; G.bite=null; G.snag=null; G.camY=2; resetRig(); populate(); initParts(); ffBg=null; resize();
+  G.drag={bait:3,jig:3.5,sabiki:2}[G.rigId]; if(G.point.real){ G.ffR=calcFFR(); setTimeout(()=>toast(`${dir8(G.hdg)}へ流れています`,1600),1900); }
+  $('#iPlace').textContent=`${G.point.name}・${SEASONS[G.season].name}・${RIGS[G.rigId].name}`; toast('<kbd>落とす</kbd>で仕掛けを投入',1800); }
+
+// ============ 入力 ============
+function holdBtn(el,on,off){ el.addEventListener('pointerdown',e=>{ e.preventDefault(); el.setPointerCapture(e.pointerId); on(); }); for(const ev of ['pointerup','pointercancel','lostpointercapture']) el.addEventListener(ev,()=>off()); }
+holdBtn($('#bReel'),()=>{SND.init(); G.reel=true; G.auto=false;},()=>{G.reel=false;});
+$('#bDrop').addEventListener('pointerdown',e=>{e.preventDefault();clutch();});
+$('#bSasou').addEventListener('pointerdown',e=>{e.preventDefault();sasou();});
+$('#bAwase').addEventListener('pointerdown',e=>{e.preventDefault();awase();});
+$('#bKaishu').addEventListener('pointerdown',e=>{e.preventDefault();kaishu();});
+$('#dMinus').onclick=()=>setDrag(G.drag-.5); $('#dPlus').onclick=()=>setDrag(G.drag+.5);
+$('#bStart').onclick=()=>{ G.useReal=true; startGame(); };
+$('#bRedrift').onclick=()=>{ if(G.state==='surface'||G.state==='idle'||G.state==='falling') redrift(); else toast('やりとり中は流し直せません',900); };
+$('#bMenu').onclick=()=>{ G.mode='menu'; buildMenu(); $('#menu').classList.remove('hide'); G.reel=false; renderMap(); drawTide(); };
+$('#bZukan').onclick=$('#bZukan2').onclick=()=>{ if(G.mode==='play') G.mode='pause'; openZukan(); };
+$('#bZClose').onclick=()=>{ $('#zukan').classList.add('hide'); if(G.mode==='pause') G.mode='play'; };
+$('#bNext').onclick=()=>{ $('#catch').classList.add('hide'); resetRig(); };
+$('#bSound').onclick=()=>{ REC.sound=!REC.sound; saveRec(); SND.init(); SND.setOn(REC.sound); $('#bSound').textContent='音：'+(REC.sound?'ON':'OFF'); };
+$('#bSound').textContent='音：'+(REC.sound?'ON':'OFF');
+addEventListener('keydown',e=>{ if(G.mode!=='play'){ if(e.code==='Enter'&&G.mode==='menu'&&!/INPUT|SELECT/.test(e.target.tagName)){ G.useReal=true; startGame(); } else if((e.code==='Space'||e.code==='Enter')&&!$('#catch').classList.contains('hide')){ e.preventDefault(); $('#bNext').click(); } return; }
+  if(!$('#catch').classList.contains('hide')){ if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); $('#bNext').click(); } return; }
+  if(e.repeat&&e.code!=='ArrowUp'&&e.code!=='KeyW') return;
+  switch(e.code){ case 'Space': e.preventDefault(); awase(); break; case 'ArrowUp': case 'KeyW': e.preventDefault(); SND.init(); G.reel=true; G.auto=false; break;
+    case 'ArrowDown': case 'KeyS': e.preventDefault(); clutch(); break; case 'KeyZ': sasou(); break; case 'KeyR': kaishu(); break;
+    case 'KeyQ': case 'ArrowLeft': setDrag(G.drag-.5); break; case 'KeyE': case 'ArrowRight': setDrag(G.drag+.5); break; } });
+addEventListener('keyup',e=>{ if(e.code==='ArrowUp'||e.code==='KeyW') G.reel=false; });
+addEventListener('blur',()=>{ G.reel=false; });
+
+// ============ メインループ ============
+function step(dt){ G.t+=dt; G.drift+=G.driftV*dt; if(G.clock) G.clock+=dt*1000*TIME_SCALE;
+  G.seaAcc=(G.seaAcc||0)+dt; if(G.seaAcc>1){ G.seaAcc=0; updateSea(); drawMini();
+    if(G.point.real&&(G.state==='surface'||G.state==='idle'||G.state==='falling')){ const [la,lo]=offsetLL(G.point.spot.lat,G.point.spot.lon,G.hdg,G.drift), d=depthLL(la,lo);
+      if(d==null) redrift('海図の外に出たので流し直した'); else if(d<3.5) redrift('浅くなったので流し直した'); else if(d<6&&!G.shallowWarned){ G.shallowWarned=true; toast('だいぶ浅くなってきた',1200,'','流し直しも考えよう'); } else if(d>=6) G.shallowWarned=false; } }
+  updateRig(dt); updateFish(dt); updateBite(dt); updateBubbles(dt);
+  if(G.state==='fight') updateFight(dt); else if(G.state==='rooted') updateRooted(dt); else if(G.state==='landing') updateLanding(dt); else if(G.state==='snag') updateSnag(dt);
+  G.ffAcc+=dt; if(G.ffAcc>.09){ G.ffAcc=0; updateFF(); maintainFish(); } }
+let last=performance.now();
+function frame(now){ const dt=Math.min(.05,(now-last)/1000); last=now; if(innerWidth!==W||innerHeight!==H) resize();
+  if(G.mode==='play'&&G.state!=='card') step(dt);
+  G.rodKick*=Math.exp(-dt*7); if(!G.bite&&G.state!=='snag') G.rodHold*=Math.exp(-dt*2.5);
+  const ty=(G.state==='fight'||G.state==='landing'||G.state==='rooted')&&G.fight?G.fight.f.y:G.state==='surface'?2:G.rig.y;
+  G.camY=lerp(G.camY,ty,1-Math.exp(-dt*3));
+  G.zoom=lerp(G.zoom||1,(G.state!=='surface'&&G.state!=='landing'&&G.rig.y>5)?1.45:1,1-Math.exp(-dt*1.5)); // 深い所では寄って見る
+  const tx=(G.fight&&G.fight.f)?G.drift+clamp(G.fight.f.x-G.drift,-12,12)*.85:G.drift; G.camX=lerp(G.camX,tx,1-Math.exp(-dt*2.5));
+  if(ui.toastT>0){ ui.toastT-=dt; if(ui.toastT<=0) $('#toast').style.opacity=0; }
+  drawScene(); drawRod(); drawFF();
+  G.hudAcc+=dt; if(G.hudAcc>.08){ G.hudAcc=0; updateHUD(); }
+  requestAnimationFrame(frame); }
+resize(); buildMenu(); initMapUI(); renderMap(); drawTide(); populate(); initParts(); requestAnimationFrame(frame);
+addEventListener('resize',()=>{ if(G.mode==='menu'){ renderMap(); drawTide(); } });
+// テスト用
+window.G=G; window.SPI=SPI; window.__pts=POINTS; window.__dbg={setSpot,redrift,updateSea,step,populate,resetRig,sasou,bottomAt,startBite,hookFish,landFish,awase,clutch,startGame,drawFish,showCatch,makeFish};
+</script>
+</body>
+</html>
