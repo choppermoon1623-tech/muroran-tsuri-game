@@ -84,34 +84,60 @@ kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:0 5px;font-family
 #tideCv{width:100%;height:110px;display:block;margin-top:8px;border-radius:8px;background:#081a26}
 #tideInfo{font-size:12.5px;color:#cfe2ea;margin-top:6px;line-height:1.6}
 .src{font-size:11px;color:var(--sub);margin-top:10px}
-@media (max-width:620px){
-  #mmBox{display:none!important}
-  #info{font-size:11.5px;min-width:0;padding:6px 9px}
-  #info .big{font-size:18px}
-  .cb{min-width:58px;height:62px;font-size:13px;padding:2px 6px}
-  #bAwase{min-width:84px;font-size:16px}
-  #rodBox{bottom:84px}
-  #gauge{bottom:80px;width:calc(100vw - 20px)}
-  .cb small{display:none}
-  #info #topbtns .sbtn{padding:3px 7px}
-}
+/* 魚探・竿先・航跡は題名をタップでたためる */
+.panel .t{cursor:pointer}
+.panel.min{width:auto!important;padding:4px 9px!important}
+.panel.min canvas{display:none!important}
+.panel.min .t{padding:0!important}
+.panel.min .t>span:first-child::after{content:' ▸';opacity:.7}
+.panel.flash{animation:flash .45s 3 alternate}
+@keyframes flash{to{border-color:#ffb547;box-shadow:0 0 0 4px rgba(255,181,71,.55);background:rgba(120,70,10,.85)}}
+#bMore{display:none}
+/* スマホ（短い辺が600px以下）：情報は上の帯、魚探は右の細い帯、竿先は小さく */
+body.phone #mmBox{display:none!important}
+body.phone #info{top:calc(6px + env(safe-area-inset-top));left:6px;right:84px;min-width:0;padding:5px 46px 5px 9px;font-size:12px;line-height:1.45;display:flex;flex-wrap:wrap;column-gap:12px;row-gap:0;align-items:baseline}
+body.phone #info .row{gap:5px}
+body.phone #info .big{font-size:17px}
+body.phone #info .opt{display:none}
+body.phone #info.open .opt{display:flex;flex-basis:100%}
+body.phone #info.open #iPlace{display:block}
+body.phone #bMore{display:block;position:absolute;right:4px;top:4px;font-size:16px;padding:1px 8px}
+body.phone #topbtns{flex-wrap:wrap;margin:4px 0 2px}
+body.phone #info #topbtns .sbtn{padding:5px 9px}
+body.phone #ffBox{top:calc(6px + env(safe-area-inset-top));right:6px;width:72px;padding:4px}
+body.phone #ffBox #ffDepth{display:none}
+body.phone #ff{aspect-ratio:auto;height:min(38vh,300px)}
+body.phone #rodBox{left:6px;bottom:140px;width:min(44vw,200px)}
+body.phone #gauge{bottom:78px;width:calc(100vw - 12px)}
+body.phone .cb{min-width:58px;height:62px;font-size:14px;padding:2px 6px}
+body.phone #bAwase{min-width:84px;font-size:17px}
+body.phone .cb small{display:none}
+body.phone #ctrls{bottom:calc(8px + env(safe-area-inset-bottom));gap:6px}
+body.phone #toast{top:30%}
+/* スマホを横にしたとき：高さが足りないので、帯を短く・ボタンを低く */
+body.phone.land #info{right:auto;max-width:48vw}
+body.phone.land #ff{height:min(52vh,240px)}
+body.phone.land .cb{height:48px}
+body.phone.land #rodBox{bottom:60px;width:min(26vw,190px)}
+body.phone.land #gauge{bottom:60px;width:min(420px,48vw)}
 </style>
 </head>
 <body>
 <canvas id="cv"></canvas>
 
 <div id="info" class="hud panel">
-  <div class="muted" id="iPlace">—</div>
+  <button class="sbtn" id="bMore" aria-label="くわしく">≡</button>
+  <div class="muted opt" id="iPlace">—</div>
   <div class="row"><span class="muted">水深</span><span class="big" id="iDepth">0.0</span>m</div>
-  <div class="row"><span class="muted">仕掛け</span><span id="iTana">水面</span></div>
   <div class="row"><span class="muted">潮</span><span id="tide">—</span><span class="muted">釣果</span><span id="iCount">0</span>匹</div>
-  <div class="row"><span class="muted">時刻</span><span id="iTime">—</span></div>
-  <div id="topbtns"><button class="sbtn" id="bMenu">メニュー</button><button class="sbtn" id="bRedrift">流し直し</button><button class="sbtn" id="bZukan">図鑑</button><button class="sbtn" id="bSound">音：ON</button></div>
+  <div class="row"><span class="muted">仕掛け</span><span id="iTana">水面</span></div>
+  <div class="row opt"><span class="muted">時刻</span><span id="iTime">—</span></div>
+  <div id="topbtns" class="opt"><button class="sbtn" id="bMenu">メニュー</button><button class="sbtn" id="bRedrift">流し直し</button><button class="sbtn" id="bZukan">図鑑</button><button class="sbtn" id="bSound">音：ON</button><button class="sbtn" id="bVib">振動：ON</button></div>
 </div>
 
 <div id="ffBox" class="hud panel"><div class="t"><span>魚探</span><span id="ffDepth">—</span></div><canvas id="ff"></canvas></div>
 <div id="mmBox" class="hud panel"><div class="t"><span>航跡 3km</span><span id="mmDir"></span></div><canvas id="mm"></canvas></div>
-<div id="rodBox" class="hud panel"><div class="t">竿先</div><canvas id="rod"></canvas></div>
+<div id="rodBox" class="hud panel"><div class="t"><span>竿先</span></div><canvas id="rod"></canvas></div>
 
 <div id="gauge" class="hud panel">
   <div class="bar"><div class="fill" id="gFill"></div><div class="drag" id="gDrag"></div></div>
@@ -131,7 +157,7 @@ kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:0 5px;font-family
 <div id="menu" class="ov">
   <div class="card">
     <h1>室蘭沖 ボート釣り</h1>
-    <p class="lead">プレジャーボートで室蘭の海へ。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.6）</span></p>
+    <p class="lead">プレジャーボートで室蘭の海へ。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.7）</span></p>
     <h2>ポイント（地図をタップ。ドラッグで移動、＋－で拡大縮小）</h2>
     <div id="mapWrap"><canvas id="map"></canvas><div class="mapbtns"><button class="sbtn" id="mzIn">＋</button><button class="sbtn" id="mzOut">－</button></div></div>
     <div id="spotInfo"></div>
@@ -500,6 +526,19 @@ const SND={ac:null,master:null,amb:null,
   fanfare(){ if(!this.ac) return; [523,659,784,1047].forEach((f,i)=>setTimeout(()=>this.tone(f,.32,.22,'triangle'),i*110)); },
 };
 
+// ============ 振動（スマホ）と画面のゆれ ============
+// Android などは navigator.vibrate。iPhone は対応していないので、iOS 17.4〜26.4 で効く「switch チェックボックスのラベルを押すと触覚が出る」挙動を試す（効かなくても害はない）
+const HAP={vib:typeof navigator.vibrate==='function',lab:null,
+  init(){ if(this.vib||this.lab) return; try{ const i=document.createElement('input'); i.type='checkbox'; i.setAttribute('switch',''); i.id='hapSw'; const l=document.createElement('label'); l.htmlFor='hapSw';
+    for(const e of [i,l]) e.style.cssText='position:fixed;left:-99px;top:0;width:1px;height:1px;opacity:0;pointer-events:none'; document.body.append(i,l); this.lab=l; }catch(e){} },
+  go(p){ if(this.vib){ try{ navigator.vibrate(p); }catch(e){} return; } if(!this.lab) return; const n=Array.isArray(p)?Math.ceil(p.length/2):1; for(let k=0;k<n;k++) setTimeout(()=>{ try{ this.lab.click(); }catch(e){} },k*110); } };
+HAP.init();
+// [振動パターン(ms), 画面のゆれ(px)]
+const BUZZ={bottom:[12,.8],tick:[18,1.2],heavy:[70,2.5],pull:[[70,40,100],5],hit:[[160],7],hook:[[60,40,200],6],guigui:[30,1.6],drag:[22,1.2],snag:[[180,80,180],4],brk:[[300],8],land:[[40,60,40,60,120],3]};
+const BUZZ_GAP={drag:.13,guigui:.3,tick:.08}; const buzzAt={};
+function buzz(k){ const b=BUZZ[k]; if(!b||REC.vib===false) return; const now=performance.now()/1000; if(BUZZ_GAP[k]&&now-(buzzAt[k]||0)<BUZZ_GAP[k]) return; buzzAt[k]=now; HAP.go(b[0]); G.shake=Math.max(G.shake||0,b[1]);
+  if(k==='pull'||k==='hit'||k==='heavy'){ const rb=$('#rodBox'); if(rb.classList.contains('min')){ rb.classList.remove('flash'); void rb.offsetWidth; rb.classList.add('flash'); } } }
+
 // ============ ゲームの状態 ============
 const cv=$('#cv'), ctx=cv.getContext('2d'), ffc=$('#ff'), ffx=ffc.getContext('2d'), rodc=$('#rod'), rodx=rodc.getContext('2d');
 let W=0,H=0,DPR=1;
@@ -658,11 +697,11 @@ function startBite(f){ const sp=f.sp; const ev=[]; let t=0;
 }
 function updateBite(dt){ const b=G.bite; if(!b) return; b.t+=dt;
   while(b.i<b.ev.length&&b.ev[b.i].t<=b.t){ const e=b.ev[b.i++];
-    if(e.k==='tick'){ G.rodKick+=.16; SND.tick(); if(b.i<=1) toast('…コツ'); }
+    if(e.k==='tick'){ G.rodKick+=.16; SND.tick(); buzz('tick'); if(b.i<=1) toast('…コツ'); }
     else if(e.k==='mae'){ b.mae=true; if(b.style==='hirame') toast('前アタリ…まだ待て',1400); }
-    else if(e.k==='heavy'){ b.mae=false; b.win={s:b.t,e:b.t+e.win}; G.rodHold=.45; SND.tick(); toast('…じわっと重くなった',1100); }
-    else if(e.k==='pull'){ b.mae=false; b.win={s:b.t,e:b.t+e.win}; G.rodKick+=.75; G.rodHold=.55; SND.gon(); toast('グググッ！ 合わせろ！',900,'hot'); }
-    else if(e.k==='hit'){ b.win={s:b.t,e:b.t+e.win}; G.rodKick+=1; G.rodHold=.6; SND.gon(); toast(G.rig.y<bottomAt(rigX())-1?'ガツン！ 合わせろ！':'ゴンッ！ 合わせろ！',800,'hot'); }
+    else if(e.k==='heavy'){ b.mae=false; b.win={s:b.t,e:b.t+e.win}; G.rodHold=.45; SND.tick(); buzz('heavy'); toast('…じわっと重くなった',1100); }
+    else if(e.k==='pull'){ b.mae=false; b.win={s:b.t,e:b.t+e.win}; G.rodKick+=.75; G.rodHold=.55; SND.gon(); buzz('pull'); toast('グググッ！ 合わせろ！',900,'hot'); }
+    else if(e.k==='hit'){ b.win={s:b.t,e:b.t+e.win}; G.rodKick+=1; G.rodHold=.6; SND.gon(); buzz('hit'); toast(G.rig.y<bottomAt(rigX())-1?'ガツン！ 合わせろ！':'ゴンッ！ 合わせろ！',800,'hot'); }
   }
   if(b.mae) G.rodHold=Math.max(G.rodHold,.18+.05*Math.sin(G.t*9));
   if(b.win&&b.t>b.win.e){ // 合わせなかった
@@ -705,7 +744,7 @@ function hookFish(q){ const f=G.bite.fish; G.bite=null; f.state='hooked'; G.stat
     for(const m of G.fishes){ if(F.extra.length>=hk-1) break; if(m===f||m.sp!==sp||m.gone||m.state==='hooked') continue;
       if(Math.hypot(m.x-f.x,m.y-f.y)>4.5) continue; if(Math.random()<pr){ m.state='hooked'; F.extra.push(m); } } }
   for(const m of [f,...F.extra]) m.hookY=m.y;
-  G.rodHold=0; SND.gon(); toast(F.extra.length?`追い食い！ ×${F.extra.length+1}`:'ヒット！',1000,'hot'); }
+  G.rodHold=0; SND.gon(); buzz('hook'); toast(F.extra.length?`追い食い！ ×${F.extra.length+1}`:'ヒット！',1000,'hot'); }
 function releaseExtras(F){ if(!F) return; for(const m of F.extra||[]){ m.state='flee'; m.tt=3; m.ty=m.y+1; } }
 function nextPhase(F){ const sp=F.f.sp, r=Math.random();
   if(sp.fight==='run'&&r<.14&&F.len>6){ F.phase='charge'; F.pt=rand(.8,1.4); return; }
@@ -720,8 +759,9 @@ function updateFight(dt){
   const pe=Math.max(0,F.pull+hs), reel=G.reel;
   let t=reel?pe*1.2+.35:pe*.85, out=0;
   if(F.phase==='charge'){ F.len-=1.6*dt; t=reel?.5:.03; }
-  if(t>G.drag){ out=Math.min(4,(t-G.drag)*1.1+.3); t=G.drag+(t-G.drag)*.2; F.dragSnd=(F.dragSnd||0)+dt*out*6; if(F.dragSnd>1){F.dragSnd=0;SND.drag();} }
+  if(t>G.drag){ out=Math.min(4,(t-G.drag)*1.1+.3); t=G.drag+(t-G.drag)*.2; F.dragSnd=(F.dragSnd||0)+dt*out*6; if(F.dragSnd>1){F.dragSnd=0;SND.drag();buzz('drag');} }
   F.ten=lerp(F.ten,t,1-Math.exp(-dt*10));
+  F.vt=(F.vt||0)+dt; if(F.vt>.34&&out===0&&(F.phase==='run'||Math.abs(hs)>.08*w)&&F.ten>G.drag*.5){ F.vt=0; buzz('guigui'); } // 魚が走る・首を振るとグイグイ
   F.len+=out*dt;
   if(reel&&out===0){ const k=G.point.dendou?2.6:1; F.len-=1.5*k*(1-.55*clamp(pe/G.drag,0,1))*dt; F.clk=(F.clk||0)+dt; if(F.clk>.07){F.clk=0;SND.click();} }
   F.len=Math.max(.5,F.len);
@@ -756,7 +796,7 @@ function updateLanding(dt){ const L=G.landing; L.t+=dt; const F=G.fight; F.f.swi
 function tamo(){ SND.splash(); landFish(); }
 function lose(msg,sub){ const F=G.fight; releaseExtras(F); if(F){ const f=F.f; f.state='flee'; f.tt=3; f.ty=f.y+2; G.rig.y=f.y; G.rig.anchor=f.y; }
   G.fight=null; G.rooted=null; G.landing=null; G.state='idle'; if(G.rigId==='bait'&&Math.random()<.7) G.rig.baitGone=true; G.rodHold=0; toast(msg,1600,'',sub); }
-function lineBreak(msg,sub){ SND.snap(); const F=G.fight; releaseExtras(F); if(F){ F.f.state='flee'; F.f.tt=3; }
+function lineBreak(msg,sub){ SND.snap(); buzz('brk');const F=G.fight; releaseExtras(F); if(F){ F.f.state='flee'; F.f.tt=3; }
   G.fight=null; G.rooted=null; G.landing=null; G.snag=null; G.lost++; G.state='lost'; G.lostT=1.6; G.rodHold=0; toast(msg,1800,'',sub); }
 function landFish(){ const F=G.fight, all=[F.f,...(F.extra||[])]; G.fight=null; G.landing=null; G.rooted=null; G.state='card';
   const sp=F.f.sp, z=REC.zukan[sp.id]||(REC.zukan[sp.id]={n:0,best:0}), first=z.n===0, prev=z.best; 
@@ -764,11 +804,11 @@ function landFish(){ const F=G.fight, all=[F.f,...(F.extra||[])]; G.fight=null; 
     REC.log.unshift({id:sp.id,size:m.size,w:Math.round(m.w*1000),p:G.point.id,s:G.season,r:G.rigId,at:Date.now()}); }
   REC.log=REC.log.slice(0,100); saveRec();
   const big=all.reduce((a,m)=>m.size>a.size?m:a,all[0]); const isRec=!first&&big.size>prev;
-  SND.fanfare(); showCatch(big,isRec,all,first); if(sp.id==='maika') toast('墨をはいた！',1400); }
+  SND.fanfare(); buzz('land'); showCatch(big,isRec,all,first); if(sp.id==='maika') toast('墨をはいた！',1400); }
 function resetRig(){ G.state='surface'; G.rig.y=.3; G.rig.anchor=.3; G.rig.off=0; G.rig.baitGone=false; G.auto=false; G.bite=null; }
 
 // 根掛かり
-function startSnag(){ G.state='snag'; G.snag={tries:0,hold:0}; G.auto=false; G.rodHold=.7; SND.gon(); toast('根掛かり！',1200,'',`<kbd>巻く</kbd>を押して外そう`); }
+function startSnag(){ G.state='snag'; G.snag={tries:0,hold:0}; G.auto=false; G.rodHold=.7; SND.gon(); buzz('snag'); toast('根掛かり！',1200,'',`<kbd>巻く</kbd>を押して外そう`); }
 function updateSnag(dt){ const S=G.snag; if(G.reel){ S.hold+=dt; G.rodHold=.7+S.hold*.3;
   if(S.hold>1.1){ S.hold=0; S.tries++; if(Math.random()<.38){ G.state='idle'; G.snag=null; G.rig.anchor-=.6; G.rodHold=0; toast('外れた！',900); SND.click(); }
     else if(S.tries>=3){ lineBreak('仕掛けロスト…','岩場では底を引きずらない'); } else { SND.tick(); toast(`ダメだ…（${S.tries}/3）`,700); } } }
@@ -778,7 +818,7 @@ function updateSnag(dt){ const S=G.snag; if(G.reel){ S.hold+=dt; G.rodHold=.7+S.
 function updateRig(dt){ const r=G.rig, rd=rigDef(), bot=bottomAt(rigX());
   if(G.state==='lost'){ G.lostT-=dt; if(G.lostT<=0){ resetRig(); toast('仕掛けを付け直した',900); } return; }
   if(G.state==='falling'){ r.y+=rd.fall*(G.point.dendou?1.4:1)*dt; r.anchor=r.y; r.off=0; r.lastAct=G.t;
-    if(r.y>=bot){ r.y=bot; r.anchor=bot; G.state='idle'; r.onBottom=true; SND.tick(); toast(`着底　水深${bot.toFixed(1)}m`,900);
+    if(r.y>=bot){ r.y=bot; r.anchor=bot; G.state='idle'; r.onBottom=true; SND.tick(); buzz('bottom'); toast(`着底　水深${bot.toFixed(1)}m`,900);
       if(G.point.type==='rock'&&Math.random()<(G.rigId==='jig'?.06:.03)) startSnag(); } return; }
   if(G.state!=='idle') return;
   if(G.reel||G.auto){ r.anchor-=reelSpeed(G.auto&&!G.reel)*dt; if(!G.auto){ r.clk=(r.clk||0)+dt; if(r.clk>.09){r.clk=0;SND.click();} } }
@@ -792,7 +832,8 @@ function updateRig(dt){ const r=G.rig, rd=rigDef(), bot=bottomAt(rigX());
 }
 
 // ============ 画面：海の中 ============
-function resize(){ DPR=Math.min(2,window.devicePixelRatio||1); W=innerWidth; H=innerHeight; cv.width=W*DPR|0; cv.height=H*DPR|0;
+function resize(){ const bc=document.body.classList; bc.toggle('phone',Math.min(innerWidth,innerHeight)<=600||innerWidth<=620); bc.toggle('land',innerWidth>innerHeight);
+  DPR=Math.min(2,window.devicePixelRatio||1); W=innerWidth; H=innerHeight; cv.width=W*DPR|0; cv.height=H*DPR|0;
   for(const c of [ffc,rodc]){ const r=c.getBoundingClientRect(); c.width=Math.max(10,r.width*DPR|0); c.height=Math.max(10,r.height*DPR|0); } ffBg=null; }
 addEventListener('resize',resize);
 let ffBg=null; const FISHX=3.4; // 魚は見やすいよう実寸の3.4倍で描く
@@ -1230,6 +1271,13 @@ $('#bZClose').onclick=()=>{ $('#zukan').classList.add('hide'); if(G.mode==='paus
 $('#bNext').onclick=()=>{ $('#catch').classList.add('hide'); resetRig(); };
 $('#bSound').onclick=()=>{ REC.sound=!REC.sound; saveRec(); SND.init(); SND.setOn(REC.sound); $('#bSound').textContent='音：'+(REC.sound?'ON':'OFF'); };
 $('#bSound').textContent='音：'+(REC.sound?'ON':'OFF');
+const vibLab=()=>{ $('#bVib').textContent='振動：'+(REC.vib===false?'OFF':'ON'); }; vibLab();
+$('#bVib').onclick=()=>{ REC.vib=REC.vib===false; saveRec(); vibLab(); if(REC.vib) buzz('hit'); };
+$('#bMore').onclick=()=>$('#info').classList.toggle('open');
+// 魚探・竿先・航跡：題名をタップでたたむ／ひらく（端末に覚えておく）
+REC.ui=REC.ui||{};
+for(const id of ['ffBox','rodBox','mmBox']){ const el=$('#'+id); if(REC.ui[id]) el.classList.add('min');
+  el.querySelector('.t').addEventListener('click',()=>{ const on=!el.classList.contains('min'); el.classList.toggle('min',on); el.classList.remove('flash'); REC.ui[id]=on; saveRec(); resize(); }); }
 addEventListener('keydown',e=>{ if(G.mode!=='play'){ if(e.code==='Enter'&&G.mode==='menu'&&!/INPUT|SELECT/.test(e.target.tagName)){ G.useReal=true; startGame(); } else if((e.code==='Space'||e.code==='Enter')&&!$('#catch').classList.contains('hide')){ e.preventDefault(); $('#bNext').click(); } return; }
   if(!$('#catch').classList.contains('hide')){ if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); $('#bNext').click(); } return; }
   if(e.repeat&&e.code!=='ArrowUp'&&e.code!=='KeyW') return;
@@ -1256,6 +1304,7 @@ function frame(now){ const dt=Math.min(.05,(now-last)/1000); last=now; if(innerW
   G.zoom=lerp(G.zoom||1,(G.state!=='surface'&&G.state!=='landing'&&G.rig.y>5)?1.45:1,1-Math.exp(-dt*1.5)); // 深い所では寄って見る
   const tx=(G.fight&&G.fight.f)?G.drift+clamp(G.fight.f.x-G.drift,-12,12)*.85:G.drift; G.camX=lerp(G.camX,tx,1-Math.exp(-dt*2.5));
   if(ui.toastT>0){ ui.toastT-=dt; if(ui.toastT<=0) $('#toast').style.opacity=0; }
+  if(G.shake>.25){ G.shake*=Math.exp(-dt*9); cv.style.transform=`translate(${((Math.random()*2-1)*G.shake).toFixed(1)}px,${((Math.random()*2-1)*G.shake).toFixed(1)}px)`; } else if(G.shake){ G.shake=0; cv.style.transform=''; }
   drawScene(); drawRod(); drawFF();
   G.hudAcc+=dt; if(G.hudAcc>.08){ G.hudAcc=0; updateHUD(); }
   requestAnimationFrame(frame); }
