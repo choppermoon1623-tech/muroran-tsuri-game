@@ -108,7 +108,11 @@ body.phone #info #topbtns .sbtn{padding:5px 9px}
 body.phone #ffBox{top:calc(6px + env(safe-area-inset-top));right:6px;width:72px;padding:4px}
 body.phone #ffBox #ffDepth{display:none}
 body.phone #ff{aspect-ratio:auto;height:min(38vh,300px)}
-body.phone #rodBox{left:6px;bottom:140px;width:min(44vw,200px)}
+body.phone #info.open{z-index:4}
+/* 竿先は上の帯のすぐ下に横長で（下半分の海底・魚をふさがない）。top は updateHUD が帯の高さに合わせる */
+body.phone #rodBox{left:6px;right:84px;width:auto;top:66px;bottom:auto}
+body.phone #rodBox.min{right:auto}
+body.phone #rod{aspect-ratio:4/1}
 body.phone #gauge{bottom:78px;width:calc(100vw - 12px)}
 body.phone .cb{min-width:58px;height:62px;font-size:14px;padding:2px 6px}
 body.phone #bAwase{min-width:84px;font-size:17px}
@@ -119,7 +123,8 @@ body.phone #toast{top:30%}
 body.phone.land #info{right:auto;max-width:48vw}
 body.phone.land #ff{height:min(52vh,240px)}
 body.phone.land .cb{height:48px}
-body.phone.land #rodBox{bottom:60px;width:min(26vw,190px)}
+body.phone.land #rodBox{left:auto;right:84px;top:calc(6px + env(safe-area-inset-top));width:min(30vw,240px)}
+body.phone.land #rod{aspect-ratio:3/1}
 body.phone.land #gauge{bottom:60px;width:min(420px,48vw)}
 </style>
 </head>
@@ -159,7 +164,7 @@ body.phone.land #gauge{bottom:60px;width:min(420px,48vw)}
 <div id="menu" class="ov">
   <div class="card">
     <h1>室蘭沖 ボート釣り</h1>
-    <p class="lead">プレジャーボートで室蘭の海へ。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.7.1）</span></p>
+    <p class="lead">プレジャーボートで室蘭の海へ。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.7.2）</span></p>
     <h2>ポイント（地図をタップ。ドラッグで移動、＋－で拡大縮小）</h2>
     <div id="mapWrap"><canvas id="map"></canvas><div class="mapbtns"><button class="sbtn" id="mzIn">＋</button><button class="sbtn" id="mzOut">－</button></div></div>
     <div id="spotInfo"></div>
@@ -1121,6 +1126,10 @@ function updateHUD(){
   $('#iTime').textContent=G.clock?`${hm(new Date(G.clock))} ${G.band}・${G.tideTxt||''}`:'—';
   $('#mmDir').textContent=G.point&&G.point.real?dir8(G.hdg)+'へ '+(G.driftV*1.944).toFixed(1)+'kt':'';
   $('#ffDepth').textContent=G.point.depthTxt;
+  // スマホ縦：竿先を情報の帯のすぐ下へ（帯が2行・3行になっても重ならない）
+  const rb=$('#rodBox'), bcl=document.body.classList;
+  if(bcl.contains('phone')&&!bcl.contains('land')){ if(!$('#info').classList.contains('open')){ const t=Math.round($('#info').getBoundingClientRect().bottom+6); if(rb._t!==t){ rb._t=t; rb.style.top=t+'px'; } } }
+  else if(rb._t){ rb._t=null; rb.style.top=''; }
   // ボタン
   const st=G.state, fighting=st==='fight'||st==='rooted'||st==='landing';
   const bd=$('#bDrop'); bd.firstChild.textContent=st==='falling'?'止める':'落とす'; bd.disabled=!(st==='surface'||st==='idle'||st==='falling');
