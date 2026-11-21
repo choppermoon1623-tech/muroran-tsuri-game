@@ -17,6 +17,12 @@ html,body{margin:0;height:100%;background:#061420;color:var(--ink);font-family:"
 #info .muted{color:var(--sub)}
 #tide{display:inline-block;padding:0 6px;border-radius:6px;font-size:12px}
 #topbtns{display:flex;gap:6px;margin-top:6px}
+#bRig{padding:1px 8px;font-size:12px;margin-left:4px}
+#rigPop{z-index:4;padding:8px;display:flex;flex-direction:column;gap:6px;max-width:300px}
+#rigPop.hide{display:none}
+#rigPop button{text-align:left;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:var(--ink);border-radius:10px;padding:7px 10px;font:inherit;cursor:pointer}
+#rigPop button b{display:block;font-size:14px}#rigPop button span{font-size:11px;color:var(--sub)}
+#rigPop button.on{border-color:var(--acc);background:rgba(255,181,71,.15)}
 .sbtn{font:inherit;font-size:12px;color:var(--ink);background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:8px;padding:4px 9px;cursor:pointer}
 .sbtn:hover{background:rgba(255,255,255,.16)}
 #ffBox{top:10px;right:10px;padding:6px;width:clamp(140px,22vw,210px)}
@@ -63,6 +69,15 @@ kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:0 5px;font-family
 #catch .card{max-width:700px;text-align:center}
 #catchCv{width:100%;aspect-ratio:2.3/1;display:block;background:radial-gradient(ellipse at center,#173a4e,#0a1c28);border-radius:12px}
 #catchName{font-size:30px;font-weight:800;margin:10px 0 0}
+#catchPrize{display:none;margin:8px auto 0;font-weight:800;font-size:20px;letter-spacing:1px;border-radius:12px;padding:6px 14px;width:fit-content;max-width:100%}
+#catchPrize.on{display:block;animation:prizeIn .5s cubic-bezier(.2,1.6,.4,1)}
+#catchPrize.r1{background:linear-gradient(#cfe8ff,#7ab0e8);color:#062038}
+#catchPrize.r2{background:linear-gradient(#fff0a8,#e8b030);color:#3a2400;box-shadow:0 0 18px #ffcf50a0}
+#catchPrize.r3{background:linear-gradient(90deg,#ff8a8a,#ffd36a,#8affc8,#8ac8ff,#d08aff);color:#2a1030;box-shadow:0 0 26px #ffffffa0}
+#catchPrize small{display:block;font-size:12px;font-weight:600;letter-spacing:0}
+@keyframes prizeIn{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+.confetti{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:9;pointer-events:none;animation:conf linear forwards}
+@keyframes conf{to{transform:translateY(105vh) rotate(720deg)}}
 #catchName small{font-size:15px;color:var(--sub);font-weight:600;margin-left:8px}
 #catchSize{font-size:22px;margin:4px 0;font-variant-numeric:tabular-nums}
 #catchSize .rec{color:var(--acc);font-weight:800;margin-left:8px}
@@ -88,7 +103,8 @@ kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:0 5px;font-family
 .zc{background:rgba(255,255,255,.05);border-radius:12px;padding:8px;text-align:center;font-size:12px;color:var(--sub)}
 .zc canvas{width:100%;aspect-ratio:2/1;display:block}
 .zc b{display:block;font-size:15px;color:var(--ink)}
-.zc.got{cursor:pointer}.zc.got:hover{background:rgba(255,255,255,.1)}
+.zc.got{cursor:pointer}.zc.gold{box-shadow:inset 0 0 0 2px #e8c050;background:rgba(232,192,80,.1)}.zc .st{color:#ffcf50;margin-left:4px;letter-spacing:-1px}
+#zTitle{display:inline-block;background:linear-gradient(#ffe08a,#e0a030);color:#3a2400;font-weight:800;border-radius:999px;padding:1px 12px;font-size:14px}.zc.got:hover{background:rgba(255,255,255,.1)}
 .zc .zd{display:inline-block;margin-top:3px;font-size:11px;color:#ffb547}
 #zDet.hide{display:none}
 #zDet canvas{width:100%;max-width:520px;aspect-ratio:2/1;display:block;margin:0 auto}
@@ -168,11 +184,12 @@ body.phone.land #gauge{bottom:60px;width:min(420px,48vw)}
   <div class="muted opt" id="iPlace">—</div>
   <div class="row"><span class="muted">水深</span><span class="big" id="iDepth">0.0</span>m</div>
   <div class="row"><span class="muted">潮</span><span id="tide">—</span><span class="muted">釣果</span><span id="iCount">0</span>匹</div>
-  <div class="row"><span class="muted">仕掛け</span><span id="iTana">水面</span></div>
+  <div class="row"><span class="muted">仕掛け</span><span id="iTana">水面</span><button class="sbtn" id="bRig" title="仕掛けを替える（C）"></button></div>
   <div class="row opt"><span class="muted">時刻</span><span id="iTime">—</span></div>
   <div id="topbtns" class="opt"><button class="sbtn" id="bMenu">メニュー</button><button class="sbtn" id="bRedrift">流し直し</button><button class="sbtn" id="bZukan">図鑑</button><button class="sbtn" id="bSound">音：ON</button><button class="sbtn" id="bVib">振動：ON</button></div>
 </div>
 
+<div id="rigPop" class="hud panel hide"></div>
 <div id="ffBox" class="hud panel"><div class="t"><span>魚探</span><span id="ffDepth">—</span></div><canvas id="ff"></canvas></div>
 <div id="mmBox" class="hud panel"><div class="t"><span>航跡 3km</span><span id="mmDir"></span></div><canvas id="mm"></canvas></div>
 <div id="rodBox" class="hud panel"><div class="t"><span>竿先</span></div><canvas id="rod"></canvas></div>
@@ -197,7 +214,7 @@ body.phone.land #gauge{bottom:60px;width:min(420px,48vw)}
 <div id="menu" class="ov">
   <div class="card">
     <h1>室蘭沖 ボート釣り</h1>
-    <p class="lead">プレジャーボートで室蘭の海へ。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.9.2）</span></p>
+    <p class="lead">プレジャーボートで室蘭の海へ。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.9.4）</span></p>
     <h2>ポイント（地図をタップ。ドラッグで移動、＋－で拡大縮小）</h2>
     <div id="mapWrap"><canvas id="map"></canvas><div class="mapbtns"><button class="sbtn" id="mzIn">＋</button><button class="sbtn" id="mzOut">－</button></div></div>
     <div id="spotInfo"></div>
@@ -209,6 +226,7 @@ body.phone.land #gauge{bottom:60px;width:min(420px,48vw)}
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <button class="go" id="bStart">出船！</button>
       <button class="sbtn" id="bZukan2" style="margin-top:16px">魚図鑑を見る</button>
+      <button class="sbtn" id="bReset" style="margin-top:16px;opacity:.8">記録をリセット</button><span id="resetMsg" class="lead" style="font-size:12px;margin-top:16px"></span>
     </div>
     <div class="src">海底地形：GEBCO Compilation Group (2025) GEBCO_2025 Grid（約400m格子のため根や瀬は表現できず、底質に合わせた起伏を足しています）／潮位：気象庁 潮位表「室蘭」</div>
     <div class="howto">
@@ -224,6 +242,7 @@ body.phone.land #gauge{bottom:60px;width:min(420px,48vw)}
     <canvas id="catchCv"></canvas>
     <div id="catchName"></div>
     <div id="catchSize"></div>
+    <div id="catchPrize"></div>
     <div id="catchDesc"></div>
     <div id="catchMeta"></div>
     <div id="catchJudge"><span>どうする？</span><button class="go" id="bKeep">持ち帰る<small>1</small></button><button class="go rel" id="bRel">海へ返す<small>2</small></button><button class="go rel" id="bPart" style="display:none"></button></div>
@@ -237,6 +256,7 @@ body.phone.land #gauge{bottom:60px;width:min(420px,48vw)}
 <div id="zukan" class="ov hide">
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center"><h1 style="font-size:26px">魚図鑑</h1><button class="sbtn" id="bZClose">とじる</button></div>
+    <div id="zTitleWrap" style="margin:4px 0 2px"></div>
     <p class="lead" id="zStat"></p>
     <div class="zgrid" id="zGrid"></div>
     <div id="zDet" class="hide"></div>
@@ -286,6 +306,10 @@ const SP=[
   rig:{bait:.9,jig:.6,sabiki:.2},size:[18,38],mode:26,lw:[.018,3],power:1.05,bite:'gon',fight:'dive',spd:.45,
   look:{kind:'rock',h:.36,back:'#3a3016',side:'#d0a838',belly:'#ecdca0',fin:'#6a5420',pat:['stripes3']},
   desc:'黄色の地に黒い縦じまが走るソイ。浅い岩場の海藻まわりに多い。見た目も味もよく、釣れるとうれしい一尾。'},
+ {id:'mazoi',photo:'L',night:1.4,pt:{okine:1.4,gansho:1,sunachi:.1,fukaba:.2},name:'マゾイ',alias:'キツネメバル',habitat:{rock:1,sand:.1,mud:0},dmin:5,dmax:100,zone:{t:'bottom',a:0,b:4},season:[.9,1,.9,.6],abund:.35,school:[1,2],
+  rig:{bait:1,jig:.7,sabiki:.3},size:[18,45],mode:28,lw:[.016,3.03],power:.95,bite:'gon',fight:'dive',spd:.5,
+  look:{kind:'rock',h:.33,back:'#4a3c34',side:'#6a5a4e',belly:'#b8aca0',fin:'#3e322c',pat:['mottle']},
+  desc:'標準和名はキツネメバル。北海道ではマゾイと呼ぶソイの仲間。茶色の体に細かいまだら模様。岩礁や沖の根の底近くにすみ、クロソイより少し深い根に多い。お腹の中で卵をかえして子を産む（胎生）。'},
  {id:'gaya',photo:'L',multi:true,name:'エゾメバル',alias:'ガヤ',habitat:{rock:1,sand:.2,mud:0},dmin:2,dmax:50,zone:{t:'bottom',a:.3,b:5},season:[.9,1,.9,.8],abund:1.3,school:[2,4],
   rig:{bait:1,jig:.35,sabiki:1},size:[13,27],mode:19,lw:[.017,3],power:.9,bite:'gon',fight:'shake',spd:.55,
   look:{kind:'rock',h:.33,back:'#2a241e',side:'#5a4838',belly:'#b6a68e',fin:'#382e26',pat:['mottle']},
@@ -302,7 +326,7 @@ const SP=[
   rig:{bait:1,jig:.05,sabiki:.25},size:[18,38],mode:26,lw:[.012,3],power:.8,bite:'kotsu',fight:'heavy',spd:.3,
   look:{kind:'flat',h:.5,dir:'right',back:'#6a5a40',side:'#7a6a4c',fin:'#6a5a40',pat:['mottleFine']},
   desc:'砂地の代表的なカレイ。目は体の右側にある（左ヒラメに右カレイ）。コツコツと小さなアタリが続いたあと、グーッと食い込む。'},
- {id:'hirame',photo:'L',pt:{sunachi:1.5,okine:.6,gansho:.6},name:'ヒラメ',habitat:{rock:.35,sand:1,mud:.2},dmin:5,dmax:120,zone:{t:'flat'},season:[.4,.9,1,.4],abund:.35,school:[1,1],
+ {id:'hirame',rare:1,photo:'L',pt:{sunachi:1.5,okine:.6,gansho:.6},name:'ヒラメ',habitat:{rock:.35,sand:1,mud:.2},dmin:5,dmax:120,zone:{t:'flat'},season:[.4,.9,1,.4],abund:.35,school:[1,1],
   rig:{bait:.35,jig:.85,sabiki:.05},size:[35,85],mode:50,lw:[.0115,3],power:1.2,bite:'hirame',fight:'heavy',spd:.4,
   look:{kind:'flat',h:.42,dir:'left',back:'#58482e',side:'#685636',fin:'#58482e',pat:['spotsRing','mottle'],bigmouth:true},
   desc:'目は体の左側。大きな口と鋭い歯で小魚を襲う。「ヒラメ40（よんじゅう）」――前アタリがあっても慌てて合わせず、しっかり食い込むまで待つのがコツ。'},
@@ -314,7 +338,7 @@ const SP=[
   rig:{bait:.3,jig:.85,sabiki:1},size:[24,42],mode:32,lw:[.0105,3],power:1.25,bite:'hit',fight:'run',spd:1.6,
   look:{kind:'mackerel',h:.2,back:'#285858',side:'#98aeae',belly:'#f0f2ee',fin:'#4e5e5e',pat:['wavy']},
   desc:'群れで中層を回る。背中の青緑の波模様が目印。小さくても引きは強い。'},
- {id:'sakuramasu',rule:'sakura',photo:'L',name:'サクラマス',habitat:{rock:1,sand:1,mud:.6},dmin:10,dmax:200,zone:{t:'abs',top:4,bot:40},season:[1,0,0,.45],abund:.3,school:[1,2],
+ {id:'sakuramasu',rare:1,rule:'sakura',photo:'L',name:'サクラマス',habitat:{rock:1,sand:1,mud:.6},dmin:10,dmax:200,zone:{t:'abs',top:4,bot:40},season:[1,0,0,.45],abund:.3,school:[1,2],
   rig:{bait:.1,jig:1,sabiki:.1},size:[38,68],mode:50,lw:[.0125,3],power:1.35,bite:'hit',fight:'run',spd:1.8,
   look:{kind:'salmon',h:.25,back:'#384858',side:'#c6ced6',belly:'#f4f6f6',fin:'#58626e',pat:['spots']},
   desc:'ヤマメが海へ下って大きく育ったもの。冬から春の船釣りで人気の大物。銀色の体に、背中の細かな黒い点。中層でジグに食う。胆振の沖には、冬（12/15〜3/15）にライセンスを受けた船でしか狙えない海域がある。'},
@@ -350,7 +374,7 @@ const SP=[
   rig:{bait:1,jig:.1,sabiki:.05},size:[40,90],mode:60,lw:[.006,3],power:1,bite:'gon',fight:'heavy',spd:.3,
   look:{kind:'flat',h:.7,dir:'right',back:'#7a5a40',side:'#8a6a50',fin:'#8a6a50',pat:['mottle']},
   desc:'北海道でカスベと呼ばれるエイの仲間。底にべったり張りつき、上げるのに一苦労。煮付けで食べる。'},
- {id:'sake',photo:'L',name:'サケ',alias:'アキアジ',habitat:{rock:1,sand:1,mud:1},dmin:5,dmax:200,zone:{t:'abs',top:1,bot:20},season:[0,.05,1,0],abund:.22,school:[1,3],
+ {id:'sake',rare:1,photo:'L',name:'サケ',alias:'アキアジ',habitat:{rock:1,sand:1,mud:1},dmin:5,dmax:200,zone:{t:'abs',top:1,bot:20},season:[0,.05,1,0],abund:.22,school:[1,3],
   rig:{bait:.2,jig:1,sabiki:.05},size:[55,80],mode:67,lw:[.011,3],power:1.6,bite:'hit',fight:'run',spd:1.8,
   look:{kind:'salmon',h:.24,back:'#4a5a60',side:'#c8ccd0',belly:'#f2f2f0',fin:'#4a5458',pat:['spots']},
   desc:'北海道ではアキアジ。秋、生まれた川へ帰るために沿岸へ寄ってくる。浅いタナで強烈に引く。河口付近には採捕禁止の区域があるので注意。'},
@@ -358,6 +382,10 @@ const SP=[
   rig:{bait:.2,jig:.6,sabiki:.9},size:[18,30],mode:24,lw:[.016,3],power:.7,bite:'omoi',fight:'heavy',spd:1.2,
   look:{kind:'hokke',h:.22,back:'#6a3a2a',side:'#9a5a40',belly:'#d8a888',fin:'#c07040',pat:[]},
   desc:'北海道でマイカと呼ばれるスルメイカ。夏から秋に群れで回る。サイズは胴の長さ。イカのハリにはカエシがないので、糸をゆるめると外れやすい。'},
+ {id:'mizudako',photo:'R',rule:'tako',rare:2,sizeLab:'全長',pt:{gansho:1.3,okine:1.2,sunachi:.2,fukaba:.3},name:'ミズダコ',habitat:{rock:1,sand:.4,mud:.3},dmin:5,dmax:200,zone:{t:'bottom',a:0,b:1},season:[1,.6,.7,.9],abund:.07,school:[1,1],wave:0,
+  rig:{bait:.7,jig:.5,sabiki:.02},size:[50,220],mode:110,lw:[.0035,3],power:1,bite:'omoi',fight:'heavy',spd:.15,
+  look:{kind:'cod',h:.4,back:'#9a3a20',side:'#b85a3a',belly:'#e0a080',fin:'#9a3a20',pat:['mottle']},
+  desc:'世界でいちばん大きいタコ。北海道の岩場や根に多く、10kgをこえるものも珍しくない。岩にはりつく力が強く、掛かると根掛かりのように重い。サイズは足を伸ばした全長。'},
  {id:'hoshizame',photo:'L',night:1.3,name:'ホシザメ',habitat:{rock:.4,sand:1,mud:.8},dmin:5,dmax:150,zone:{t:'bottom',a:0,b:1.5},season:[.3,1,.8,.1],abund:.3,school:[1,2],wave:.12,
   rig:{bait:1,jig:.2,sabiki:.05},size:[50,110],mode:75,lw:[.0022,3],power:1.2,bite:'gon',fight:'run',spd:.9,
   look:{kind:'hokke',h:.12,back:'#8a7a70',side:'#b0a098',belly:'#ecebe6',fin:'#8a7a70',pat:['spots']},
@@ -370,6 +398,10 @@ const SP=[
   rig:{bait:1,jig:.03,sabiki:.3},size:[25,45],mode:32,lw:[.011,3],power:.85,bite:'kotsu',fight:'heavy',spd:.3,
   look:{kind:'flat',h:.46,dir:'right',back:'#8a5a40',side:'#9a6a48',fin:'#c07050',pat:['mottleFine']},
   desc:'深場の泥底にすむ赤みのあるカレイ。ひれのふちが赤っぽい。冬に脂がのる。'},
+ {id:'namata',rare:1,photo:'L',pt:{fukaba:1.6,sunachi:.5,okine:.6,gansho:0},name:'ナメタガレイ',alias:'ババガレイ',habitat:{rock:.4,sand:1,mud:.8},dmin:40,dmax:400,zone:{t:'flat'},season:[.6,.35,.8,1],abund:.4,school:[1,1],
+  rig:{bait:1,jig:.02,sabiki:.08},size:[25,55],mode:38,lw:[.015,3],power:.9,bite:'kotsu',fight:'heavy',spd:.25,
+  look:{kind:'flat',h:.48,dir:'right',back:'#3a3024',side:'#4a3c2a',fin:'#3a3024',pat:['mottleFine']},
+  desc:'標準和名はババガレイ。体がぬるぬるの粘液におおわれ「ナメタ」と呼ばれる。水深50〜400mの砂泥底、とくに根のまわりにすみ、小さな口でゴカイなどを食べる。成長がおそく、1kgをこえるまで7〜8年。産卵は3〜4月で、冬の子持ちは高級品。'},
  {id:'ishigarei',photo:'R',pt:{sunachi:2,gansho:.15,okine:.15,fukaba:.3},name:'イシガレイ',habitat:{rock:.3,sand:1,mud:.2},dmin:3,dmax:40,zone:{t:'flat'},season:[.9,.8,.6,.4],abund:.45,school:[1,1],
   rig:{bait:1,jig:.03,sabiki:.1},size:[25,55],mode:36,lw:[.013,3],power:1,bite:'kotsu',fight:'heavy',spd:.3,
   look:{kind:'flat',h:.44,dir:'right',back:'#2e2e26',side:'#3e3e34',fin:'#6a5032',pat:['mottle']},
@@ -383,7 +415,7 @@ const SP=[
   look:{kind:'cod',h:.16,back:'#5a5048',side:'#9a9088',belly:'#e0dcd4',fin:'#4a4440',pat:['mottleFine']},
   desc:'正式名はトクビレ。オスは背びれとしりびれが帆のように大きい。体は硬い骨の板でおおわれ、断面が八角形に見えるのが名前の由来。軍艦焼きで有名。'},
  // ---- v0.8 で追加（生態は道・道総研の資料と本人の実感から。数値はゲーム用の仮の値） ----
- {id:'matsukawa',photo:'R',pt:{sunachi:1.8,gansho:.4,okine:.3,fukaba:.2},name:'マツカワ',alias:'マツカワガレイ・王鰈',habitat:{rock:.3,sand:1,mud:.5},dmin:5,dmax:150,zone:{t:'flat'},season:[.6,1,1,.4],abund:.16,school:[1,1],keepMin:35,
+ {id:'matsukawa',rare:2,photo:'R',pt:{sunachi:1.8,gansho:.4,okine:.3,fukaba:.2},name:'マツカワ',alias:'マツカワガレイ・王鰈',habitat:{rock:.3,sand:1,mud:.5},dmin:5,dmax:150,zone:{t:'flat'},season:[.6,1,1,.4],abund:.16,school:[1,1],keepMin:35,
   rig:{bait:1,jig:.3,sabiki:.05},size:[25,75],mode:40,lw:[.0125,3],power:1.25,bite:'gon',fight:'heavy',spd:.4,
   look:{kind:'flat',h:.5,dir:'right',back:'#4a4232',side:'#5a5040',fin:'#c8a060',pat:['mottle']},
   desc:'背びれ・しりびれ・尾びれに黒い帯が並ぶ大型のカレイ。一時は「幻の魚」と呼ばれるほど減り、えりも以西の太平洋で毎年稚魚を放流して増やしている。いま釣れるのはほとんどが放流魚。'},
@@ -407,11 +439,15 @@ const SP=[
   rig:{bait:.05,jig:.02,sabiki:1},size:[7,15],mode:11,lw:[.0075,3],power:.6,bite:'gon',fight:'shake',spd:1.3,
   look:{kind:'hokke',h:.16,back:'#2a4a5a',side:'#a0b0b8',belly:'#eef0f0',fin:'#8a9a9a',pat:[]},
   desc:'上あごが下あごより長く、口が目の後ろまで大きく裂けている（片口）。マイワシより小さく細い。煮干しやしらす、アンチョビの原料。青物の大好物で、なぶらのもとになる。'},
- {id:'shiira',photo:'L',nabRole:'pred',name:'シイラ',habitat:{rock:1,sand:1,mud:1},dmin:15,dmax:500,zone:{t:'abs',top:.5,bot:8},season:[0,.35,.5,0],abund:.04,school:[1,2],
+ {id:'hatahata',photo:'L',multi:true,pt:{sunachi:1.4,fukaba:1,gansho:.8,okine:.4},name:'ハタハタ',habitat:{rock:.6,sand:1,mud:.8},dmin:2,dmax:400,zone:{t:'bottom',a:0,b:5},season:[.3,0,.5,1],abund:.5,school:[4,10],
+  rig:{bait:.5,jig:.1,sabiki:1},size:[12,25],mode:18,lw:[.009,3],power:.5,bite:'hit',fight:'shake',spd:.8,
+  look:{kind:'hokke',h:.24,back:'#7a6a3a',side:'#c0b080',belly:'#eeeadc',fin:'#c8c090',pat:['mottleFine']},
+  desc:'うろこがなく、口が大きい。ふだんは水深100〜400mの砂泥底にすみ、冬に群れで浅い藻場へ寄って卵を産む。北海道の太平洋側（胆振・日高）では秋から冬に釣れる。雷の鳴る季節に来るので「鰰」と書く。'},
+ {id:'shiira',rare:3,photo:'L',nabRole:'pred',name:'シイラ',habitat:{rock:1,sand:1,mud:1},dmin:15,dmax:500,zone:{t:'abs',top:.5,bot:8},season:[0,.35,.5,0],abund:.04,school:[1,2],
   rig:{bait:.05,jig:1,sabiki:.02},size:[50,120],mode:72,lw:[.008,3],power:1.65,bite:'hit',fight:'run',spd:2.6,
   look:{kind:'yellowtail',h:.26,back:'#2a6a5a',side:'#c8c040',belly:'#f0e890',fin:'#2a4a6a',pat:[]},
   desc:'本来は暖かい海の魚。海水温が高い年の夏から秋、北海道の沖にも回ってくる。金色と青緑の体、頭から尾まで続く長い背びれ。大きなオスはおでこが角ばる。掛かると水面を跳ねて走る。'},
- {id:'kegani',rule:'crab',photo:'R',crab:true,imgK:1.5,sizeLab:'甲長',pt:{sunachi:1.5,fukaba:1,okine:.4,gansho:.3},name:'ケガニ',alias:'毛ガニ',habitat:{rock:.3,sand:1,mud:.8},dmin:10,dmax:200,zone:{t:'flat'},season:[1,.5,.4,.8],abund:.22,school:[1,1],wave:0,
+ {id:'kegani',rare:1,rule:'crab',photo:'R',crab:true,imgK:1.5,sizeLab:'甲長',pt:{sunachi:1.5,fukaba:1,okine:.4,gansho:.3},name:'ケガニ',alias:'毛ガニ',habitat:{rock:.3,sand:1,mud:.8},dmin:10,dmax:200,zone:{t:'flat'},season:[1,.5,.4,.8],abund:.22,school:[1,1],wave:0,
   rig:{bait:.9,jig:0,sabiki:.05},size:[5,12],mode:8,lw:[.65,3],power:.45,bite:'omoi',fight:'heavy',spd:.05,
   look:{kind:'flat',h:.85,dir:'right',back:'#9a5a40',side:'#b06a48',fin:'#b06a48',pat:['mottleFine']},
   desc:'かたいとげと短い毛におおわれたカニ。噴火湾は毛ガニの有名な産地。漁業者がとる大切な資源で、漁業者でも大きさ・メス・漁期にきびしい決まりがある。エサに抱きついて上がってきたら、海へ返そう。'},
@@ -419,11 +455,11 @@ const SP=[
   rig:{bait:.9,jig:0,sabiki:.05},size:[7,15],mode:11,lw:[.33,3],power:.4,bite:'omoi',fight:'heavy',spd:.05,
   look:{kind:'flat',h:.85,dir:'right',back:'#a05a30',side:'#c07040',fin:'#c07040',pat:['mottleFine']},
   desc:'ズワイガニの仲間で、深めの泥の底にすむ。2023年ごろ噴火湾や日高で大量に現れ、刺し網に絡まる「やっかい者」になったが、いまは味が見直されている。カニは漁業者の資源なので、釣れたら海へ返そう。'},
- {id:'watari',photo:'R',crab:true,imgK:1.5,sizeLab:'甲幅',pt:{sunachi:1.5,gansho:.6,okine:.2,fukaba:0},name:'ワタリガニ',alias:'ガザミの仲間',habitat:{rock:.3,sand:1,mud:.5},dmin:2,dmax:40,zone:{t:'flat'},season:[0,.45,.7,0],abund:.08,school:[1,1],wave:0,
+ {id:'watari',rare:2,photo:'R',crab:true,imgK:1.5,sizeLab:'甲幅',pt:{sunachi:1.5,gansho:.6,okine:.2,fukaba:0},name:'ワタリガニ',alias:'ガザミの仲間',habitat:{rock:.3,sand:1,mud:.5},dmin:2,dmax:40,zone:{t:'flat'},season:[0,.45,.7,0],abund:.08,school:[1,1],wave:0,
   rig:{bait:1,jig:.05,sabiki:.05},size:[12,25],mode:17,lw:[.06,3],power:.7,bite:'kotsu',fight:'shake',spd:.2,
   look:{kind:'flat',h:.6,dir:'right',back:'#4a6a50',side:'#5a7a60',fin:'#4a6aa0',pat:['spots']},
   desc:'いちばん後ろの足がオールのように平たく、海の中を泳げるカニ。本来は暖かい海に多く、北海道ではめずらしい。はさみの力が強いので、つかむときは甲らの後ろから。持ち帰って食べられるが、小さいものは海へ返そう。'},
- {id:'kuromaguro',photo:'L',rule:'tuna',nabRole:'pred',name:'クロマグロ',alias:'本マグロ',habitat:{rock:1,sand:1,mud:1},dmin:20,dmax:500,zone:{t:'abs',top:1,bot:20},season:[0,.3,.6,.05],abund:.02,school:[1,2],
+ {id:'kuromaguro',rare:3,photo:'L',rule:'tuna',nabRole:'pred',name:'クロマグロ',alias:'本マグロ',habitat:{rock:1,sand:1,mud:1},dmin:20,dmax:500,zone:{t:'abs',top:1,bot:20},season:[0,.3,.6,.05],abund:.02,school:[1,2],
   rig:{bait:.05,jig:1,sabiki:.01},size:[45,200],mode:75,lw:[.0177,3],power:.35,bite:'hit',fight:'run',spd:3,
   look:{kind:'mackerel',h:.26,back:'#18284a',side:'#8494a8',belly:'#e8eef2',fin:'#24345a',pat:[]},
   desc:'太平洋を大回遊するマグロの王様。夏から秋、北海道の沖にも群れで来て、イワシを追ってなぶらを立てる。資源が減ったため、釣り人にも国の細かいルール（重さ・届出・尾数・採捕禁止期間）がある。'},
@@ -613,6 +649,7 @@ const SND={ac:null,master:null,amb:null,
   snap(){ this.burst(5000,1,.12,.6,'highpass'); this.tone(900,.15,.25,'square',200); },
   swish(){ this.burst(1800,1.2,.18,.25); },
   plop(){ this.tone(420,.12,.3,'sine',160); },
+  rare(lv){ if(!this.ac) return; const N=lv>=3?[523,659,784,1047,1319,1568,2093]:lv===2?[659,784,988,1319,1568]:[784,988,1319]; N.forEach((f,i)=>setTimeout(()=>{ this.tone(f,.28,.2,'triangle'); this.tone(f*1.5,.2,.06,'sine'); },300+i*90)); },
   fanfare(){ if(!this.ac) return; [523,659,784,1047].forEach((f,i)=>setTimeout(()=>this.tone(f,.32,.22,'triangle'),i*110)); },
 };
 
@@ -1307,6 +1344,7 @@ const DISH={
  hoshizame:'湯引き・フライ。早めに血抜きと下処理をしないとアンモニアのにおいが出る',
  asaba:'煮付け・唐揚げ・干物',
  akagarei:'煮付け・干物・唐揚げ。冬の子持ちは煮付けに',
+ namata:'煮付け（冬の子持ちナメタの煮付けは、東北では正月のごちそう）・唐揚げ・刺身。ぬめりは塩でもんで洗い落とす',
  ishigarei:'刺身・洗い・煮付け。皮の石（かたい粒）のにおいが強いので、皮は引く',
  hakkaku:'軍艦焼き（腹を開いて味噌をのせて焼く）・刺身。脂がのって濃厚',
  matsukawa:'刺身・昆布締め・煮付け。「王鰈」と呼ばれる高級魚で、えんがわも絶品',
@@ -1314,6 +1352,9 @@ const DISH={
  gisukajika:'カジカ鍋・味噌汁。卵（ギス子）はしょうゆ漬けに',
  donko:'ドンコ汁（肝を溶かした味噌汁）・鍋・煮付け。大きいものは肝がたっぷり',
  maiwashi:'刺身・なめろう・塩焼き・つみれ汁・梅煮。足が早いので、釣ったらすぐ氷で冷やして鮮度を保つ',
+ hatahata:'煮付け・塩焼き・田楽・飯寿司（いずし）。冬の子持ちの卵は「ぶりこ」。秋田ではしょっつる鍋',
+ mizudako:'刺身（さっと湯通し）・しゃぶしゃぶ・やわらか煮・唐揚げ・酢だこ。塩でもんでぬめりを取ってからゆでる',
+ mazoi:'煮付け・刺身・唐揚げ・塩焼き。身がやわらかく、丸ごとの煮付けが定番',
  katakuchi:'天ぷら・唐揚げ・南蛮漬け。干せば煮干し、塩漬けでアンチョビ',
  shiira:'フライ・ムニエル・照り焼き。ハワイでは「マヒマヒ」として人気',
  watari:'塩ゆで・蒸しガニ・味噌汁・パスタ。内子（卵）のあるメスは特においしい',
@@ -1370,6 +1411,7 @@ function judge(sp,all){ const small=all.reduce((a,m)=>m.size<a.size?m:a,all[0]),
     return F('届出済み・30kg以上・採捕禁止期間でない・この期間の1尾目なので、持ち帰ってよい。','水産庁','陸揚げから1日以内に水産庁へ採捕を報告する。採捕禁止期間は上限に近づくと公示で追加されるので、出船前に確かめる。'); }
   if(sp.zakoMin&&small.size<sp.zakoMin) return R('manner',`小さいもの（${sp.zakoMin}cmくらいまで）は雑魚あつかい。持ち帰る人は少ない。大きいものは持ち帰って食べる。`);
   if(sp.mannerMin&&small.size<sp.mannerMin) return R('manner',`漁業者は資源管理協定で全長${sp.mannerMin}cm未満を海へ返している。釣り人も小さいものは逃がそう。`,'北海道「フィッシングルール2026」p.12');
+  if(sp.rule==='tako') return R('manner','タコは北海道の多くの浜で、漁業者の「共同漁業権」の対象。漁業権の区域（岸寄りの海）で漁業者以外がとると、漁業権の侵害になる。区域の外の沖なら問題にならないとされるが、場所によるので、このゲームでは「迷ったら返す」。実際は振興局の水産課（胆振は0143-24-9809）や「海しる」で区域を確かめる。','漁業法（漁業権）・胆振総合振興局水産課');
   if(sp.rule==='trash') return R('manner','食べない外道。持ち帰らない。');
   if(sp.rule==='fugu') return R('manner','毒がある。ふぐ処理の資格がない人は調理できないので、持ち帰らないのが安全。');
   return F(''); }
@@ -1401,9 +1443,20 @@ function showCatch(f,isRec,all=[f],first=false){ const sp=f.sp; $('#catch').clas
   const multi=all.length>1?`<br><span class="rec">${all.length}匹の多点掛け！</span>　${all.map(m=>m.size.toFixed(0)).join('・')}cm　合計${all.reduce((a,m)=>a+m.w,0).toFixed(2)}kg`:'';
   const lab=sp.sizeLab?sp.sizeLab+' ':'';
   $('#catchSize').innerHTML=`${all.length>1?'最大 ':''}${lab}${f.size.toFixed(1)}cm ／ ${wt}`+(isRec?'<span class="rec">自己記録更新！</span>':'')+(first?'<span class="rec">図鑑に登録！</span>':'')+multi; openJudge(sp,all);
-  $('#catchDesc').textContent=sp.desc;
+  $('#catchDesc').textContent=sp.desc; prize(sp,f,first);
   $('#catchMeta').textContent=`${G.point.name}・${G.clock?ymd(new Date(G.clock)).slice(5).replace('-','/')+' '+hm(new Date(G.clock)):SEASONS[G.season].name}・${RIGS[G.rigId].name}・水深${(f.hookY??f.y).toFixed(0)}m付近`;
 }
+// レア・大物・称号アップのご褒美（紙ふぶき・音・帯）
+function prize(sp,f,first){ const el=$('#catchPrize'); el.className=''; el.innerHTML=''; const big=f.size>=sp.size[0]+(sp.size[1]-sp.size[0])*.9;
+  const R=sp.rare||0, T0=REC.titleK||0, T=titleIdx().k; let lv=0, head='', sub=[];
+  if(R>=3){ lv=3; head='★★★ 超レア！'; } else if(R===2){ lv=2; head='★★ レア！'; } else if(R===1){ lv=1; head='★ ちょっとレア'; }
+  if(big){ lv=Math.max(lv,2); head=head?head+'　大物！':'大物！'; sub.push(`${sp.name}としては特大サイズ`); }
+  if(R&&first) sub.push('図鑑に'+(R>=2?'金わく':'★')+'で登録');
+  if(T>T0){ REC.titleK=T; saveRec(); lv=Math.max(lv,2); sub.push(`称号が「${TITLES[T].name}」になった`); head=head?head+'　称号アップ！':'称号アップ！'; }
+  if(!lv) return; el.innerHTML=head+(sub.length?`<small>${sub.join('　')}</small>`:''); el.className='on r'+lv;
+  SND.rare(lv); buzz('land'); const n=lv===3?90:lv===2?50:18, cols=['#ffd36a','#ff7a7a','#7affc8','#7ac8ff','#ffffff','#d08aff'];
+  for(let i=0;i<n;i++){ const c=document.createElement('div'); c.className='confetti'; c.style.left=Math.random()*100+'vw'; c.style.background=cols[i%cols.length];
+    c.style.animationDuration=(1.6+Math.random()*1.8)+'s'; c.style.animationDelay=(Math.random()*.6)+'s'; document.body.appendChild(c); setTimeout(()=>c.remove(),4200); } }
 function drawCard(x,w,h,f,L){ x.clearRect(0,0,w,h); const ph=photoOf(f.sp), flat=f.sp.zone.t==='flat'; let headLeft=!(flat&&f.sp.look.dir==='right');
   if(ph){ headLeft=ph.head==='L'; const a=ph.img.naturalWidth/ph.img.naturalHeight; L=Math.min(w*.8,h*.7*a); x.save(); x.translate(w/2,h*.43); x.drawImage(ph.img,-L/2,-L/a/2,L,L/a); x.restore(); }
   else { x.save(); x.translate(w/2,h*.44); drawFish(x,L,f,{flip:flat?false:true,swim:0}); x.restore(); }
@@ -1411,18 +1464,28 @@ function drawCard(x,w,h,f,L){ x.clearRect(0,0,w,h); const ph=photoOf(f.sp), flat
   const K=f.sp.imgK||1, pxcm=L/(f.size*K), y=h*.86, len=Math.ceil(f.size/10)*10+5, x0=headLeft?w/2-L/K/2:w/2+L/K/2, dir=headLeft?1:-1;
   x.fillStyle='#f2d24a'; const rx=headLeft?x0:x0-len*pxcm; x.fillRect(Math.max(4,rx),y,Math.min(w-8,len*pxcm),h*.09);
   x.fillStyle='#222'; x.font=`${Math.max(9,h*.045)}px sans-serif`; x.textAlign='center';
-  for(let cm=0;cm<=len;cm++){ const X=x0+dir*cm*pxcm; if(X<4||X>w-4) continue; const tall=cm%10===0?.06:cm%5===0?.04:.022; x.fillRect(X,y,1,h*tall); if(cm%10===0&&cm>0) x.fillText(cm,X,y+h*.085); } }
+  const LS=pxcm*10>=26?10:pxcm*20>=26?20:50;
+  for(let cm=0;cm<=len;cm++){ const X=x0+dir*cm*pxcm; if(X<4||X>w-4) continue; const tall=cm%10===0?.06:cm%5===0?.04:.022; x.fillRect(X,y,1,h*tall); if(cm%LS===0&&cm>0) x.fillText(cm,X,y+h*.085); } }
 function openZukan(){ $('#zukan').classList.remove('hide'); zukanBack(); const grid=$('#zGrid'); grid.innerHTML=''; let got=0;
-  for(const sp of SP){ const z=REC.zukan[sp.id]; if(z) got++; const d=document.createElement('div'); d.className='zc'+(z?' got':' no'); if(z) d.onclick=()=>zukanDetail(sp);
+  for(const sp of SP){ const z=REC.zukan[sp.id]; if(z) got++; const d=document.createElement('div'); d.className='zc'+(z?' got':' no')+(z&&sp.rare>=2?' gold':''); if(z) d.onclick=()=>zukanDetail(sp);
     const cnv=document.createElement('canvas'); d.appendChild(cnv);
-    const lab=document.createElement('div'); lab.innerHTML=z?`<b>${sp.name}${sp.alias?'（'+sp.alias+'）':''}</b>最大 ${z.best.toFixed(1)}cm・${z.n}匹${DISH[sp.id]&&!NODISH.includes(sp.id)?'<span class="zd">🍳 料理を見る</span>':''}`:`<b>？？？</b>${hint(sp)}`; d.appendChild(lab); grid.appendChild(d);
+    const lab=document.createElement('div'); lab.innerHTML=z?`<b>${sp.name}${sp.alias?'（'+sp.alias+'）':''}${stars(sp)}</b>最大 ${z.best.toFixed(1)}cm・${z.n}匹${DISH[sp.id]&&!NODISH.includes(sp.id)?'<span class="zd">▶ 料理を見る</span>':''}`:`<b>？？？${stars(sp)}</b>${hint(sp)}`; d.appendChild(lab); grid.appendChild(d);
     requestAnimationFrame(()=>{ const r=cnv.getBoundingClientRect(); cnv.width=r.width*DPR; cnv.height=r.height*DPR; const x=cnv.getContext('2d'); x.setTransform(DPR,0,0,DPR,0,0); x.translate(r.width/2,r.height/2);
-      const f={sp,seed:7,nuptial:false}; if(!z){ x.filter='brightness(0) opacity(.45)'; } const ph=photoOf(sp);
+      const f={sp,seed:7,nuptial:false}; if(!z){ x.fillStyle='rgba(255,255,255,.16)'; x.font='800 '+Math.round(r.height*.55)+'px sans-serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillText('？',0,2); return; } const ph=photoOf(sp);
       if(ph){ const a=ph.img.naturalWidth/ph.img.naturalHeight, L=Math.min(r.width*.86,r.height*.86*a); x.drawImage(ph.img,-L/2,-L/a/2,L,L/a); }
       else drawFish(x,r.width*.78,f,{flip:sp.zone.t!=='flat'}); }); }
+  const T=titleNow(); $('#zTitleWrap').innerHTML=`<span id="zTitle">称号「${T.name}」</span>`+(T.next?`<span class="lead" style="font-size:12px;margin-left:8px;display:inline-block">つぎは「${T.next}」：${T.need}</span>`:'');
   const J=REC.judge; $('#zStat').textContent=`${got} / ${SP.length} 種　・　これまでの釣果 ${REC.log.length}匹（最新100件まで記録）`+(J?`　・　返すべき魚の判断 ${J.ok}/${J.ok+J.ng} 正解`:''); }
 // 図鑑の詳細：釣ったことのある魚をタップすると、絵・記録・説明・料理（写真）を出す
 const NODISH=['hitode','fugu'];
+// レア度（★の数）と称号
+function stars(sp){ return sp.rare?`<span class="st">${'★'.repeat(sp.rare)}</span>`:''; }
+const TITLES=[{name:'かけだし釣り人'},{name:'室蘭の釣り人',n:8},{name:'腕ききの釣り人',n:16,r:1},{name:'室蘭沖の名人',n:26,r:3},{name:'室蘭沖の主',all:true}];
+function titleIdx(){ const got=SP.filter(sp=>REC.zukan[sp.id]), n=got.length, r=got.filter(sp=>sp.rare>=2).length; let k=0;
+  TITLES.forEach((t,i)=>{ if(i&&(t.all?n>=SP.length:(n>=t.n&&r>=(t.r||0)))) k=i; }); return {k,n,r}; }
+function titleNow(){ const {k,n,r}=titleIdx(), nx=TITLES[k+1]; let need='';
+  if(nx) need=nx.all?`図鑑をぜんぶうめる（あと${SP.length-n}種）`:[n<nx.n?`あと${nx.n-n}種`:'',nx.r&&r<nx.r?`★★以上のレアをあと${nx.r-r}種`:''].filter(Boolean).join('・');
+  return {name:TITLES[k].name,next:nx&&nx.name,need}; }
 let ZSCROLL=0;
 function zukanBack(){ const was=!$('#zDet').classList.contains('hide'); $('#zDet').classList.add('hide'); $('#zDet').innerHTML=''; $('#zGrid').style.display=''; $('#zStat').style.display=''; if(was) $('#zukan').scrollTop=ZSCROLL; }
 function zukanDetail(sp){ const z=REC.zukan[sp.id]; if(!z) return; const det=$('#zDet'), ds=DISH[sp.id]; ZSCROLL=$('#zukan').scrollTop;
@@ -1434,7 +1497,8 @@ function zukanDetail(sp){ const z=REC.zukan[sp.id]; if(!z) return; const det=$('
     const ph=photoOf(sp); if(ph){ const a=ph.img.naturalWidth/ph.img.naturalHeight, L=Math.min(r.width*.86,r.height*.86*a); x.drawImage(ph.img,-L/2,-L/a/2,L,L/a); } else drawFish(x,r.width*.78,{sp,seed:7,nuptial:false},{flip:sp.zone.t!=='flat'}); });
   if(ds) putDish(det.querySelector('img'),sp.id);
   det.parentElement.scrollTop=0; $('#zukan').scrollTop=0; }
-function hint(sp){ const s=['春','夏','秋','冬'].filter((_,i)=>sp.season[i]>=.8*Math.max(1,Math.max(...sp.season)/1.5)).join('・')||'—'; const best=sp.pt?POINTS.reduce((a,p)=>(sp.pt[p.id]??1)>(sp.pt[a.id]??1)?p:a):null; const hab=best&&(sp.pt[best.id]??1)>1?best.name:sp.zone.t==='flat'?'砂地の底':sp.zone.t==='bottom'?(sp.dmin>=50?'深場の底':'岩場の底近く'):'中層'; const rig=Object.entries(sp.rig).sort((a,b)=>b[1]-a[1])[0][0]; return `${hab}・${s}・${RIGS[rig].name}`; }
+function hint(sp){ return (sp.rare>=2?'めったに釣れない・':'')+hint0(sp); }
+function hint0(sp){ const s=['春','夏','秋','冬'].filter((_,i)=>sp.season[i]>=.8*Math.max(1,Math.max(...sp.season)/1.5)).join('・')||'—'; const best=sp.pt?POINTS.reduce((a,p)=>(sp.pt[p.id]??1)>(sp.pt[a.id]??1)?p:a):null; const hab=best&&(sp.pt[best.id]??1)>1?best.name:sp.zone.t==='flat'?'砂地の底':sp.zone.t==='bottom'?(sp.dmin>=50?'深場の底':'岩場の底近く'):'中層'; const rig=Object.entries(sp.rig).sort((a,b)=>b[1]-a[1])[0][0]; return `${hab}・${s}・${RIGS[rig].name}`; }
 
 // ============ 出船前の地図（ポイント選び）・潮のグラフ・航跡の小地図 ============
 const MAP={clat:42.315,clon:140.965,mpp:28};
@@ -1536,7 +1600,7 @@ function buildMenu(){
   REC.lic=REC.lic||{}; const LIC={sakura:['さくらます船釣りライセンス船','胆振の沖の制限海域（地図の水色）で 12/15〜3/15 にサクラマスを狙える'],tuna:['クロマグロ大型魚の遊漁届出','水産庁へ届出済み。30kg以上を持ち帰れる（ほかの条件もある）']};
   mk('#chLic',Object.keys(LIC),k=>!!REC.lic[k],k=>{ REC.lic[k]=!REC.lic[k]; saveRec(); },k=>`<b>${REC.lic[k]?'☑':'☐'} ${LIC[k][0]}</b><span>${LIC[k][1]}</span>`);
 }
-function startGame(){ SND.init();
+function startGame(){ SND.init(); closeRigPop(); setTimeout(rigLabel,0);
   if(G.useReal&&G.spot){ readClock(); G.hdg=chooseHeading(G.spot.lat,G.spot.lon); G.point=makeRealPoint(G.spot); G.clock=G.startClock; G.season=monthSeason(new Date(G.clock).getMonth()); saveSpot(G.spot); mmBase=null; $('#mmBox').style.display='block'; }
   else { G.clock=null; G.ffR=null; $('#mmBox').style.display='none'; }
   G.nab=null; G.run=null; NAB.cool=rand(25,60); updateSea(); $('#menu').classList.add('hide'); G.mode='play'; G.drift=G.point.start; G.camX=G.drift; G.t=0; G.count=0; G.fight=null; G.bite=null; G.snag=null; G.camY=2; resetRig(); populate(); initParts(); ffBg=null; resize();
@@ -1559,8 +1623,26 @@ $('#bZukan').onclick=$('#bZukan2').onclick=()=>{ if(G.mode==='play') G.mode='pau
 $('#bZClose').onclick=()=>{ zukanBack(); $('#zukan').classList.add('hide'); if(G.mode==='pause') G.mode='play'; };
 const BACK=[...document.body.children].filter(el=>el.id!=='catch'&&el.tagName!=='SCRIPT');
 new MutationObserver(()=>{ const on=!$('#catch').classList.contains('hide'); for(const el of BACK) el.inert=on; }).observe($('#catch'),{attributes:true,attributeFilter:['class']});
-$('#bNext').onclick=()=>{ if(JUDGE&&!JUDGE.done) return; $('#catch').classList.add('hide'); resetRig(); };
+$('#bNext').onclick=()=>{ document.querySelectorAll('.confetti').forEach(c=>c.remove()); if(JUDGE&&!JUDGE.done) return; $('#catch').classList.add('hide'); resetRig(); };
 $('#bKeep').onclick=()=>decide(true); $('#bRel').onclick=()=>decide(false); $('#bPart').onclick=()=>decide('part');
+let RESET_T=0;
+$('#bReset').onclick=()=>{ const now=Date.now(), m=$('#resetMsg');
+  if(now-RESET_T>4000){ RESET_T=now; $('#bReset').textContent='本当に消す？（もう一度押す）'; $('#bReset').style.color='#ff9a9a'; m.textContent='図鑑・釣果・判定の成績が消えます';
+    setTimeout(()=>{ if(Date.now()-RESET_T>=4000){ $('#bReset').textContent='記録をリセット'; $('#bReset').style.color=''; m.textContent=''; } },4100); return; }
+  RESET_T=0; REC.zukan={}; REC.log=[]; for(const k of ['judge','tunaBag','sakuraDay','pending']) delete REC[k]; REC.titleK=0; G.count=0; saveRec();
+  $('#bReset').textContent='記録をリセット'; $('#bReset').style.color=''; m.textContent='まっさらにしました（音・振動・許可の設定は残しています）'; };
+const rigShort=k=>RIGS[k].name.replace(/（.*）/,'');
+function rigLabel(){ $('#bRig').textContent=rigShort(G.rigId)+' ▾'; }
+function canChangeRig(){ return (G.mode==='play'||(G.mode==='pause'&&G.rigPop))&&!G.bite&&!G.run&&(G.state==='surface'||G.state==='idle'||G.state==='falling'); }
+function setRig(k){ if(k===G.rigId){ closeRigPop(); return; } if(!canChangeRig()){ toast(G.bite?'アタリ中！ 先に合わせよう':'やりとり中は替えられない',900); return; }
+  const was=G.state!=='surface'; G.rigId=k; resetRig(); rigLabel(); closeRigPop(); toast(`仕掛けを${rigShort(k)}に替えた`,1100,'',was?'いったん回収して付け替えた':''); }
+function openRigPop(){ const p=$('#rigPop'), b=$('#bRig').getBoundingClientRect();
+  p.innerHTML=Object.keys(RIGS).map(k=>`<button data-k="${k}" class="${k===G.rigId?'on':''}"><b>${RIGS[k].name}</b><span>${RIGS[k].desc}</span></button>`).join('');
+  p.querySelectorAll('button').forEach(bt=>bt.onclick=()=>setRig(bt.dataset.k));
+  p.style.left=Math.max(6,Math.min(innerWidth-310,b.left))+'px'; p.style.top=(b.bottom+6)+'px'; p.classList.remove('hide'); if(G.mode==='play') G.mode='pause'; G.rigPop=1; }
+function closeRigPop(){ if(!G.rigPop) return; G.rigPop=0; $('#rigPop').classList.add('hide'); if(G.mode==='pause') G.mode='play'; }
+$('#bRig').onclick=e=>{ e.stopPropagation(); if(G.rigPop) closeRigPop(); else if(G.mode==='play'||G.mode==='pause') openRigPop(); };
+addEventListener('pointerdown',e=>{ if(G.rigPop&&!e.target.closest('#rigPop')&&e.target.id!=='bRig') closeRigPop(); });
 $('#bSound').onclick=()=>{ REC.sound=!REC.sound; saveRec(); SND.init(); SND.setOn(REC.sound); $('#bSound').textContent='音：'+(REC.sound?'ON':'OFF'); };
 $('#bSound').textContent='音：'+(REC.sound?'ON':'OFF');
 const vibLab=()=>{ $('#bVib').textContent='振動：'+(REC.vib===false?'OFF':'ON'); }; vibLab();
@@ -1568,6 +1650,7 @@ $('#bVib').onclick=()=>{ REC.vib=REC.vib===false; saveRec(); vibLab(); if(REC.vi
 $('#bMore').onclick=()=>$('#info').classList.toggle('open');
 // 魚探・竿先・航跡：題名をタップでたたむ／ひらく（端末に覚えておく）
 if(REC.pending){ for(const e of REC.log) if(e.keep===undefined&&e.at>Date.now()-864e5) e.keep=-1; delete REC.pending; saveRec(); }
+if(REC.titleK===undefined){ REC.titleK=titleIdx().k; saveRec(); }
 REC.ui=REC.ui||{};
 for(const id of ['ffBox','rodBox','mmBox']){ const el=$('#'+id); if(REC.ui[id]) el.classList.add('min');
   el.querySelector('.t').addEventListener('click',()=>{ const on=!el.classList.contains('min'); el.classList.toggle('min',on); el.classList.remove('flash'); REC.ui[id]=on; saveRec(); resize(); }); }
@@ -1575,7 +1658,7 @@ addEventListener('keydown',e=>{ if(G.mode!=='play'){ if(e.code==='Enter'&&G.mode
   if(!$('#catch').classList.contains('hide')){ if(e.code==='Digit1'||e.code==='Numpad1') decide(true); else if(e.code==='Digit2'||e.code==='Numpad2') decide(false); else if((e.code==='Digit3'||e.code==='Numpad3')&&v_part(JUDGE)) decide('part'); else if((e.code==='Space'||e.code==='Enter')&&(!JUDGE||JUDGE.done)){ e.preventDefault(); $('#bNext').click(); } return; }
   if(e.repeat&&e.code!=='ArrowUp'&&e.code!=='KeyW') return;
   switch(e.code){ case 'Space': e.preventDefault(); awase(); break; case 'ArrowUp': case 'KeyW': e.preventDefault(); SND.init(); G.reel=true; G.auto=false; break;
-    case 'ArrowDown': case 'KeyS': e.preventDefault(); clutch(); break; case 'KeyZ': sasou(); break; case 'KeyN': if(G.nab) chaseNabura(); break; case 'KeyR': kaishu(); break;
+    case 'ArrowDown': case 'KeyS': e.preventDefault(); clutch(); break; case 'KeyZ': sasou(); break; case 'KeyN': if(G.nab) chaseNabura(); break; case 'KeyR': kaishu(); break; case 'KeyC': { const ks=Object.keys(RIGS); setRig(ks[(ks.indexOf(G.rigId)+1)%ks.length]); break; }
     case 'KeyQ': case 'ArrowLeft': setDrag(G.drag-.5); break; case 'KeyE': case 'ArrowRight': setDrag(G.drag+.5); break; } });
 addEventListener('keyup',e=>{ if(e.code==='ArrowUp'||e.code==='KeyW') G.reel=false; });
 addEventListener('blur',()=>{ G.reel=false; });
