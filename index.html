@@ -96,6 +96,8 @@ body.phone.land #catchDesc{font-size:12px}
 .ztgt{display:block;margin:4px auto 0;font-size:11px;padding:2px 8px}
 .ztgt.on{border-color:#ffd36a;color:#ffd36a}
 .cb small.hold{display:none} body.phone .cb small.hold{display:block;font-size:9px;opacity:.8}
+.cb{touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#bReel.down{background:rgba(60,170,200,.95);transform:scale(.97)}
 .howto{font-size:12.5px;color:var(--sub);line-height:1.7;margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
 kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:0 5px;font-family:inherit;font-size:.95em;color:#fff}
 #catch .card{max-width:700px;text-align:center}
@@ -251,7 +253,7 @@ body.phone.land #gauge{bottom:60px;width:min(420px,48vw)}
   <div class="card">
     <h1>室蘭沖 ボート釣り</h1>
     <div id="tripSum"></div>
-    <p class="lead">プレジャーボートで室蘭の海へ。地図の「洞爺湖」から湖でも釣れる。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.22）</span></p>
+    <p class="lead">プレジャーボートで室蘭の海へ。地図の「洞爺湖」から湖でも釣れる。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.23）</span></p>
     <h2>ポイント（地図をタップ。ドラッグで移動、＋－で拡大縮小）</h2>
     <div id="mapWrap"><canvas id="map"></canvas><div class="mapbtns"><button class="sbtn" id="mzIn">＋</button><button class="sbtn" id="mzOut">－</button><button class="sbtn place" id="mGoSea">室蘭沖</button><button class="sbtn place" id="mGoLake">洞爺湖</button></div></div>
     <div class="mapnote">地図：GEBCO・約400m格子の目安（根や瀬は出ません。洞爺湖の水深は推定）。◆は代表ポイント、赤は禁漁区（中島のまわり以外は漁協の図から写した目安）、橙は河口規制（河口の位置は目安）</div>
@@ -2052,7 +2054,14 @@ function startGame(){ if(G.useReal&&G.spot&&G.spot.lake&&$('#inDate').value){ re
   G.nbT=0; G.tideSign=null; placeLabel(); G.trip={c:[],pt:G.point.name,rig:G.rigId,bites:{},fr:[]}; $('#tripSum').classList.remove('on'); if(REC.tutDone) toast('<kbd>落とす</kbd>で仕掛けを投入',1800); }
 
 // ============ 入力 ============
-function holdBtn(el,on,off){ el.addEventListener('pointerdown',e=>{ e.preventDefault(); el.setPointerCapture(e.pointerId); on(); }); for(const ev of ['pointerup','pointercancel','lostpointercapture']) el.addEventListener(ev,()=>off()); }
+function holdBtn(el,on,off){ let tid=null, upT=0, tm=null; const MIN=220;
+  const start=()=>{ clearTimeout(tm); upT=performance.now()+MIN; el.classList.add('down'); on(); };
+  const stop=()=>{ clearTimeout(tm); el.classList.remove('down'); const w=upT-performance.now(); if(w>0) tm=setTimeout(off,w); else off(); };
+  el.addEventListener('touchstart',e=>{ e.preventDefault(); if(tid!==null) return; tid=e.changedTouches[0].identifier; start(); },{passive:false});
+  const tEnd=e=>{ for(const t of e.changedTouches) if(t.identifier===tid){ tid=null; stop(); } };
+  el.addEventListener('touchend',tEnd); el.addEventListener('touchcancel',tEnd);
+  el.addEventListener('pointerdown',e=>{ if(e.pointerType==='touch') return; e.preventDefault(); try{ el.setPointerCapture(e.pointerId); }catch(_){ } start(); });
+  for(const ev of ['pointerup','pointercancel']) el.addEventListener(ev,e=>{ if(e.pointerType==='touch') return; stop(); }); }
 holdBtn($('#bReel'),()=>{SND.init(); G.reel=true; G.auto=false; G.autoResume=false;},()=>{G.reel=false;});
 $('#bDrop').addEventListener('pointerdown',e=>{e.preventDefault();clutch();});
 $('#bSasou').addEventListener('pointerdown',e=>{e.preventDefault();sasou();});
