@@ -248,7 +248,7 @@ body.phone.land #gauge{bottom:60px;width:min(420px,48vw)}
   <div class="card">
     <h1>室蘭沖 ボート釣り</h1>
     <div id="tripSum"></div>
-    <p class="lead">プレジャーボートで室蘭の海へ。地図の「洞爺湖」から湖でも釣れる。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.20）</span></p>
+    <p class="lead">プレジャーボートで室蘭の海へ。地図の「洞爺湖」から湖でも釣れる。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.21）</span></p>
     <h2>ポイント（地図をタップ。ドラッグで移動、＋－で拡大縮小）</h2>
     <div id="mapWrap"><canvas id="map"></canvas><div class="mapbtns"><button class="sbtn" id="mzIn">＋</button><button class="sbtn" id="mzOut">－</button><button class="sbtn place" id="mGoSea">室蘭沖</button><button class="sbtn place" id="mGoLake">洞爺湖</button></div></div>
     <div class="mapnote">地図：GEBCO・約400m格子の目安（根や瀬は出ません。洞爺湖の水深は推定）。◆は代表ポイント、赤は禁漁区（中島のまわり以外は漁協の図から写した目安）、橙は河口規制（河口の位置は目安）</div>
@@ -1776,13 +1776,13 @@ function decide(keep){ const J=JUDGE; if(!J||J.done) return; let v_=null;
   let mark, cls, head; const part=keep==='part';
   if(part){ mark=`◯ 正解！ 小さい${v.part.k}匹だけ返した`; cls='ok'; }
   else if(v.part&&!keep){ mark='◯ 全部返した（大きいのは持ち帰ってもよかった）'; cls='ok'; }
-  else if(v.need==='release'&&keep){ mark=v.lv==='rule'?'✕ ルール違反':v.lv==='danger'?'✕ 食べないで。海へ返そう':v.lv==='check'?'？ 要確認：この日の決まりはゲームでは分からない':'△ 持ち帰ってもよいが…'; cls=v.lv==='rule'||v.lv==='danger'?'ng':'so'; }
+  else if(v.need==='release'&&keep){ mark=v.lv==='rule'?'✕ ルール違反':v.lv==='danger'?'✕ 持ち帰らないで。海へ返した（食べると命にかかわる）':v.lv==='check'?'？ 要確認：この日の決まりはゲームでは分からない':'△ 持ち帰ってもよいが…'; cls=v.lv==='rule'||v.lv==='danger'?'ng':'so'; }
   else if(v.need==='release'){ mark=v.lv==='check'?`◯ 迷ったら返す（${J.C.lake?'湖':'海'}へ返した）`:`◯ 正解！ ${J.C.lake?'湖':'海'}へ返した`; cls='ok'; }
   else { mark=keep?'持ち帰り':'リリース'; cls='ok'; }
   if(v.chk){ if(v.need==='release'&&keep&&!part){ mark='△ マス類の決まりに当てはめると違反'; cls='so'; } mark='？ 要確認　'+mark; }
   if(v.need==='release'&&v.lv!=='check'&&!v.chk){ const st=REC.judge||(REC.judge={ok:0,ng:0}), dj=G.dj||(G.dj={ok:0,ng:0}); if(keep&&!part){ st.ng++; dj.ng++; } else { st.ok++; dj.ok++; } }
   if(keep){ if(sp.rule==='tuna'&&v.need==='free'){ (REC.tunaBag||(REC.tunaBag={}))[tunaPeriod(d)]=1; } if(sp.rule==='sakura'&&v.sakuraCount){ const k=ymd(d); (REC.sakuraDay||(REC.sakuraDay={}))[k]=((REC.sakuraDay||{})[k]||0)+J.n; const dd=G.dsd||(G.dsd={}); dd[k]=(dd[k]||0)+J.n; } }
-  if(J.id) REC.doneIds=[...(REC.doneIds||[]),J.id].slice(-30); const ents=J.id?REC.log.filter(e=>e.j===J.id):REC.log.slice(0,J.n); for(const e of ents) e.keep=part?(e.size>=v.part.min?1:0):keep?1:0; if(REC.pendings&&J.id) delete REC.pendings[J.id]; saveRec();
+  if(J.id) REC.doneIds=[...(REC.doneIds||[]),J.id].slice(-30); const ents=J.id?REC.log.filter(e=>e.j===J.id):REC.log.slice(0,J.n); for(const e of ents) e.keep=part?(e.size>=v.part.min?1:0):keep&&v.lv!=='danger'?1:0; if(REC.pendings&&J.id) delete REC.pendings[J.id]; saveRec();
   $('#catchJudge').style.display='none'; $('#bNext').style.display=''; $('#bNext').focus({preventScroll:true});
   const why=v.why?`<div class="why">${v.why}</div>`:''; const src=v.src?`<div class="src2">根拠：${v.src}</div>`:''; const note=v.note&&keep&&!part?`<div class="why">${v.note}</div>`:'';
   $('#catchVerdict').innerHTML=`<div class="mk ${cls}">${mark}</div>${why}${note}${src}`;
@@ -1865,13 +1865,18 @@ let ZSCROLL=[0,0], ZLAST=null;
 function zukanBack(){ const was=!$('#zDet').classList.contains('hide'); $('#zDet').classList.add('hide'); $('#zDet').innerHTML=''; $('#zGrid').style.display=''; $('#zStat').style.display=''; if(was){ $('#zukan').scrollTop=ZSCROLL[0]; $('#zukan .card').scrollTop=ZSCROLL[1]; const c=ZLAST&&document.querySelector(`#zGrid .zc[data-id="${ZLAST}"]`); if(c) c.focus({preventScroll:true}); } }
 function zukanRecent(sp){ const L=REC.log.filter(e=>e.id===sp.id&&e.hit).slice(0,3); if(!L.length) return '';
   return '<div class="zrecent"><b>最近の釣果</b>'+L.map((e,i)=>{ const t=e.hit.t?new Date(e.hit.t):null; return `<div>${t?`${t.getMonth()+1}/${t.getDate()} ${hm(t)}`:''}${e.hit.st?'（'+e.hit.st+'）':''}・${e.pn||''}・${RIGS[e.r]?rigShort(e.r):''}・タナ${e.y??'?'}m・${e.size.toFixed(1)}cm ${e.hit.ll?`<button class="sbtn" data-zr="${i}">この場所・時刻で出船画面へ</button>`:''}</div>`; }).join('')+'</div>'; }
-function zukanUse(sp,i){ const e=REC.log.filter(e=>e.id===sp.id&&e.hit).slice(0,3)[i]; if(!e||!e.hit.ll) return; $('#bZClose').click(); if(G.mode!=='menu') $('#bMenu').click();
-  const t=e.hit.t?new Date(e.hit.t):null; if(t){ $('#inTime').value=String(Math.min(23*60+30,Math.round((t.getHours()*60+t.getMinutes())/30)*30)); } if(RIGS[e.r]) G.rigId=e.r; buildMenu(); [MAP.clat,MAP.clon]=e.hit.ll; setSpot(e.hit.ll[0],e.hit.ll[1]); readClock(); drawTide(); goSpot(); renderMap(); }
+let CAND=null; // 図鑑から呼び出した出船の条件（出船画面に移れたときに使う）
+function zukanUse(sp,i){ const e=REC.log.filter(e=>e.id===sp.id&&e.hit).slice(0,3)[i]; if(!e||!e.hit.ll) return; CAND={t:e.hit.t||null,ll:e.hit.ll,r:RIGS[e.r]?e.r:null};
+  $('#bZClose').click(); if(G.mode!=='menu') $('#bMenu').click(); if(G.mode==='menu') applyCand(); }
+function applyCand(){ const c=CAND; CAND=null; if(!c) return; const t=c.t?new Date(c.t):null;
+  if(t){ $('#inDate').value=ymd(t); $('#inTime').value=String(Math.min(23*60+30,Math.round((t.getHours()*60+t.getMinutes())/30)*30)); } if(c.r) G.rigId=c.r; buildMenu();
+  [MAP.clat,MAP.clon]=c.ll; setSpot(c.ll[0],c.ll[1]); readClock(); drawTide(); goSpot(); renderMap();
+  if(t) toast(`${t.getMonth()+1}/${t.getDate()} ${hm(new Date(G.startClock))}・${rigShort(G.rigId)}で出船の準備`,1800,'',t.getMinutes()%30?'時刻は30分きざみに合わせた':''); }
 function zukanDetail(sp){ const z=REC.zukan[sp.id]; if(!z) return; const det=$('#zDet'), ds=DISH[sp.id]; ZSCROLL=[$('#zukan').scrollTop,$('#zukan .card').scrollTop];
   $('#zGrid').style.display='none'; $('#zStat').style.display='none'; det.classList.remove('hide');
   det.innerHTML=`<button class="sbtn" id="bZBack">← 一覧へ</button><canvas></canvas><h2>${sp.name}${sp.alias?'<span style="font-size:14px;color:var(--sub)">（'+sp.alias+'）</span>':''}</h2>
     <div class="zrec">最大 ${z.best.toFixed(1)}cm・これまで ${z.n}匹</div><div class="zrec">狙い方：${hint0(sp)}</div>${zukanRecent(sp)}<div class="zdesc"></div>`+(ds?`<div class="zdish"><span class="dt">料理</span>${ds}${rawNote(sp,ds)}</div><img alt="">`:'');
-  det.querySelector('.zdesc').textContent=sp.desc||''; $('#bZBack').onclick=zukanBack; det.querySelectorAll('[data-zr]').forEach(b=>b.onclick=()=>zukanUse(sp,+b.dataset.zr)); ZLAST=sp.id; setTimeout(()=>$('#bZBack').focus({preventScroll:true}),0);
+  det.querySelector('.zdesc').textContent=sp.desc||''; $('#bZBack').onclick=zukanBack; det.querySelectorAll('[data-zr]').forEach(b=>b.onclick=()=>zukanUse(sp,+b.dataset.zr)); ZLAST=sp.id; setTimeout(()=>{ const z=$('#bZBack'); z&&z.focus({preventScroll:true}); },0);
   const cnv=det.querySelector('canvas'); requestAnimationFrame(()=>{ const r=cnv.getBoundingClientRect(); cnv.width=r.width*DPR; cnv.height=r.height*DPR; const x=cnv.getContext('2d'); x.setTransform(DPR,0,0,DPR,0,0); x.translate(r.width/2,r.height/2);
     const ph=photoOf(sp); if(ph){ const a=ph.img.naturalWidth/ph.img.naturalHeight, L=Math.min(r.width*.86,r.height*.86*a); x.drawImage(ph.img,-L/2,-L/a/2,L,L/a); } else drawFish(x,r.width*.78,{sp,seed:7,nuptial:false},{flip:sp.zone.t!=='flat'}); });
   if(ds) putDish(det.querySelector('img'),sp.id);
@@ -2054,8 +2059,8 @@ function tripSummary(){ const T=G.trip; G.trip=null; const el=$('#tripSum'); if(
       return why[0]>0?`アタリは${bt.map(([k,v])=>(RIGS[k]?rigShort(k):k)+'で'+v+'回').join('・')||'あった'}、${why[1]}のが${why[0]}回。次は${why[2]}。`:bt.length?`アタリは${bt.map(([k,v])=>(RIGS[k]?rigShort(k):k)+'で'+v+'回').join('・')}あった。合わせは竿先がグッと入ってから。`:fr.length?`魚探の反応は${q(.25)}〜${q(.75)}m。次はハリをその深さに合わせよう。`:'魚探に反応がほとんどなかった。次は◆代表ポイントか、図鑑の「狙い方」の場所を選ぼう。'; })())+(prev?`<br><span class="muted">前回：${prev.pt}・${RIGS[prev.rig]?rigShort(prev.rig):String(prev.rig||'')}　${prev.n}匹・${prev.kinds}種${+prev.big?'・最大 '+(+prev.big).toFixed(1)+'cm':''}</span>`:''); el.classList.add('on'); }
 $('#bMenu').onclick=()=>{ const busy=G.bite||G.state==='fight'||G.state==='rooted'||G.state==='landing'||G.state==='snag';
   if(busy){ $('#endMsg').innerHTML=G.state==='snag'?'根掛かりしています。<br>釣行を終えると仕掛けは切って帰ります。':G.bite?'アタリが来ています。<br>釣行を終えると、この魚はあきらめます。':'魚が掛かっています。<br>釣行を終えると魚は逃げます。'; G.mode='pause'; G.reel=false; $('#endDlg').classList.remove('hide'); setTimeout(()=>$('#bEndBack').focus(),0); return; } endTrip(); };
-$('#bEndBack').onclick=()=>{ $('#endDlg').classList.add('hide'); if(G.mode==='pause') G.mode='play'; };
-$('#bEndGo').onclick=()=>{ $('#endDlg').classList.add('hide'); endTrip(); };
+$('#bEndBack').onclick=()=>{ CAND=null; $('#endDlg').classList.add('hide'); if(G.mode==='pause') G.mode='play'; };
+$('#bEndGo').onclick=()=>{ $('#endDlg').classList.add('hide'); endTrip(); applyCand(); };
 function endTrip(){
   tripSummary(); G.mode='menu'; G.fight=null; G.bite=null; G.rooted=null; G.landing=null; G.snag=null; coach(''); G.nab=null; G.run=null; buildMenu(); $('#menu').classList.remove('hide'); G.reel=false; renderMap(); drawTide(); }
 let ZOPENER=null;
