@@ -64,6 +64,18 @@ h2{font-size:15px;color:var(--sub);margin:16px 0 8px;font-weight:600}
 .ch span{display:block;font-size:12px;color:var(--sub);margin-top:2px;line-height:1.45}
 .ch.sel{border-color:var(--acc);background:rgba(255,181,71,.12)}
 .go{font:inherit;font-size:20px;font-weight:800;color:#1b1206;background:linear-gradient(#ffc76a,#ff9d3c);border:0;border-radius:14px;padding:12px 30px;cursor:pointer;margin-top:16px}
+#goBar{position:sticky;bottom:-18px;margin:16px -20px -18px;padding:10px 20px 12px;background:#0c2232;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap;z-index:1}
+#goBar .go{margin:0}
+#goSpot{flex:1 1 220px;font-size:12.5px;color:var(--sub);line-height:1.5}
+#goSpot b{color:var(--ink)}
+#coach{left:50%;bottom:96px;transform:translateX(-50%);width:min(560px,calc(100vw - 20px));background:rgba(8,30,44,.92);border:1px solid #ffb547;border-radius:12px;padding:8px 34px 8px 12px;font-size:14px;line-height:1.55;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+#coach.hide{display:none}
+#coach b{color:#ffd36a}
+#coach .x{position:absolute;right:4px;top:3px;font:inherit;font-size:13px;color:var(--sub);background:none;border:0;padding:4px 8px;cursor:pointer}
+body.phone #coach{bottom:calc(78px + env(safe-area-inset-bottom));font-size:12.5px;padding:6px 30px 6px 10px}
+body.phone.land #coach{bottom:calc(60px + env(safe-area-inset-bottom))}
+.spotbtns{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px}
+.spotbtns .sbtn.on{border-color:#ffe36a;color:#ffe36a}
 .howto{font-size:12.5px;color:var(--sub);line-height:1.7;margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
 kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:0 5px;font-family:inherit;font-size:.95em;color:#fff}
 #catch .card{max-width:700px;text-align:center}
@@ -209,13 +221,14 @@ body.phone.land #gauge{bottom:60px;width:min(420px,48vw)}
 </div>
 <button class="hud hide" id="bNab">なぶらへ<small>N</small></button>
 <div id="toast" class="hud"></div>
+<div id="coach" class="hud hide"></div>
 <div id="edge"></div>
 
 <!-- スタートメニュー -->
 <div id="menu" class="ov">
   <div class="card">
     <h1>室蘭沖 ボート釣り</h1>
-    <p class="lead">プレジャーボートで室蘭の海へ。地図の「洞爺湖」から湖でも釣れる。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.9.5）</span></p>
+    <p class="lead">プレジャーボートで室蘭の海へ。地図の「洞爺湖」から湖でも釣れる。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.12）</span></p>
     <h2>ポイント（地図をタップ。ドラッグで移動、＋－で拡大縮小）</h2>
     <div id="mapWrap"><canvas id="map"></canvas><div class="mapbtns"><button class="sbtn" id="mzIn">＋</button><button class="sbtn" id="mzOut">－</button><button class="sbtn place" id="mGoSea">室蘭沖</button><button class="sbtn place" id="mGoLake">洞爺湖</button></div></div>
     <div id="spotInfo"></div>
@@ -224,11 +237,11 @@ body.phone.land #gauge{bottom:60px;width:min(420px,48vw)}
     <canvas id="tideCv"></canvas><div id="tideInfo"></div>
     <h2>仕掛け</h2><div class="choices" id="chRig"></div>
     <h2>許可・届出（持ち帰ってよいかの判定に使う）</h2><div class="choices" id="chLic"></div>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <button class="go" id="bStart">出船！</button>
-      <button class="sbtn" id="bZukan2" style="margin-top:16px">魚図鑑を見る</button>
-      <button class="sbtn" id="bReset" style="margin-top:16px;opacity:.8">記録をリセット</button><span id="resetMsg" class="lead" style="font-size:12px;margin-top:16px"></span>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px">
+      <button class="sbtn" id="bZukan2">魚図鑑を見る</button>
+      <button class="sbtn" id="bReset" style="opacity:.8">記録をリセット</button><span id="resetMsg" class="lead" style="font-size:12px"></span>
     </div>
+    <div id="goBar"><button class="go" id="bStart">出船！</button><span id="goSpot"></span></div>
     <div class="src">海底地形：GEBCO Compilation Group (2025) GEBCO_2025 Grid・(2020) GEBCO_2020 Grid（約400m格子のため根や瀬は表現できず、底質に合わせた起伏を足しています。洞爺湖の水深は湖の形から推定した作り物）／潮位：気象庁 潮位表「室蘭」／洞爺湖の決まり：洞爺湖漁業協同組合「遊漁について」（2026年）</div>
     <div class="howto">
       <b>あそび方</b>　①<kbd>落とす</kbd>で仕掛けを沈める（底に着くと「着底」）　②<kbd>巻く</kbd>でタナ（深さ）を調整。魚探の魚の反応に合わせよう　③<kbd>誘う</kbd>で仕掛けを動かす（ジグはしゃくらないと食わない）　④竿先がグッと入ったら<kbd>合わせ</kbd>　⑤やりとりは<kbd>巻く</kbd>を押し続ける。張りがドラグを超えると糸が出る。張りすぎると切れる、ゆるめるとバレる　⑥大物は水面で<kbd>合わせ</kbd>＝タモ入れ。<br>
@@ -294,6 +307,7 @@ const RIGS={
  bait:{name:'胴突き（エサ）',desc:'オモリで底を取り、枝バリに切り身やイソメ。根魚・カレイ・タラの基本',fall:1.5,hooks:[.35,.85,1.35],sense:4.5,brk:8,sasou:.3},
  jig:{name:'メタルジグ',desc:'しゃくって誘う金属ルアー。青物・サクラマス・ヒラメ・ソイ',fall:2.4,hooks:[.1],sense:6.5,brk:9,sasou:1.1},
  sabiki:{name:'サビキ',desc:'疑似バリが6本。群れで回るホッケ・サバ・ガヤ',fall:1.3,hooks:[.35,.75,1.15,1.55,1.95,2.35],sense:5,brk:6,sasou:.6},
+ bake:{name:'バケ（オオナゴ）',desc:'重いバケをしゃくって誘う。針にオオナゴ。ヒラメとサクラマスの定番。マダラやソイも',fall:2.7,hooks:[.12,.24],sense:5.5,brk:10,sasou:.9},
 };
 
 // ============ データ：魚 ============
@@ -495,6 +509,11 @@ const SP=[
   look:{kind:'hokke',h:.22,back:'#5a5a48',side:'#c0bcb0',belly:'#f0e8e0',fin:'#c09070',pat:[]},
   desc:'川・湖から海の岸近くまで、どこにでもいるコイの仲間。海へ下るものもいて、室蘭の海でも岸近くの浅場で釣れる。春の産卵期には体に赤い筋が出る（婚姻色）。小骨が多く、持ち帰る人は少ないが、甘露煮にして食べる地域もある。'},
 ];
+// バケへの食いつきやすさ（本人の実感 2026-11-21：バケと言えばヒラメ、この辺りではサクラマスも定番、マダラ・ソイも可能性あり。ほかは仮の値）。表にない魚は エサ×0.5 と ジグ×0.4 の大きいほう
+const BAKE_PREF={hirame:1,sakuramasu:.9,madara:.6,kurosoi:.55,shimazoi:.45,mazoi:.55,sukesou:.35,ainame:.5,hokke:.5,toubetsu:.6,gisukajika:.6,yanaginomai:.4,hoshizame:.5,kasube:.4,donko:.5,anago:.4,hakkaku:.3,
+  matsukawa:.4,buri:.4,maika:.4,mizudako:.4,hitode:.4,fugu:.4,gaya:.2,souhachi:.2,akagarei:.2,namata:.2,magarei:.15,kurogashira:.15,ishigarei:.15,asaba:.15,sunagarei:.1,
+  saba:.2,sake:.2,shiira:.05,kuromaguro:.02,maiwashi:.02,katakuchi:.02,hatahata:.05,kegani:.3,oozuwai:.3,watari:.2,himemasu:.2,yamabe:.3,niji:.4,brown:.4,wakasagi:0,ugui:.3};
+for(const s of SP) if(s.rig.bake==null) s.rig.bake=BAKE_PREF[s.id]??Math.max(s.rig.bait*.5,s.rig.jig*.4);
 const SPI=Object.fromEntries(SP.map(s=>[s.id,s]));
 function dispName(sp,size){ if(sp.id==='buri') return size<60?'フクラギ':'ブリ'; return sp.name; }
 function weightG(sp,cm){ return sp.lw[0]*Math.pow(cm,sp.lw[1]); }
@@ -676,7 +695,7 @@ const SND={ac:null,master:null,amb:null,
   snap(){ this.burst(5000,1,.12,.6,'highpass'); this.tone(900,.15,.25,'square',200); },
   swish(){ this.burst(1800,1.2,.18,.25); },
   plop(){ this.tone(420,.12,.3,'sine',160); },
-  rare(lv){ if(!this.ac) return; const N=lv>=3?[523,659,784,1047,1319,1568,2093]:lv===2?[659,784,988,1319,1568]:[784,988,1319]; N.forEach((f,i)=>setTimeout(()=>{ this.tone(f,.28,.2,'triangle'); this.tone(f*1.5,.2,.06,'sine'); },300+i*90)); },
+  rare(lv){ if(!this.ac) return; const N=lv>=3?[523,659,784,1047,1319,1568,2093]:lv===2?[659,784,988,1319,1568]:[784,988,1319]; N.forEach((f,i)=>setTimeout(()=>{ this.tone(f,.28,.2,'triangle'); this.tone(f*1.5,.2,.06,'sine'); },i*90)); },
   fanfare(){ if(!this.ac) return; [523,659,784,1047].forEach((f,i)=>setTimeout(()=>this.tone(f,.32,.22,'triangle'),i*110)); },
 };
 
@@ -753,6 +772,11 @@ function microRelief(type,x,seed){
 function makeRealPoint(sp){ const d0=depthLL(sp.lat,sp.lon)||20, seed=hash(sp.lat*977+sp.lon*131)*100;
   const lake=isLake(sp.lat,sp.lon); return {id:pointClass(sp.type,d0,lake), real:true, lake, type:sp.type, name:lake?'洞爺湖':sp.name||llText(sp.lat,sp.lon), depthTxt:`${BOTTOM_NAME[sp.type]}・約${Math.round(d0)}m${lake?'（推定）':''}`, start:0, dendou:d0>55, spot:sp,
     bottom:x=>{ const [la,lo]=offsetLL(sp.lat,sp.lon,G.hdg,x); let d=depthLL(la,lo); if(d==null) d=150; return Math.max(1.2,d+(G.tideM||0)+microRelief(sp.type,x,seed)); } }; }
+// 代表ポイント：種類ごとに1か所。GEBCO の水深と推定底質から選んだ目安（_work/spot_scan.js）。実際の釣り場名ではない
+const SPOTS=[{k:'gansho',lat:42.311,lon:140.959,type:'rock'},{k:'okine',lat:42.290,lon:140.992,type:'rock'},{k:'sunachi',lat:42.311,lon:141.028,type:'sand'},{k:'fukaba',lat:42.260,lon:140.971,type:'mud'},
+  {k:'kogan',lat:42.576,lon:140.808},{k:'kooki',lat:42.574,lon:140.844}];
+const LAKE_PT_NAME={kogan:'湖の岸寄り',kooki:'湖の沖'};
+const spotName=k=>LAKE_PT_NAME[k]||(POINTS.find(p=>p.id===k)||{}).name||k;
 const llText=(lat,lon)=>`N${lat.toFixed(3)} E${lon.toFixed(3)}`;
 // 流す向き：400m先まで水深5m以上を保てる向きを選ぶ
 function chooseHeading(lat,lon,prefer){ const cand=[]; for(let h=0;h<360;h+=15) cand.push(h); cand.sort(()=>Math.random()-.5); if(prefer!=null) cand.unshift(prefer);
@@ -819,10 +843,11 @@ function maintainFish(){ const rx=rigX();
 
 // ============ 魚の動き・食いつき ============
 function hookBand(){ const r=G.rig, hk=rigDef().hooks; return {x:rigX(), y0:r.y-hk[hk.length-1], y1:r.y-hk[0]+.05}; }
-function attraction(){ const r=G.rig; if(!(G.state==='idle'||G.state==='falling')) return 0; if(r.baitGone) return .1;
+function attraction(){ const r=G.rig; if(!(G.state==='idle'||G.state==='falling')) return 0; if(r.baitGone&&G.rigId!=='bake') return .1;
   const since=G.t-r.lastAct;
   if(G.rigId==='jig') return G.state==='falling'?1:since<2.5?1:(G.reel||G.auto)?.7:.15;
   if(G.rigId==='sabiki') return since<3?1.2:.75;
+  if(G.rigId==='bake') return r.baitGone?(since<2.5?.8:.2):(since<2.5?1.15:.8); // しゃくると寄る。オオナゴを取られてもタコベイトで少しは食う
   return 1; }
 function updateFish(dt){
   const hb=hookBand(), att=attraction(), act=activity();
@@ -884,7 +909,7 @@ function updateBite(dt){ const b=G.bite; if(!b) return; b.t+=dt;
 function missBite(msg){ const b=G.bite; if(!b) return; const f=b.fish; f.state='flee'; f.tt=rand(2,4); f.face=Math.random()<.5?1:-1; f.ty=f.y+rand(-2,1);
   G.bite=null; G.rodHold=0; const thief=f.sp.thief;
   if(thief&&G.rigId!=='jig'&&Math.random()<.15){ G.lost++; G.state='lost'; G.lostT=1.6; toast('ハリスを切られた！',1600,'','犯人はフグ…'); return; }
-  if(G.rigId==='bait'&&Math.random()<(thief?.95:.55)){ G.rig.baitGone=true; } toast(thief?'エサをかじり取られた…':msg,1300); }
+  if((G.rigId==='bait'||G.rigId==='bake')&&Math.random()<(thief?.95:G.rigId==='bake'?.4:.55)){ G.rig.baitGone=true; } toast(thief?'エサをかじり取られた…':msg,1300); }
 
 // ============ なぶら（青物がイワシの群れを水面へ追い上げる） ============
 // 夏〜秋の昼、ときどき船から数十m先に立つ。鳥が集まり、水面がざわつく。数十秒で沈むので、船を走らせて真上で仕掛けを落とす
@@ -1019,16 +1044,17 @@ function updateLanding(dt){ const L=G.landing; L.t+=dt; const F=G.fight; F.f.swi
   if(L.t>L.lim){ G.state='fight'; G.landing=null; F.len=4; F.phase='run'; F.pt=1.5; F.mul=1.3; SND.splash(); toast('タモ入れ失敗！ 潜られた',1100); } }
 function tamo(){ SND.splash(); landFish(); }
 function lose(msg,sub){ const F=G.fight; releaseExtras(F); if(F){ const f=F.f; f.state='flee'; f.tt=3; f.ty=f.y+2; G.rig.y=f.y; G.rig.anchor=f.y; }
-  G.fight=null; G.rooted=null; G.landing=null; G.state='idle'; if(G.rigId==='bait'&&Math.random()<.7) G.rig.baitGone=true; G.rodHold=0; toast(msg,1600,'',sub); }
+  G.fight=null; G.rooted=null; G.landing=null; G.state='idle'; if((G.rigId==='bait'&&Math.random()<.7)||(G.rigId==='bake'&&Math.random()<.5)) G.rig.baitGone=true; G.rodHold=0; toast(msg,1600,'',sub); }
 function lineBreak(msg,sub){ SND.snap(); buzz('brk');const F=G.fight; releaseExtras(F); if(F){ F.f.state='flee'; F.f.tt=3; }
   G.fight=null; G.rooted=null; G.landing=null; G.snag=null; G.lost++; G.state='lost'; G.lostT=1.6; G.rodHold=0; toast(msg,1800,'',sub); }
 function landFish(){ const F=G.fight, all=[F.f,...(F.extra||[])]; G.fight=null; G.landing=null; G.rooted=null; G.state='card';
-  const sp=F.f.sp, z=REC.zukan[sp.id]||(REC.zukan[sp.id]={n:0,best:0}), first=z.n===0, prev=z.best; 
+  const sp=F.f.sp, z=REC.zukan[sp.id]||(REC.zukan[sp.id]={n:0,best:0}), first=z.n===0, prev=z.best, cid=Date.now(); 
   for(const m of all){ m.gone=true; m.state='landed'; G.count++; z.n++; if(m.size>z.best) z.best=m.size;
-    REC.log.unshift({id:sp.id,size:m.size,w:Math.round(m.w*1000),p:G.point.id,s:G.season,r:G.rigId,at:Date.now(),...(F.f.nab?{nab:1}:{})}); }
-  REC.log=REC.log.slice(0,100); saveRec();
+    REC.log.unshift({id:sp.id,size:m.size,w:Math.round(m.w*1000),p:G.point.id,s:G.season,r:G.rigId,at:Date.now(),j:cid,...(F.f.nab?{nab:1}:{})}); }
+  REC.log=REC.log.slice(0,100);
   const big=all.reduce((a,m)=>m.size>a.size?m:a,all[0]); const isRec=!first&&big.size>prev;
-  SND.fanfare(); buzz('land'); showCatch(big,isRec,all,first); if(sp.id==='maika') toast('墨をはいた！',1400); }
+  if(!REC.tutDone){ REC.tutDone=1; saveRec(); coach(''); }
+  buzz('land'); showCatch(big,isRec,all,first,{id:cid}); if(sp.id==='maika') toast('墨をはいた！',1400); }
 function resetRig(){ G.state='surface'; G.rig.y=.3; G.rig.anchor=.3; G.rig.off=0; G.rig.baitGone=false; G.auto=false; G.bite=null; }
 
 // 根掛かり
@@ -1064,7 +1090,25 @@ let ffBg=null; const FISHX=3.4; // 魚は見やすいよう実寸の3.4倍で描
 function view(){ const sc=Math.min(H/(H<560?11:13),W/12)*(G.zoom||1), vh=H/sc; let top=G.camY-vh*.45; top=Math.max(top,-vh*.33); const maxB=bottomAt(rigX())+3; top=Math.min(top,Math.max(-vh*.33,maxB-vh)); return {vh,sc,top,cx:W*.42}; }
 const sx=(V,x)=>V.cx+(x-G.camX)*V.sc, sy=(V,y)=>(y-V.top)*V.sc;
 function waterCol(d,a=1){ const k=1-Math.exp(-Math.max(0,d)/22); return `rgba(${lerp(40,3,k)|0},${lerp(122,16,k)|0},${lerp(150,30,k)|0},${a})`; }
-function initParts(){ G.parts=[]; for(let i=0;i<80;i++) G.parts.push({x:rand(-20,20),y:rand(0,90),r:rand(.6,1.8),v:rand(.02,.08)}); }
+// 浮遊物（マリンスノー）：奥・中・手前の3層。手前ほど大きく速く動く
+function initParts(){ G.parts=[]; for(let i=0;i<150;i++){ const z=i<70?.45:i<125?1:1.9; G.parts.push({x:Math.random(),y:Math.random(),z,r:rand(.5,1.4)*z,v:rand(.004,.012),a:rand(.18,.5)/(z>1.5?1.6:1)}); } }
+// 海底のゆらめく光（コースティクス）と、底の質感（ざらつき）。タイルにして繰り返し貼る
+let TEX=null;
+function makeTex(){ const N=256, cv=document.createElement('canvas'); cv.width=cv.height=N; const x=cv.getContext('2d'), im=x.createImageData(N,N), P=[]; let s=12345; const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+  for(let i=0;i<26;i++) P.push([rnd()*N,rnd()*N]);
+  for(let j=0;j<N;j++) for(let i=0;i<N;i++){ let f1=1e9,f2=1e9; for(const [px,py] of P){ let dx=Math.abs(i-px), dy=Math.abs(j-py); if(dx>N/2) dx=N-dx; if(dy>N/2) dy=N-dy; const d=dx*dx+dy*dy; if(d<f1){ f2=f1; f1=d; } else if(d<f2) f2=d; }
+    const e=Math.sqrt(f2)-Math.sqrt(f1), v=Math.pow(Math.max(0,1-e/15),3)*.85, o=(j*N+i)*4; im.data[o]=215; im.data[o+1]=248; im.data[o+2]=255; im.data[o+3]=v*255|0; }
+  x.putImageData(im,0,0);
+  const M=96, nv=document.createElement('canvas'); nv.width=nv.height=M; const nx=nv.getContext('2d'), ni=nx.createImageData(M,M);
+  for(let k=0;k<M*M;k++){ const r=rnd(), o=k*4, dark=r<.55; ni.data[o]=dark?10:255; ni.data[o+1]=dark?8:244; ni.data[o+2]=dark?6:220; ni.data[o+3]=Math.pow(Math.abs(r-.55)*2,2.2)*120|0; }
+  nx.putImageData(ni,0,0);
+  return {c:cv,n:nv,cp:ctx.createPattern(cv,'repeat'),np:ctx.createPattern(nv,'repeat')}; }
+function patAt(p,ox,oy,k,ky=k){ p.setTransform(new DOMMatrix([k,0,0,ky,ox,oy])); return p; }
+// 遠くの海底（奥にある起伏のシルエット）。奥ほど水の色に溶ける
+function drawRidges(V){ const c=ctx, x0=G.camX+(-10-V.cx)/V.sc; if(sy(V,bottomAt(rigX())-12)>H) return;
+  for(const [par,hmin,hmax,al,sd] of [[.35,5,12,.55,3],[.6,1.5,6,.7,9]]){ c.beginPath(); c.moveTo(-10,H+10); let yt=H;
+    for(let X=-10;X<=W+10;X+=10){ const wx=G.camX+(X-V.cx)/V.sc, wp=G.camX*par+(X-V.cx)/V.sc, n=.5+.28*Math.sin(wp*.06+sd)+.16*Math.sin(wp*.17+sd*2)+.08*Math.sin(wp*.5+sd*3), bw=bottomAt(wx), f=clamp(bw/32,.3,1), d=bw-(hmin+(hmax-hmin)*n)*f, Y=sy(V,d); yt=Math.min(yt,Y); c.lineTo(X,Y); }
+    c.lineTo(W+10,H+10); c.closePath(); const dd=V.top+yt/V.sc; const g=c.createLinearGradient(0,yt,0,yt+V.sc*10); g.addColorStop(0,waterCol(dd+10,al*.55)); g.addColorStop(1,waterCol(dd+25,al)); c.fillStyle=g; c.fill(); } }
 function drawScene(){
   const V=view(), c=ctx; c.setTransform(DPR,0,0,DPR,0,0);
   const y0=sy(V,0), yB=H;
@@ -1073,12 +1117,19 @@ function drawScene(){
   // 水
   const top=Math.max(0,y0), dTop=V.top+top/V.sc, dBot=V.top+V.vh;
   const g=c.createLinearGradient(0,top,0,yB); g.addColorStop(0,waterCol(dTop)); g.addColorStop(1,waterCol(dBot)); c.fillStyle=g; c.fillRect(0,top,W,yB-top);
-  // 光の筋
-  if(dTop<14&&(G.light??1)>.3){ c.save(); c.globalCompositeOperation='lighter'; c.globalAlpha=G.light??1; for(let i=0;i<6;i++){ const x=((i*W/5+G.t*8*(i%2?1:-1)-G.drift*V.sc*.5)%(W*1.2)+W*1.2)%(W*1.2)-W*.1, w=V.sc*rand2(()=>hash(i),.6,1.6);
-      const lg=c.createLinearGradient(0,y0,0,y0+V.sc*14); lg.addColorStop(0,'rgba(180,230,255,.10)'); lg.addColorStop(1,'rgba(180,230,255,0)'); c.fillStyle=lg;
-      c.beginPath(); c.moveTo(x,y0); c.lineTo(x+w,y0); c.lineTo(x+w*2.2+V.sc*3,y0+V.sc*14); c.lineTo(x+V.sc*3,y0+V.sc*14); c.fill(); } c.restore(); }
-  // 浮遊物
-  c.fillStyle='rgba(220,240,240,.35)'; for(const p of G.parts){ p.y+=p.v*.016; let px=((p.x-(G.drift-20))%40+40)%40+G.drift-20; let py=((p.y-V.top)%V.vh+V.vh)%V.vh+V.top; if(py<0) continue; c.fillRect(sx(V,px),sy(V,py),p.r,p.r); }
+  if(!TEX) TEX=makeTex(); const LT=G.light??1;
+  // 水面近くの明るさ（太陽の側が明るい）
+  if(dTop<18&&LT>.2){ const gx=W*.72, gr=Math.max(W,H)*.75, sg=c.createRadialGradient(gx,y0,0,gx,y0,gr); sg.addColorStop(0,`rgba(150,225,230,${.32*LT})`); sg.addColorStop(.45,`rgba(90,170,190,${.12*LT})`); sg.addColorStop(1,'rgba(60,140,170,0)');
+    c.save(); c.globalCompositeOperation='screen'; c.fillStyle=sg; c.fillRect(0,top,W,H-top); c.restore(); }
+  // 光の筋：細いのと太いのが、ゆっくり揺れて明るさを変える
+  if(dTop<26&&LT>.25){ c.save(); c.globalCompositeOperation='lighter'; const len=V.sc*26, sl=V.sc*5;
+    for(let i=0;i<12;i++){ const ph=hash(i*3.1+.7), base=((ph*W*1.4+G.t*(2+ph*4)*(i%2?1:-1)-G.camX*V.sc*.3)%(W*1.4)+W*1.4)%(W*1.4)-W*.2, w=V.sc*(.25+hash(i+5)*1.5), a=(.035+.05*hash(i+8))*(.55+.45*Math.sin(G.t*.6+i*1.7))*LT;
+      const lg=c.createLinearGradient(0,y0,0,y0+len); lg.addColorStop(0,`rgba(200,240,255,${a})`); lg.addColorStop(.5,`rgba(170,225,245,${a*.45})`); lg.addColorStop(1,'rgba(170,225,245,0)'); c.fillStyle=lg;
+      c.beginPath(); c.moveTo(base,y0); c.lineTo(base+w,y0); c.lineTo(base+w*2.6-sl,y0+len); c.lineTo(base-sl,y0+len); c.fill(); } c.restore(); }
+  drawRidges(V);
+  // 浮遊物（画面に対して3層で流れる。手前の大きい粒はぼかす）
+  for(const p of G.parts){ p.y-=p.v*.004; const X=(((p.x*(W+60)-G.camX*V.sc*p.z*.6+G.t*4*p.z)%(W+60))+W+60)%(W+60)-30, Y=(((p.y*(H+60)-V.top*V.sc*p.z*.5)%(H+60))+H+60)%(H+60)-30; if(Y<top) continue;
+    const a=p.a*(.35+.65*LT); if(p.z>1.5){ c.fillStyle=`rgba(225,240,235,${a*.35})`; c.beginPath(); c.arc(X,Y,p.r*1.6,0,Math.PI*2); c.fill(); } else { c.fillStyle=`rgba(225,240,235,${a})`; c.fillRect(X,Y,p.r,p.r); } }
   drawFloor(V);
   // 暗さ（深いほど暗く）。魚と仕掛けは水中ライトで見ている想定で、暗さの上に描く
   if(dBot>8){ const dg=c.createLinearGradient(0,top,0,yB); dg.addColorStop(0,`rgba(0,6,14,${clamp((dTop-5)/90,0,.55)})`); dg.addColorStop(1,`rgba(0,6,14,${clamp((dBot-5)/90,0,.55)})`); c.fillStyle=dg; c.fillRect(0,top,W,yB-top); }
@@ -1091,6 +1142,11 @@ function drawScene(){
     drawFish(c,L,f,{flip:f.face<0,swim:f.swim,hooked,squash:flat&&!hooked?.3:hooked&&flat?.55:undefined});
     c.restore(); }
   drawRigAndLine(V); drawBubbles(V);
+  // 深さで赤が抜けて青緑になる（魚・仕掛けもなじませる）
+  { const tc=d=>{ const k=clamp(d/40,0,1); return `rgba(${lerp(205,70,k)|0},${lerp(238,160,k)|0},${lerp(242,195,k)|0},${lerp(.14,.45,k)})`; };
+    const tg=c.createLinearGradient(0,top,0,H); tg.addColorStop(0,tc(Math.max(0,dTop))); tg.addColorStop(1,tc(dBot)); c.save(); c.globalCompositeOperation='multiply'; c.fillStyle=tg; c.fillRect(0,top,W,H-top); c.restore(); }
+  // 周辺減光（水中だけ）
+  if(top<H){ const vg=c.createRadialGradient(W/2,H*.5,Math.min(W,H)*.3,W/2,H*.5,Math.hypot(W,H)*.6); vg.addColorStop(0,'rgba(0,10,18,0)'); vg.addColorStop(1,'rgba(0,10,18,.42)'); c.fillStyle=vg; c.fillRect(0,top,W,H-top); }
   // 水面とボート
   if(y0>-5&&y0<H+V.sc*3){ drawBoat(V,y0); drawSurface(V,y0); }
   drawNabura(V,y0);
@@ -1103,24 +1159,50 @@ function drawFloor(V){ const c=ctx, t=G.point.type; const pts=[];
   const col={rock:['#3b3a33','#1c1b17'],sand:['#a89670','#5a4e38'],mud:['#3e4234','#1e2018']}[t];
   c.beginPath(); c.moveTo(pts[0][0],H+10); for(const p of pts) c.lineTo(p[0],p[1]); c.lineTo(W+8,H+10); c.closePath();
   const minY=Math.min(...pts.map(p=>p[1])); const g=c.createLinearGradient(0,minY,0,minY+V.sc*6); g.addColorStop(0,col[0]); g.addColorStop(1,col[1]); c.fillStyle=g; c.fill();
+  { const ox=sx(V,0), oy=sy(V,0), dB=bottomAt(rigX()), I=(G.light??1)*Math.exp(-dB/13); c.save(); c.clip();
+    c.globalAlpha=.3; c.fillStyle=patAt(TEX.np,ox,oy,V.sc*.05); c.fillRect(0,minY-V.sc,W,H-minY+V.sc*2); c.globalAlpha=.8; c.fillStyle=patAt(TEX.np,ox,oy,V.sc*.18); c.fillRect(0,minY-V.sc,W,H-minY+V.sc*2); c.globalAlpha=.4; c.fillStyle=patAt(TEX.np,ox,oy,V.sc*.6); c.fillRect(0,minY-V.sc,W,H-minY+V.sc*2);
+    // 上からの光で、底の上の面は明るく、奥へいくほど暗い
+    const sh=c.createLinearGradient(0,minY,0,minY+V.sc*3.5); sh.addColorStop(0,'rgba(255,250,230,.10)'); sh.addColorStop(1,'rgba(0,0,0,.35)'); c.globalAlpha=1; c.fillStyle=sh; c.fillRect(0,minY-V.sc,W,H-minY+V.sc*2);
+    c.restore();
+    if(I>.03){ c.save(); c.globalCompositeOperation='lighter'; const k=V.sc*.7/48;
+      for(const [a0,a1,al] of [[-.05,.5,1],[.5,1.1,.55],[1.1,1.9,.22]]){ c.beginPath(); pts.forEach((p,i)=>{ const y=p[1]+V.sc*a0; i?c.lineTo(p[0],y):c.moveTo(p[0],y); }); for(let i=pts.length-1;i>=0;i--) c.lineTo(pts[i][0],pts[i][1]+V.sc*a1); c.closePath();
+        c.globalAlpha=Math.min(.5,I*.9)*al; c.fillStyle=patAt(TEX.cp,ox+G.t*V.sc*.2,oy+G.t*V.sc*.03,k,k*.32); c.fill();
+        c.globalAlpha=Math.min(.4,I*.7)*al; c.fillStyle=patAt(TEX.cp,ox-G.t*V.sc*.15,oy-G.t*V.sc*.02,k*1.4,k*.45); c.fill(); }
+      c.restore(); } }
   const x0=Math.floor(G.camX+(-V.cx)/V.sc)-2, x1=Math.ceil(G.camX+(W-V.cx)/V.sc)+2;
   if(t==='rock'){ for(let i=x0*2;i<=x1*2;i++){ const wx=i*.5, h=hash(i); if(h<.35) continue; const b=bottomAt(wx), r=(.25+hash(i+7)*.7)*V.sc;
       const X=sx(V,wx), Y=sy(V,b)+r*.35, n=7; const rg=c.createLinearGradient(0,Y-r,0,Y+r*.3); const k=hash(i+3);
       rg.addColorStop(0,`rgb(${78+k*30|0},${74+k*24|0},${62+k*18|0})`); rg.addColorStop(1,`rgb(${34+k*10|0},${32+k*8|0},${28+k*6|0})`); c.fillStyle=rg; c.beginPath();
       for(let j=0;j<=n;j++){ const a=Math.PI+j/n*Math.PI, rr=r*(.75+hash(i*13+j)*.45); const px=X+Math.cos(a)*rr*1.25, py=Y+Math.sin(a)*rr*(.65+hash(i+j)*.25); j?c.lineTo(px,py):c.moveTo(px,py); }
-      c.closePath(); c.fill();
-      if(b<26&&hash(i+21)<.5){ c.fillStyle='rgba(150,90,110,.35)'; c.beginPath(); c.ellipse(X-r*.3,Y-r*.55,r*.35,r*.12,0,0,Math.PI*2); c.fill(); } }
+      c.closePath(); c.fill(); c.fillStyle=patAt(TEX.np,X,Y,V.sc*.035); c.fill(); { const hl=c.createLinearGradient(0,Y-r,0,Y); hl.addColorStop(0,'rgba(230,240,220,.16)'); hl.addColorStop(.5,'rgba(0,0,0,0)'); hl.addColorStop(1,'rgba(0,0,0,.25)'); c.fillStyle=hl; c.fill(); }
+      if(b<26&&hash(i+21)<.5){ c.fillStyle='rgba(150,90,110,.16)'; c.beginPath(); c.ellipse(X-r*.3,Y-r*.55,r*.35,r*.12,0,0,Math.PI*2); c.fill(); } }
     // 海藻（浅い所だけ）
     for(let i=x0;i<=x1;i++){ if(hash(i+50)<.55) continue; const b=bottomAt(i); if(b>24) continue; const hgt=(1+hash(i+9)*2.2)*V.sc, X=sx(V,i), Y=sy(V,b);
-      c.strokeStyle=hash(i+11)<.5?'rgba(110,90,40,.9)':'rgba(60,100,50,.85)'; c.lineWidth=Math.max(2,V.sc*.09); c.lineCap='round'; c.beginPath(); c.moveTo(X,Y);
-      for(let k=1;k<=8;k++){ const yy=Y-hgt*k/8, xx=X+Math.sin(G.t*.9+k*.6+i)*V.sc*.18*k/8; c.lineTo(xx,yy);} c.stroke(); } }
+      const n=12, L=[], Rr=[], wd=V.sc*(.07+hash(i+13)*.09), sw=V.sc*(.25+hash(i+17)*.25);
+      for(let k=0;k<=n;k++){ const u=k/n, yy=Y-hgt*u, xx=X+Math.sin(G.t*.8+u*2.4+i)*sw*u*u, w=wd*(u<.08?.3:Math.sin(Math.PI*Math.min(1,u*1.05))*(1-.3*u)+.15)*(1+.25*Math.sin(u*9+i)); L.push([xx-w,yy]); Rr.push([xx+w,yy]); }
+      const kg=c.createLinearGradient(0,Y,0,Y-hgt), br=hash(i+11)<.6; kg.addColorStop(0,br?'rgba(62,52,22,.95)':'rgba(40,62,34,.95)'); kg.addColorStop(1,br?'rgba(128,112,52,.7)':'rgba(84,118,64,.7)'); c.fillStyle=kg;
+      c.beginPath(); L.forEach((p,j)=>j?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1])); for(let j=Rr.length-1;j>=0;j--) c.lineTo(Rr[j][0],Rr[j][1]); c.closePath(); c.fill(); } }
   else if(t==='sand'){ c.strokeStyle='rgba(255,240,200,.18)'; c.lineWidth=1.2; for(let i=x0*3;i<=x1*3;i++){ const wx=i/3, b=bottomAt(wx); if(hash(i)<.4) continue; const X=sx(V,wx), Y=sy(V,b)+V.sc*(.15+hash(i+2)*.6); c.beginPath(); c.moveTo(X-V.sc*.15,Y); c.quadraticCurveTo(X,Y-V.sc*.06,X+V.sc*.15,Y); c.stroke(); }
     for(let i=x0;i<=x1;i++){ if(hash(i+70)<.8) continue; const b=bottomAt(i); c.fillStyle='rgba(240,230,210,.6)'; c.beginPath(); c.ellipse(sx(V,i),sy(V,b)+2,V.sc*.06,V.sc*.04,0,0,Math.PI*2); c.fill(); } }
   else { c.fillStyle='rgba(90,100,70,.25)'; for(let i=x0*2;i<=x1*2;i++){ if(hash(i)<.5) continue; const wx=i/2; c.fillRect(sx(V,wx),sy(V,bottomAt(wx))+V.sc*.2*hash(i+1),V.sc*.3,2); } }
 }
 // ============ 空・船・水面・仕掛け（v0.5 で描き直し） ============
 const SKY={日中:['#5d9ed2','#d6e9f2','#9fb6c2','#7d97a3'],朝まずめ:['#27406e','#f3b27c','#6b6a80','#4c4e66'],夕まずめ:['#2c3768','#ef8f5e','#6a5a72','#4a4058'],夜:['#02060e','#13223a','#0c1624','#070d18']};
-function drawSky(V,y0){ const c=ctx, col=SKY[G.band||'日中'], s=V.sc;
+// 背景の絵（本人のAI生成・_work/make_bg.py）。船の地点にいちばん近い名所（5km以内）、なければ沖から見た駒ヶ岳。湖は南側なら有珠山、北側なら羊蹄山
+// ll は名所のおよその位置（銀屏風・金屏風は目安）。base は絵の中で水際になる行（ここをゲームの水面に合わせる）。[昼,夜]
+const BG={shiratori:{ll:[42.345,140.935],base:[690,715],name:'白鳥大橋と大黒島'},ginbyobu:{ll:[42.305,140.965],base:[655,655],name:'銀屏風'},chikyu:{ll:[42.300,141.000],base:[660,665],name:'地球岬'},
+  kinbyobu:{ll:[42.318,141.030],base:[630,628],name:'金屏風'},komagatake:{base:[650,645],name:'駒ヶ岳'},yotei:{base:[500,500],name:'羊蹄山'},usu:{base:[600,600],name:'有珠山'}};
+function bgPick(s){ if(!s) return null; if(s.lake) return s.lat<42.59?'usu':'yotei'; let best='komagatake', bd=5000;
+  for(const k in BG){ const b=BG[k]; if(!b.ll) continue; const d=Math.hypot((b.ll[0]-s.lat)*M_LAT,(b.ll[1]-s.lon)*mLon(s.lat)); if(d<bd){ bd=d; best=k; } } return best; }
+function bgLoad(k){ const b=k&&BG[k]; if(!b||b.img) return; b.img=['day','night'].map(t=>{ const im=new Image(); im.src=`img/bg/${k}_${t}.webp`; return im; }); }
+function drawBg(c,y0,s){ const b=G.bg&&BG[G.bg]; if(!b||!b.img) return false; const n=G.band==='夜'?1:0, im=b.img[n]; if(!im.complete||!im.naturalWidth) return false;
+  const iw=im.naturalWidth, base=b.base[n], k=Math.max(W*1.12/iw,(y0+2)/base), w=iw*k, room=(w-W)/2, x=-room+clamp(-G.drift*s*.012,-room,room);
+  c.drawImage(im,x,y0-base*k,w,im.naturalHeight*k);
+  if(G.band==='朝まずめ'||G.band==='夕まずめ'){ const g=c.createLinearGradient(0,0,0,y0); g.addColorStop(0,'#4a4f8c'); g.addColorStop(.65,'#e9a08a'); g.addColorStop(1,'#ffc79a');
+    c.save(); c.globalCompositeOperation='multiply'; c.fillStyle=g; c.fillRect(0,0,W,y0+1); c.globalCompositeOperation='screen';
+    const sx0=G.band==='朝まずめ'?W*.85:W*.15, sg=c.createRadialGradient(sx0,y0,0,sx0,y0,W*.45); sg.addColorStop(0,'rgba(255,170,90,.55)'); sg.addColorStop(1,'rgba(255,150,90,0)'); c.fillStyle=sg; c.fillRect(0,0,W,y0+1); c.restore(); }
+  G.lighthouse=null; return true; }
+function drawSky(V,y0){ const c=ctx, col=SKY[G.band||'日中'], s=V.sc; if(drawBg(c,y0,s)) return;
   const g=c.createLinearGradient(0,0,0,y0); g.addColorStop(0,col[0]); g.addColorStop(1,col[1]); c.fillStyle=g; c.fillRect(0,0,W,y0);
   // 太陽（昼・まずめ）
   if(G.band==='日中'||!G.band){ const sxp=W*.8, syp=Math.max(20,y0*.22); const sg=c.createRadialGradient(sxp,syp,0,sxp,syp,60); sg.addColorStop(0,'rgba(255,255,240,.95)'); sg.addColorStop(.25,'rgba(255,250,220,.5)'); sg.addColorStop(1,'rgba(255,250,220,0)'); c.fillStyle=sg; c.fillRect(sxp-60,syp-60,120,120); }
@@ -1128,17 +1210,23 @@ function drawSky(V,y0){ const c=ctx, col=SKY[G.band||'日中'], s=V.sc;
   // 雲
   for(let i=0;i<6;i++){ const cxp=((hash(i)*W*1.4+G.t*(2+hash(i+9)*3)-G.drift*s*.02)%(W*1.4)+W*1.4)%(W*1.4)-W*.2, cyp=y0*(.12+hash(i+3)*.45), cw=W*(.08+hash(i+5)*.1);
     c.fillStyle=G.band==='夜'?'rgba(40,50,70,.5)':G.band&&G.band!=='日中'?'rgba(255,200,170,.45)':'rgba(255,255,255,.6)';
-    for(let j=0;j<5;j++){ c.beginPath(); c.ellipse(cxp+(j-2)*cw*.28,cyp+Math.abs(j-2)*cw*.03,cw*(.28-Math.abs(j-2)*.04),cw*.11,0,0,Math.PI*2); c.fill(); } }
+    const cc=c.fillStyle; for(let j=0;j<7;j++){ const bx=cxp+(j-3)*cw*.22+hash(i*7+j)*cw*.08, by=cyp+Math.abs(j-3)*cw*.025-hash(i+j)*cw*.05, br=cw*(.22-Math.abs(j-3)*.03); const rg=c.createRadialGradient(bx,by,0,bx,by,br);
+      rg.addColorStop(0,cc); rg.addColorStop(.6,cc); rg.addColorStop(1,'rgba(255,255,255,0)'); c.fillStyle=rg; c.beginPath(); c.ellipse(bx,by,br,br*.55,0,0,Math.PI*2); c.fill(); } }
   // 遠くの山なみと岬（イメージ）
-  const ph=-G.drift*s*.03, hb=y0;
+  const ph=-G.drift*s*.03, hb=y0-s*.28;
   c.fillStyle=col[2]; c.beginPath(); c.moveTo(-10,hb); for(let x=-10;x<=W*.62;x+=W/40){ c.lineTo(x,hb-s*(.45+.35*Math.sin(x*.012+1)+.15*Math.sin(x*.05))); } c.lineTo(W*.62,hb); c.fill();
   if(G.lake){ c.fillStyle=col[3]; c.beginPath(); c.moveTo(W*.48+ph,hb); c.bezierCurveTo(W*.58+ph,hb-s*.85,W*.7+ph,hb-s*1.1,W*.78+ph,hb-s*1.05); c.bezierCurveTo(W*.88+ph,hb-s*1.0,W*.97+ph,hb-s*.55,W*1.06+ph,hb); c.closePath(); c.fill();
-    c.fillStyle=G.band==='夜'?'rgba(20,40,30,.6)':'rgba(70,100,70,.5)'; c.fill(); G.lighthouse=null; return; }
+    c.fillStyle=G.band==='夜'?'rgba(20,40,30,.6)':'rgba(70,100,70,.5)'; c.fill(); farSea(c,y0,hb,col,s); G.lighthouse=null; return; }
   c.fillStyle=col[3]; c.beginPath(); c.moveTo(W*.5+ph,hb); c.bezierCurveTo(W*.58+ph,hb-s*.4,W*.6+ph,hb-s*1.3,W*.7+ph,hb-s*1.35); c.bezierCurveTo(W*.78+ph,hb-s*1.42,W*.86+ph,hb-s*1.38,W*.92+ph,hb-s*1.45); c.bezierCurveTo(W*.98+ph,hb-s*1.5,W*1.05+ph,hb-s*1.25,W*1.3+ph,hb-s*1.2); c.lineTo(W*1.3+ph,hb); c.fill();
   const cg=c.createLinearGradient(0,hb-s*1.45,0,hb); cg.addColorStop(0,'rgba(0,0,0,0)'); cg.addColorStop(1,'rgba(0,0,0,.25)'); c.fillStyle=cg; c.fillRect(W*.5+ph,hb-s*1.45,W*.8,s*1.45);
   c.fillStyle=G.band==='夜'?'rgba(20,40,30,.6)':'rgba(70,100,70,.45)'; c.beginPath(); c.moveTo(W*.68+ph,hb-s*1.33); for(let x=W*.68;x<=W*1.3;x+=W/60){ c.lineTo(x+ph,hb-s*(1.42+.06*Math.sin(x*.2))); } c.lineTo(W*1.3+ph,hb-s*1.2); c.lineTo(W*.68+ph,hb-s*1.25); c.fill(); // 岬の上の木々
   const lx=W*.86+ph, ly=hb-s*1.42; c.fillStyle=G.band==='夜'?'#556':'#f4f4f0'; c.fillRect(lx-s*.07,ly-s*.55,s*.14,s*.55); c.fillStyle='#c33'; c.fillRect(lx-s*.1,ly-s*.62,s*.2,s*.08);
-  G.lighthouse={x:lx,y:ly-s*.58}; }
+  farSea(c,y0,hb,col,s); G.lighthouse={x:lx,y:ly-s*.58}; }
+// 遠くの海面（水平線から手前の切り口まで）と、山のふもとのかすみ
+function farSea(c,y0,hb,col,s){ const hz=c.createLinearGradient(0,hb-s*1.6,0,hb); hz.addColorStop(0,'rgba(0,0,0,0)'); hz.addColorStop(1,G.band==='夜'?'rgba(10,20,35,.5)':hexA(col[1],.55)); c.fillStyle=hz; c.fillRect(0,hb-s*1.6,W,s*1.6);
+  const g=c.createLinearGradient(0,hb,0,y0); const n=G.band==='夜'; g.addColorStop(0,n?'#0d1a2a':hexA(col[1],1)); g.addColorStop(.25,n?'#0a1726':G.lake?'#5d8a96':'#4f8fa6'); g.addColorStop(1,n?'#081420':G.lake?'#2f6676':'#2a6f8a'); c.fillStyle=g; c.fillRect(0,hb,W,y0-hb+1);
+  if(!n){ c.fillStyle='rgba(255,255,255,.55)'; for(let i=0;i<40;i++){ const yy=hb+(y0-hb)*Math.pow(hash(i+3),1.6), xx=((hash(i)*W+G.t*6*(hash(i+1)-.5))%W+W)%W, ww=s*(.08+.35*(yy-hb)/(y0-hb+1)); if(Math.sin(G.t*2.2+i*1.9)>.35) c.fillRect(xx,yy,ww,1); } } }
+function hexA(h,a){ const v=parseInt(h.slice(1),16); return `rgba(${v>>16&255},${v>>8&255},${v&255},${a})`; }
 // 夜の明かり（暗さを重ねたあとに描く）
 function drawNightLights(V,y0){ const c=ctx; if(y0<=0) return; const s=V.sc;
   if(G.band==='夜'){ for(let i=0;i<60;i++){ const x=hash(i*3.1)*W, y=hash(i*7.7)*y0*.85; const a=.4+.4*Math.sin(G.t*2+i); c.fillStyle=`rgba(255,255,240,${a})`; c.fillRect(x,y,1.4,1.4); }
@@ -1152,7 +1240,11 @@ function drawNightLights(V,y0){ const c=ctx; if(y0<=0) return; const s=V.sc;
       c.fillStyle='#fff8d0'; c.beginPath(); c.arc(D.x,D.y,Math.max(2,s*.07),0,Math.PI*2); c.fill(); } } }
 
 // 船：ボートの座標（m。x は流れに合わせた位置、y は上が負）で描き、波で上下・前後にゆれる
-const ROD={bx:.32,by:-1.32,ang:-.56,len:2.3};
+const ROD={bx:.32,by:-1.32,ang:-.56,len:2.3}, ROD0={...ROD};
+// 釣り人の絵（本人のAI生成。_work/make_angler.py）。冬装備＝11〜4月、夏装備＝5〜10月。竿は手元（P）から先をゲームが描いてしならせる
+const ANG={k:1.75/640,feet:-.35,px:.62,ang:-.42,len:1.84,w:{src:'img/angler_winter.webp',P:[327.6,204.2]},s:{src:'img/angler_summer.webp',P:[329,207.4]}};
+for(const key of ['w','s']){ const o=ANG[key], im=new Image(); im.onload=()=>{ o.img=im; o.ok=true; }; im.src=o.src; }
+function anglerNow(){ const m=G.clock?new Date(G.clock).getMonth()+1:null, win=m?(m>=11||m<=4):(G.season===3||G.season===0), o=ANG[win?'w':'s']; return o.ok?o:null; }
 // 船の絵（img/boat.webp・H.M Works）。へさき先端 -5.35m〜船尾 1.62m、喫水線 0m に合わせて置く。読めなければ下の手描きに戻る
 const BOAT={ok:false,cv:null,x:-5.35,y:-2.9226,w:6.97,h:3.2547,wl:660/735};
 { const img=new Image(); img.onload=()=>{ const cv=document.createElement('canvas'); cv.width=img.naturalWidth; cv.height=img.naturalHeight; const x=cv.getContext('2d');
@@ -1210,15 +1302,18 @@ function drawBoat(V,y0){ const c=ctx, s=V.sc, X=boatXf(V,y0);
   for(let i=1;i<=N;i++){ const t=i/N, u=1-t, x=u*u*R.B[0]+2*u*t*R.C[0]+t*t*R.T[0], y=u*u*R.B[1]+2*u*t*R.C[1]+t*t*R.T[1];
     c.strokeStyle=t>.9?(i%2?'#ff7b2c':'#fff'):t<.18?'#3a3a3a':'#16191c'; c.lineWidth=lerp(.05,.012,t); c.beginPath(); c.moveTo(p0[0],p0[1]); c.lineTo(x,y); c.stroke(); p0=[x,y];
     if([7,12,16,20,23,26].includes(i)){ c.strokeStyle='#c8ced2'; c.lineWidth=.012; c.beginPath(); c.arc(x,y+.035,.022,0,Math.PI*2); c.stroke(); } }
-  const rt=.13, rx=(1-rt)**2*R.B[0]+2*(1-rt)*rt*R.C[0]+rt*rt*R.T[0], ry=(1-rt)**2*R.B[1]+2*(1-rt)*rt*R.C[1]+rt*rt*R.T[1];
+  if(!anglerNow()){ const rt=.13, rx=(1-rt)**2*R.B[0]+2*(1-rt)*rt*R.C[0]+rt*rt*R.T[0], ry=(1-rt)**2*R.B[1]+2*(1-rt)*rt*R.C[1]+rt*rt*R.T[1];
   c.fillStyle='#2b2f33'; c.beginPath(); c.ellipse(rx,ry-.07,.1,.07,ROD.ang,0,Math.PI*2); c.fill(); c.fillStyle='#b8c0c6'; c.beginPath(); c.ellipse(rx+.02,ry-.07,.04,.06,ROD.ang,0,Math.PI*2); c.fill();
   c.strokeStyle='#222'; c.lineWidth=.02; c.beginPath(); c.moveTo(rx,ry-.07); c.lineTo(rx+.04,ry+.06); c.stroke();
   // 前の手（竿を持つ手）
-  c.fillStyle='#e8c2a0'; const ht=.2, hx2=(1-ht)**2*R.B[0]+2*(1-ht)*ht*R.C[0]+ht*ht*R.T[0], hy2=(1-ht)**2*R.B[1]+2*(1-ht)*ht*R.C[1]+ht*ht*R.T[1]; c.beginPath(); c.arc(hx2,hy2,.045,0,Math.PI*2); c.fill();
+  c.fillStyle='#e8c2a0'; const ht=.2, hx2=(1-ht)**2*R.B[0]+2*(1-ht)*ht*R.C[0]+ht*ht*R.T[0], hy2=(1-ht)**2*R.B[1]+2*(1-ht)*ht*R.C[1]+ht*ht*R.T[1]; c.beginPath(); c.arc(hx2,hy2,.045,0,Math.PI*2); c.fill(); }
   c.restore();
   const [tx,ty]=X.P(R.T[0],R.T[1]); G.tip={x:tx,y:ty};
 }
-function drawAngler(c){ const x=.52;
+function drawAngler(c){ const A=anglerNow();
+  if(A){ const k=ANG.k, w=A.img.naturalWidth*k, h=A.img.naturalHeight*k, top=ANG.feet-h; Object.assign(ROD,{bx:ANG.px,by:top+A.P[1]*k,ang:ANG.ang,len:ANG.len});
+    c.drawImage(A.img,ANG.px-A.P[0]*k,top,w,h); return; }
+  Object.assign(ROD,ROD0); const x=.52;
   // 脚（舷の陰になる）・胴・救命胴衣・腕・頭・帽子
   c.fillStyle='#2c3440'; c.beginPath(); c.roundRect?c.roundRect(x-.16,-1.2,.32,.85,.06):c.rect(x-.16,-1.2,.32,.85); c.fill();
   c.fillStyle='#24364f'; c.beginPath(); c.moveTo(x-.2,-1.22); c.quadraticCurveTo(x-.24,-1.6,x-.12,-1.78); c.lineTo(x+.14,-1.78); c.quadraticCurveTo(x+.24,-1.55,x+.2,-1.22); c.closePath(); c.fill();
@@ -1234,6 +1329,10 @@ function drawSurface(V,y0){ const c=ctx, s=V.sc;
   c.beginPath(); c.moveTo(0,wv(0)); for(let x=8;x<=W+8;x+=8) c.lineTo(x,wv(x)); c.lineTo(W,y0+14); c.lineTo(0,y0+14); c.closePath();
   const g=c.createLinearGradient(0,y0-6,0,y0+14); g.addColorStop(0,G.band==='夜'?'rgba(30,60,80,.9)':'rgba(120,190,210,.85)'); g.addColorStop(1,'rgba(40,122,150,0)'); c.fillStyle=g; c.fill();
   c.strokeStyle=G.band==='夜'?'rgba(200,220,255,.25)':'rgba(255,255,255,.7)'; c.lineWidth=1.6; c.beginPath(); for(let x=0;x<=W+8;x+=8){ x?c.lineTo(x,wv(x)):c.moveTo(x,wv(x)); } c.stroke();
+  // 水面の裏側（下から見た水面が明るく揺れる）
+  if(y0<H){ const ug=c.createLinearGradient(0,y0,0,y0+V.sc*1.4); ug.addColorStop(0,G.band==='夜'?'rgba(80,110,150,.12)':'rgba(190,240,250,.28)'); ug.addColorStop(1,'rgba(190,240,250,0)'); c.fillStyle=ug; c.fillRect(0,y0,W,V.sc*1.4);
+    c.save(); c.globalCompositeOperation='lighter'; c.lineWidth=1.2; for(let k=0;k<3;k++){ c.strokeStyle=`rgba(200,240,255,${(G.band==='夜'?.05:.16)-k*.04})`; c.beginPath();
+      for(let x=0;x<=W+8;x+=8){ const y=wv(x)+7+k*6+Math.sin(x*.08+G.t*(1.8+k*.7)+k*2)*2.2; x?c.lineTo(x,y):c.moveTo(x,y); } c.stroke(); } c.restore(); }
   // きらめき
   if(G.band!=='夜'){ c.fillStyle='rgba(255,255,255,.7)'; for(let i=0;i<14;i++){ const x=((hash(i)*W+G.t*14*(hash(i+1)-.5))%W+W)%W; if(Math.sin(G.t*3+i*2)>.6) c.fillRect(x,wv(x)-1,s*.25,1.5); } }
   // 船まわりの白波
@@ -1247,16 +1346,33 @@ function drawSinker(c,X,Y,k){ // ナス型オモリ（Yが底）
   c.beginPath(); c.moveTo(X,Y-k*6.2); c.bezierCurveTo(X+k*.9,Y-k*5.6,X+k*2.6,Y-k*2.8,X+k*2.3,Y-k*1.1); c.quadraticCurveTo(X+k*1.8,Y,X,Y); c.quadraticCurveTo(X-k*1.8,Y,X-k*2.3,Y-k*1.1); c.bezierCurveTo(X-k*2.6,Y-k*2.8,X-k*.9,Y-k*5.6,X,Y-k*6.2); c.fill();
   c.strokeStyle='#9aa0a5'; c.lineWidth=Math.max(1,k*.35); c.beginPath(); c.arc(X,Y-k*6.8,k*.6,0,Math.PI*2); c.stroke();
   c.strokeStyle='#c8a050'; c.beginPath(); c.ellipse(X,Y-k*8.2,k*.45,k*.9,0,0,Math.PI*2); c.stroke(); } // スナップ付きサルカン
+// 仕掛けの絵（本人のAI生成・_work/make_rig.py で部品に切り分け）。ゲームの針の位置に合わせて組み立てる。読めなければ手描き
+const RIGSPR={"bait_br0":{"w":346,"h":156,"ax":327,"ay":26,"hook":[39,137],"left":true},"bait_br1":{"w":354,"h":146,"ax":18,"ay":26,"hook":[312,127],"left":false},"bait_br2":{"w":350,"h":152,"ax":331,"ay":26,"hook":[39,133],"left":true},"bait_top":{"w":85,"h":187,"ax":42,"ay":185},"bait_sinker":{"w":193,"h":368,"ax":99,"ay":2,"bot":[99,365]},"sabiki_br0":{"w":238,"h":102,"ax":219,"ay":25,"hook":[57,83],"left":true},"sabiki_br1":{"w":238,"h":101,"ax":18,"ay":25,"hook":[179,82],"left":false},"sabiki_br2":{"w":237,"h":103,"ax":218,"ay":24,"hook":[57,84],"left":true},"sabiki_br3":{"w":239,"h":102,"ax":18,"ay":24,"hook":[179,83],"left":false},"sabiki_br4":{"w":237,"h":106,"ax":218,"ay":24,"hook":[57,87],"left":true},"sabiki_top":{"w":85,"h":187,"ax":42,"ay":185},"sabiki_sinker":{"w":185,"h":384,"ax":93,"ay":2,"bot":[93,381]},"baitk_br0":{"w":368,"h":225,"ax":349,"ay":86,"hook":[19,206],"left":true},"baitk_br1":{"w":371,"h":218,"ax":18,"ay":41,"hook":[352,199],"left":false},"baitk_br2":{"w":368,"h":227,"ax":349,"ay":34,"hook":[19,208],"left":true},"baitk_top":{"w":85,"h":192,"ax":42,"ay":190},"baitk_sinker":{"w":422,"h":384,"ax":345,"ay":2,"bot":[345,381]},"baiti_br0":{"w":363,"h":183,"ax":344,"ay":34,"hook":[22,164],"left":true},"baiti_br1":{"w":365,"h":167,"ax":18,"ay":36,"hook":[344,148],"left":false},"baiti_br2":{"w":361,"h":194,"ax":342,"ay":35,"hook":[23,175],"left":true},"baiti_top":{"w":85,"h":192,"ax":42,"ay":190},"baiti_sinker":{"w":148,"h":383,"ax":73,"ay":2,"bot":[73,380]},"bake_on":{"w":1087,"h":344,"ax":200,"ay":4,"bot":[200,339]},"bake_off":{"w":1087,"h":344,"ax":200,"ay":4,"bot":[200,339]},"jig":{"w":1193,"h":1206,"ax":615,"ay":25,"c":[620,452]}}; for(const n in RIGSPR){ const o=RIGSPR[n], im=new Image(); im.onload=()=>{ o.ok=true; }; im.src=`img/rig/${n}.webp`; o.img=im; }
+const rs=n=>{ const o=RIGSPR[n]; return o&&o.ok?o:null; };
+const bakeU=k=>k*20/580;
+// 道糸を結ぶ点（仕掛けのいちばん下＝r.y からの高さ。px、上が負）：胴突き・サビキは上のサルカンの輪、ジグは頭のリング、バケは三又サルカンの上
+function rigAttach(V,k){ const id=G.rigId, r=G.rig;
+  if(id==='jig') return rs('jig')?-k*15:0;
+  if(id==='bake'){ const B=rs('bake_on'); return B?-(B.bot[1]-B.ay)*bakeU(k):0; }
+  const T=rs(id+'_top'); if(!T) return 0; const hk=rigDef().hooks; return (sy(V,r.y-hk[hk.length-1]-.35)-sy(V,r.y))-(T.ay-2)*k*9/352; }
+function brSpr(set,left,j){ const a=(left?[0,2,4]:[1,3]).map(i=>rs(set+'_br'+i)).filter(Boolean); return a.length?a[j%a.length]:null; }
+function drawPart(c,o,x,y,u,ang=0){ c.save(); c.translate(x,y); if(ang) c.rotate(ang); c.drawImage(o.img,-o.ax*u,-o.ay*u,o.w*u,o.h*u); c.restore(); }
 function drawRigAndLine(V){ const c=ctx, r=G.rig, s=V.sc, k=s*FISHX*.0115; // 1cmあたりのpx（魚と同じく大きめに描く）
   const y0=sy(V,0); const tip=G.tip&&y0>-5?G.tip:{x:sx(V,G.drift+2.3),y:y0-s*2.4};
-  let ex,ey; if(G.fight&&G.fight.f){ ex=sx(V,G.fight.f.x+.45*G.fight.f.size/100*FISHX*G.fight.f.face); ey=sy(V,G.fight.f.y); } else { ex=sx(V,rigX()); ey=sy(V,r.y); }
+  const ry=sy(V,r.y); let ex,ey; if(G.fight&&G.fight.f){ ex=sx(V,G.fight.f.x+.45*G.fight.f.size/100*FISHX*G.fight.f.face); ey=sy(V,G.fight.f.y); } else { ex=sx(V,rigX()); ey=ry+rigAttach(V,k); }
   const ent=tip.x+s*.08;
   c.strokeStyle='rgba(255,240,140,.85)'; c.lineWidth=1.1; c.beginPath(); c.moveTo(tip.x,tip.y); c.quadraticCurveTo(tip.x+s*.05,(tip.y+y0)/2,ent,y0); c.stroke();
   c.strokeStyle='rgba(255,240,140,.6)'; c.beginPath(); c.moveTo(ent,y0); c.quadraticCurveTo(ent+(ex-ent)*.2+Math.sin(G.t*.7)*6,(y0+ey)/2,ex,ey); c.stroke();
   if(G.fight) return;
   const X=ex, Y=ey;
+  if(G.rigId==='bake'){ const B=rs(r.baitGone?'bake_off':'bake_on')||rs('bake_on');
+    if(B){ const jerk=G.t-r.lastAct<.9, ang=G.state==='falling'?-.2+Math.sin(G.t*6)*.08:jerk?Math.sin(G.t*12)*.15:Math.sin(G.t*1.4+.5)*.035; drawPart(c,B,X,Y,bakeU(k),ang); return; }
+    drawSinker(c,X,ry,k); return; }
   if(G.rigId==='jig'){ const fall=G.state==='falling', jerk=G.t-r.lastAct<.9; const ang=fall?Math.sin(G.t*8)*.55:jerk?Math.sin(G.t*13)*.4:Math.sin(G.t*1.6)*.1;
-    const L=k*15, w=L*.13; c.save(); c.translate(X,Y-L*.5); c.rotate(ang);
+    const L=k*15, w=L*.13, J=rs('jig');
+    if(J){ const u=L/845; c.save(); c.translate(X,Y+L*.5); c.rotate(ang); c.drawImage(J.img,-J.c[0]*u,-J.c[1]*u,J.w*u,J.h*u);
+      if(fall||jerk){ c.globalCompositeOperation='lighter'; c.globalAlpha=.18+.22*Math.max(0,Math.sin(G.t*22)); c.drawImage(J.img,-J.c[0]*u,-J.c[1]*u,J.w*u,J.h*u); } c.restore(); return; }
+    c.save(); c.translate(X,Y-L*.5); c.rotate(ang);
     // リーダー・ソリッドリング・アシストフック
     c.strokeStyle='#c8ced2'; c.lineWidth=Math.max(1,k*.3); c.beginPath(); c.arc(0,-L/2-k*1.1,k*.7,0,Math.PI*2); c.stroke();
     c.strokeStyle='#e8732c'; c.lineWidth=Math.max(1,k*.4); c.beginPath(); c.moveTo(0,-L/2-k*.6); c.quadraticCurveTo(-k*1.4,-L/2+k*.6,-k*1.6,-L/2+k*2.2); c.moveTo(0,-L/2-k*.6); c.quadraticCurveTo(k*1.4,-L/2+k*.6,k*1.6,-L/2+k*2.2); c.stroke();
@@ -1266,7 +1382,20 @@ function drawRigAndLine(V){ const c=ctx, r=G.rig, s=V.sc, k=s*FISHX*.0115; // 1c
     c.save(); c.clip(body); c.globalCompositeOperation='lighter'; for(let i=-6;i<8;i++){ const o=i*L*.09+((G.t*30)%(L*.09)); const hue=(i*40+G.t*120)%360; c.strokeStyle=`hsla(${hue},90%,70%,.35)`; c.lineWidth=k*.6; c.beginPath(); c.moveTo(-w,o); c.lineTo(w,o-L*.15); c.stroke(); } c.restore();
     c.fillStyle='#ffd23a'; c.beginPath(); c.arc(0,-L*.36,w*.42,0,Math.PI*2); c.fill(); c.fillStyle='#111'; c.beginPath(); c.arc(0,-L*.36,w*.22,0,Math.PI*2); c.fill();
     c.restore(); return; }
-  // 胴突き・サビキ：幹糸・枝ス・ハリ・エサ／スキン・オモリ
+  // 胴突き・サビキ（絵）：上のサルカン・幹糸・枝（左右）・エサ・オモリ
+  { const id=G.rigId, T=rs(id+'_top'), S=rs(id+'_sinker'), Ls=[0,2,4].map(i=>rs(id+'_br'+i)).filter(Boolean), Rs=[1,3].map(i=>rs(id+'_br'+i)).filter(Boolean);
+    if(T&&S&&Ls.length&&Rs.length){ const u=k*9/352, hk=rigDef().hooks, topY=sy(V,r.y-hk[hk.length-1]-.35), sTop=ry-(S.bot[1]-S.ay)*u;
+      c.strokeStyle='rgba(150,195,240,.5)'; c.lineWidth=Math.max(.8,u*12); const ub=u*(id==='sabiki'?1.5:1.2); c.beginPath(); c.moveTo(X,topY); c.lineTo(X,sTop+u*6); c.stroke();
+      drawPart(c,T,X,topY,u);
+      hk.forEach((h,i)=>{ const hy=sy(V,r.y-h), left=i%2===0, eb=id==='bait'&&!r.baitGone?brSpr(i%2?'baiti':'baitk',left,i>>1):null, o=eb||(left?Ls[(i>>1)%Ls.length]:Rs[(i>>1)%Rs.length]), sw=Math.sin(G.t*1.8+i)*(id==='bait'?.1:.2)*(left?-1:1);
+        drawPart(c,o,X,hy,ub,sw);
+        const dx=(o.hook[0]-o.ax)*ub, dy=(o.hook[1]-o.ay)*ub, hx=X+dx*Math.cos(sw)-dy*Math.sin(sw), hyy=hy+dx*Math.sin(sw)+dy*Math.cos(sw), dir=left?-1:1;
+        if(id==='bait'&&!r.baitGone&&!eb){ c.save(); c.translate(hx,hyy+k*.3); c.rotate(Math.sin(G.t*3+i)*.35+dir*.2); const bw=k*1.3, bl=k*4.6;
+          const bg=c.createLinearGradient(-bw,0,bw,0); bg.addColorStop(0,'#5c7a99'); bg.addColorStop(.35,'#d6e0ea'); bg.addColorStop(.55,'#e9a090'); bg.addColorStop(1,'#c46a5e'); c.fillStyle=bg;
+          c.beginPath(); c.moveTo(-bw*.8,-bl*.15); c.lineTo(bw*.8,-bl*.2); c.lineTo(bw,bl*.8); c.lineTo(-bw*.6,bl); c.closePath(); c.fill(); c.restore(); }
+        if(id==='sabiki'&&Math.sin(G.t*4+i*1.7)>.75){ c.fillStyle='rgba(255,255,255,.9)'; c.beginPath(); c.arc(hx-dir*k*.8,hyy-k*.8,k*.55,0,Math.PI*2); c.fill(); } });
+      drawPart(c,S,X,sTop,u); return; } }
+  // 胴突き・サビキ（手描き）：幹糸・枝ス・ハリ・エサ／スキン・オモリ
   const hk=rigDef().hooks, topY=sy(V,r.y-hk[hk.length-1]-.35);
   c.strokeStyle='rgba(235,245,255,.55)'; c.lineWidth=1; c.beginPath(); c.moveTo(X,Y-k*8.8); c.lineTo(X,topY); c.stroke();
   c.strokeStyle='#c8a050'; c.lineWidth=Math.max(1,k*.35); c.beginPath(); c.ellipse(X,topY,k*.45,k*.9,0,0,Math.PI*2); c.stroke(); // 上のサルカン
@@ -1321,14 +1450,39 @@ function updateFF(){ const c=ffx, w=ffc.width, h=ffc.height; if(!ffBg){ ffBg=doc
 }
 function drawFF(){ const c=ffx, w=ffc.width, h=ffc.height; if(!ffBg) return; c.drawImage(ffBg,0,0); const rng=ffRange();
   c.font=`${11*DPR}px sans-serif`; c.fillStyle='rgba(200,230,255,.8)'; c.textAlign='left';
-  for(let d=10;d<rng;d+=10){ const y=d/rng*h; c.fillStyle='rgba(200,230,255,.18)'; c.fillRect(0,y,w,1); c.fillStyle='rgba(200,230,255,.75)'; c.fillText(d,3*DPR,y-2*DPR); }
-  const bot=bottomAt(rigX()); c.font=`bold ${16*DPR}px sans-serif`; c.textAlign='right'; c.fillStyle='#fff'; c.fillText(bot.toFixed(1),w-4*DPR,18*DPR);
+  const fs=(w<100*DPR?13:16)*DPR, top=fs+8*DPR;
+  for(let d=10;d<rng;d+=10){ const y=d/rng*h; c.fillStyle='rgba(200,230,255,.18)'; c.fillRect(0,y,w,1); if(y-2*DPR>top){ c.fillStyle='rgba(200,230,255,.75)'; c.fillText(d,3*DPR,y-2*DPR); } }
+  const bot=bottomAt(rigX()); c.font=`bold ${fs}px sans-serif`; c.textAlign='right'; const tw=c.measureText(bot.toFixed(1)).width;
+  c.fillStyle='rgba(4,16,42,.85)'; c.fillRect(w-tw-18*DPR,0,tw+8*DPR,top); c.fillStyle='#fff'; c.fillText(bot.toFixed(1),w-14*DPR,fs+2*DPR);
   if(G.state!=='surface'&&G.state!=='lost'){ const y=G.rig.y/rng*h; c.fillStyle='#7dff9a'; c.beginPath(); c.moveTo(w,y); c.lineTo(w-8*DPR,y-5*DPR); c.lineTo(w-8*DPR,y+5*DPR); c.fill(); }
 }
 
 // ============ HUD ============
 function toast(msg,ms=1000,cls='',sub=''){ const el=$('#toast'); el.innerHTML=msg+(sub?`<small>${sub}</small>`:''); el.style.color=cls==='hot'?'#ffd36a':'#fff'; el.style.opacity=1; ui.toastT=(ms||1400)/1000; }
-function updateHUD(){
+// 魚探に映っている反応のおよその深さ（いちばん多い深さ。なければ null）
+function ffReact(){ const rx=rigX(), bins={}; let best=null;
+  for(const f of G.fishes){ if(f.gone||f.state==='hooked') continue; const dx=Math.abs(f.x-rx); if(dx>1+f.y*.1) continue; const k=Math.round(f.y/3); bins[k]=(bins[k]||0)+1; }
+  for(const k in bins) if(!best||bins[k]>bins[best]) best=k; return best==null?null:Math.max(1,best*3); }
+function coach(html){ const el=$('#coach'); if(!html){ el.classList.add('hide'); el._h=''; return; } if(el._h===html) return; el._h=html;
+  el.innerHTML=html+'<button class="x" id="bCoachX" aria-label="案内を閉じる">×</button>'; el.classList.remove('hide'); $('#bCoachX').onclick=()=>{ REC.tutDone=1; saveRec(); coach(''); }; }
+function updateCoach(){ if(REC.tutDone||G.mode!=='play'||G.state==='card'){ coach(''); return; } const r=G.rig, fr=ffReact();
+  let s='';
+  if(G.state==='surface') s='<b>① 仕掛けを沈める</b>　「落とす」を押そう。魚探（右上）の色のついた点が魚の反応。';
+  else if(G.state==='falling') s='<b>② 止めどころ</b>　'+(fr?`魚探の反応は <b>${fr}m付近</b>。仕掛け（緑の線）がそこまで来たら「<b>止める</b>」を押す。`:'底まで落ちると「着底」。途中で止めたいときは「<b>止める</b>」。');
+  else if(G.bite) s='<b>③ アタリ！</b>　竿先がグッと大きく入ったら「合わせ」。コツコツ小さいうちはまだ待つ。';
+  else if(G.state==='fight'||G.state==='rooted') s='<b>④ やりとり</b>　「巻く」を<b>押し続けて</b>寄せる。糸が出るときは無理に巻かない。ドラグ（－＋）で調整。';
+  else if(G.state==='landing') s='<b>⑤ タモ入れ</b>　水面まで来た！「合わせ」ですくう。';
+  else if(G.state==='snag') s='根掛かり。「巻く」を押して外そう。底を引きずらないよう、着底したら少し巻き上げる。';
+  else if(G.state==='idle'){ const y=r.y; s='<b>② タナを合わせる</b>　'+(fr==null?'いまは真下に反応がない。「誘う」で動かして待つか、少し巻いて探ろう。':y>fr+2.5?`反応は <b>${fr}m付近</b>、仕掛けは${y.toFixed(0)}m。「巻く」を<b>押し続けて</b>上げよう。`:y<fr-2.5?`反応は <b>${fr}m付近</b>、仕掛けは${y.toFixed(0)}m。「落とす」で下げて、「止める」で止めよう。`:`いいタナ（${y.toFixed(0)}m）！「誘う」で動かしてアタリを待とう。`); }
+  coach(s); placeCoach(); }
+// 操作ボタン・やりとりのゲージ・「なぶらへ」のどれよりも上に出す
+function placeCoach(){ const el=$('#coach'); if(el.classList.contains('hide')) return; let t=innerHeight;
+  for(const id of ['#ctrls','#gauge','#bNab']){ const e=$(id); if(!e||e.classList.contains('hide')||getComputedStyle(e).display==='none') continue; const r=e.getBoundingClientRect(); if(r.height) t=Math.min(t,r.top); }
+  const b=Math.round(innerHeight-t+8); if(el._b!==b){ el._b=b; el.style.bottom=b+'px'; } }
+function noBiteHint(dt){ if(G.state==='idle'&&!G.bite){ G.nbT=(G.nbT||0)+dt; if(G.nbT>80){ G.nbT=0; const fr=ffReact();
+      toast('なかなか来ない…',2600,'',(fr?`魚探の反応は${fr}m付近。タナを合わせて「誘う」`:'反応がない。少し待つか「流し直し」')+`／仕掛けを替える（${rigShort(G.rigId)} ▾）`); } }
+  else if(G.state!=='idle') G.nbT=0; }
+function updateHUD(){ updateCoach();
   const bot=bottomAt(rigX()), r=G.rig;
   $('#iDepth').textContent=bot.toFixed(1);
   let tana='水面'; if(G.state==='fight'||G.state==='landing'||G.state==='rooted') tana='やりとり中'; else if(G.state==='snag') tana='根掛かり'; else if(G.state==='lost') tana='付け直し中';
@@ -1432,9 +1586,10 @@ const TUNA_FY=['2026-04-01','2027-03-31'];
 function tunaInFY(d){ const k=ymd(d); return k>=TUNA_FY[0]&&k<=TUNA_FY[1]; }
 function tunaBanned(d){ const k=ymd(d); return TUNA_BAN.some(([a,b])=>k>=a&&k<=b); }
 // need: release（返す）/ free（どちらでもよい）　lv: rule（決まり）/ manner（マナー・慣習）
-function judge(sp,all){ const small=all.reduce((a,m)=>m.size<a.size?m:a,all[0]), big=all.reduce((a,m)=>m.size>a.size?m:a,all[0]), d=nowDate(), lic=REC.lic||{};
+function jctx(){ return {d:nowDate(),ll:boatLL(),lake:!!G.lake,rig:G.rigId}; }
+function judge(sp,all,C=jctx()){ const small=all.reduce((a,m)=>m.size<a.size?m:a,all[0]), big=all.reduce((a,m)=>m.size>a.size?m:a,all[0]), d=C.d, lic=REC.lic||{};
   const R=(lv,why,src)=>({need:'release',lv,why,src}), F=(why,src,note)=>({need:'free',why:why||'',src,note});
-  if(G.lake) return judgeLake(sp,all,R,F);
+  if(C.lake) return judgeLake(sp,all,R,F,C);
   if(sp.rule==='crab') return R('rule','毛ガニやズワイガニの仲間は、漁業者が許可を受け、大きさ・メス・漁期の決まりを守ってとっている資源。釣り人は持ち帰らず、すぐ海へ返す。');
   const mixed=(min,lv,why,src)=>{ const k=all.filter(m=>m.size<min).length; if(!k||k===all.length) return null; const list=all.map(m=>m.size.toFixed(1)+'cm').join('・');
     return Object.assign(R(lv,`${all.length}匹（${list}）のうち、${min}cm未満の${k}匹は返す。${why}`,src),{part:{min,k}}); };
@@ -1442,7 +1597,7 @@ function judge(sp,all){ const small=all.reduce((a,m)=>m.size<a.size?m:a,all[0]),
     if(min&&all.length>1){ const r=mixed(min,lv,why,src||undefined); if(r) return r; }
   if(sp.keepMin&&small.size<sp.keepMin) return R('rule',`函館市古部町〜えりも町東端の太平洋では、全長${sp.keepMin}cm未満のマツカワは速やかに海へ返す（海区漁業調整委員会指示）。放流した稚魚を大きく育てて資源を増やすため。`,'北海道「フィッシングルール2026」p.12');
   if(sp.keepMin) return F(`全長${sp.keepMin}cm以上なので持ち帰ってよい。`,'北海道「フィッシングルール2026」p.12');
-  if(sp.rule==='sakura'){ const ll=boatLL(), z=ll&&sakuraZone(ll[0],ll[1]);
+  if(sp.rule==='sakura'){ const ll=C.ll, z=ll&&sakuraZone(ll[0],ll[1]);
     if(!z||!sakuraPeriod(d)) return F(z?'ライセンス海域だが、制限期間（12/15〜3/15）の外なので持ち帰ってよい。':'ライセンス海域の外なので、ふつうに持ち帰ってよい。');
     if(!lic.sakura) return R('rule',`ここは胆振のさくらます船釣りライセンス海域（${z}海域）で、いまは制限期間（12/15〜3/15）。ライセンスを受けた船以外は、サクラマスの船釣りをしてはならない。`,'胆振海区漁業調整委員会指示');
     const s=sunTimes(d,ll[0],ll[1]), end=new Date(d); end.setHours(z==='A'?14:12,0,0,0); const dm=new Date(d); dm.setSeconds(0,0); const rise=new Date(s.rise); rise.setSeconds(0,0);
@@ -1465,50 +1620,61 @@ function judge(sp,all){ const small=all.reduce((a,m)=>m.size<a.size?m:a,all[0]),
   return F(''); }
 // 洞爺湖（洞爺湖漁協「遊漁について」2026年）。船釣りとして判定する
 const TOYA_SRC='洞爺湖漁協「遊漁について」（2026年）';
-function judgeLake(sp,all,R,F){ const d=nowDate(), lic=REC.lic||{}, m=d.getMonth()+1, hh=d.getHours(), ll=boatLL();
+const TOYA_KINRYO='洞爺湖には中島のほかにも禁漁区が4か所ある（臨湖実験所・孵化場の前の沖1,000m／菅原川の河口〜洞爺湖町の境の沖1,000m／発電所と長流川の放水路の100m／安宅川）。このゲームでは位置を入れていない（要確認）。実際は湖岸の看板と漁協の図で確かめる。';
+function judgeLake(sp,all,R,F,C){ const d=C.d, lic=REC.lic||{}, m=d.getMonth()+1, hh=d.getHours(), ll=C.ll;
   if(ll&&inKinryo(ll[0],ll[1])) return R('rule','ここは中島のまわり2,000m以内の禁漁区。洞爺湖の禁漁区では一年中、釣りをしてはいけない。',TOYA_SRC);
-  if(!lic.toya) return R('rule','洞爺湖で釣りをするには、洞爺湖漁協の遊漁券が要る（船釣りのマス類は1日1,500円、ワカサギは1日500円）。遊漁券なしで釣った魚は湖へ返す。',TOYA_SRC);
   if(hh<4||hh>=19) return R('rule',`洞爺湖で釣りをしてよいのは4時〜19時。いま${hm(d)}は時間外。`,TOYA_SRC);
-  if(sp.id==='ugui') return F('ウグイは遊漁券の魚種（マス類・ワカサギ・エビ）に入っていないので、持ち帰るかは自由。小骨が多いが、甘露煮にする地域もある。',TOYA_SRC);
+  if(sp.id==='ugui') return F('【要確認】ウグイは漁協の決まりの表（マス類・ワカサギ・エビ）にのっていない。このゲームでは持ち帰るかは自由にしたが、実際は漁協に確かめる。小骨が多いが、甘露煮にする地域もある。',TOYA_SRC,TOYA_KINRYO);
+  if(sp.id==='wakasagi'&&!lic.toyaWaka) return R('rule','ワカサギを釣るには、洞爺湖漁協のワカサギの遊漁券（1日500円）が要る。券なしで釣った魚は湖へ返す。'+(lic.toyaMasu?'マス類の券ではワカサギは釣れない。':''),TOYA_SRC);
+  if(sp.id!=='wakasagi'&&!lic.toyaMasu) return R('rule','マス類（ヒメマス・ヤマベ・ニジマス）を釣るには、洞爺湖漁協のマス類の遊漁券（船釣り1日1,500円）が要る。'+(lic.toyaWaka?'ワカサギの券ではマス類は釣れない。':'券なしで釣った魚は湖へ返す。'),TOYA_SRC);
   const lim=(cm,name)=>{ const k=all.filter(f=>f.size<=cm).length; if(!k) return null;
     if(k===all.length) return R('rule',`全長${cm}cm以下の${name}は湖へ返す決まり。`,TOYA_SRC);
     return Object.assign(R('rule',`${all.length}匹（${all.map(f=>f.size.toFixed(1)+'cm').join('・')}）のうち、全長${cm}cm以下の${k}匹は湖へ返す決まり。`,TOYA_SRC),{part:{min:cm+.05,k}}); };
   if(sp.id==='wakasagi'){ if(!(m>=5&&m<=8||m>=11||m<=3)) return R('rule','いまはワカサギを釣ってよい期間（5/1〜8/31・11/1〜翌3/31）の外。',TOYA_SRC);
-    return lim(5,'ワカサギ')||F('期間内・時間内で、全長5cmをこえているので持ち帰ってよい。',TOYA_SRC); }
+    return lim(5,'ワカサギ')||F('期間内・時間内で、全長5cmをこえているので持ち帰ってよい。',TOYA_SRC,TOYA_KINRYO); }
   if(!(m===6||m===12||m<=3)) return R('rule','いまは船からマス類（ヒメマス・ヤマベ・ニジマス）を釣ってよい期間（6/1〜6/30・12/1〜翌3/31）の外。岸からの陸釣りなら6/1〜8/31も釣れるが、船は6月だけ。',TOYA_SRC);
-  const br=sp.id==='brown'?' ブラウントラウトは漁協の魚種の表にない外来のマスなので、このゲームではマス類と同じ決まりで判定している。':'';
-  return lim(15,'マス類')||F('期間内・時間内で、全長15cmをこえているので持ち帰ってよい。'+br,TOYA_SRC); }
+  if(RIGS[C.rig].hooks.length>3) return R('rule',`マス類は「竿1本につき針3個以内」の決まり。${RIGS[C.rig].name.replace(/（.*）/,'')}は針が${RIGS[C.rig].hooks.length}本あるので、マス類を釣ってはいけない。胴突き（3本針）かジグで狙う。`,TOYA_SRC);
+  const br=sp.id==='brown'?' 【要確認】ブラウントラウトは漁協の決まりの表にない外来のマス。このゲームではマス類と同じ決まりで判定しているが、実際は漁協に確かめる。':'';
+  return lim(15,'マス類')||F('期間内・時間内・針3個以内で、全長15cmをこえているので持ち帰ってよい。'+br,TOYA_SRC,TOYA_KINRYO); }
 let JUDGE=null;
-function decide(keep){ const J=JUDGE; if(!J||J.done) return; if(keep==='part'&&!v_part(J)) return; J.done=true; const v=J.v, sp=J.sp, d=nowDate();
+function decide(keep){ const J=JUDGE; if(!J||J.done) return; if(keep==='part'&&!v_part(J)) return; J.done=true; const v=J.v, sp=J.sp, d=J.C.d;
   let mark, cls, head; const part=keep==='part';
   if(part){ mark=`◯ 正解！ 小さい${v.part.k}匹だけ返した`; cls='ok'; }
   else if(v.part&&!keep){ mark='◯ 全部返した（大きいのは持ち帰ってもよかった）'; cls='ok'; }
   else if(v.need==='release'&&keep){ mark=v.lv==='rule'?'✕ ルール違反':'△ 持ち帰ってもよいが…'; cls=v.lv==='rule'?'ng':'so'; }
-  else if(v.need==='release'){ mark=`◯ 正解！ ${G.lake?'湖':'海'}へ返した`; cls='ok'; }
+  else if(v.need==='release'){ mark=`◯ 正解！ ${J.C.lake?'湖':'海'}へ返した`; cls='ok'; }
   else { mark=keep?'持ち帰り':'リリース'; cls='ok'; }
   if(v.need==='release'){ const st=REC.judge||(REC.judge={ok:0,ng:0}); if(keep&&!part) st.ng++; else st.ok++; }
   if(keep){ if(sp.rule==='tuna'&&v.need==='free'){ (REC.tunaBag||(REC.tunaBag={}))[tunaPeriod(d)]=1; } if(sp.rule==='sakura'&&v.sakuraCount){ const k=ymd(d); (REC.sakuraDay||(REC.sakuraDay={}))[k]=((REC.sakuraDay||{})[k]||0)+J.n; } }
-  for(const e of REC.log.slice(0,J.n)) e.keep=part?(e.size>=v.part.min?1:0):keep?1:0; delete REC.pending; saveRec();
+  const ents=J.id?REC.log.filter(e=>e.j===J.id):REC.log.slice(0,J.n); for(const e of ents) e.keep=part?(e.size>=v.part.min?1:0):keep?1:0; delete REC.pending; saveRec();
   $('#catchJudge').style.display='none'; $('#bNext').style.display=''; $('#bNext').focus({preventScroll:true});
   const why=v.why?`<div class="why">${v.why}</div>`:''; const src=v.src?`<div class="src2">根拠：${v.src}</div>`:''; const note=v.note&&keep&&!part?`<div class="why">${v.note}</div>`:'';
   $('#catchVerdict').innerHTML=`<div class="mk ${cls}">${mark}</div>${why}${note}${src}`;
   const ds=DISH[sp.id]; if((keep||part)&&ds&&(part||!(v.need==='release'&&v.lv==='rule'))){ $('#catchDish').innerHTML=`<div class="dt">料理</div><div class="dd">${ds}</div>${rawNote(sp,ds)}<img id="dishImg" alt="">`; putDish($('#dishImg'),sp.id); }
   else $('#catchDish').innerHTML=''; }
 function v_part(J){ return !!(J&&J.v&&J.v.part); }
-function openJudge(sp,all){ JUDGE={sp,n:all.length,v:judge(sp,all),done:false}; $('#bRel').firstChild.textContent=G.lake?'湖へ返す':'海へ返す'; const P=JUDGE.v.part; $('#bPart').style.display=P?'':'none'; if(P) $('#bPart').innerHTML=`小さい${P.k}匹だけ返す<small>3</small>`;
-  REC.pending=1; saveRec(); $('#catchJudge').style.display=''; setTimeout(()=>{ const c=$('#catch .card'); if(c){ c.tabIndex=-1; c.focus({preventScroll:true}); } },0); $('#bNext').style.display='none'; $('#catchVerdict').innerHTML=''; $('#catchDish').innerHTML=''; }
+function openJudge(sp,all,C=jctx(),id){ JUDGE={sp,n:all.length,id,C,v:judge(sp,all,C),done:false}; $('#bRel').firstChild.textContent=C.lake?'湖へ返す':'海へ返す'; const P=JUDGE.v.part; $('#bPart').style.display=P?'':'none'; if(P) $('#bPart').innerHTML=`小さい${P.k}匹だけ返す<small>3</small>`;
+  $('#catchJudge').style.display=''; setTimeout(()=>{ const c=$('#catch .card'); if(c){ c.tabIndex=-1; c.focus({preventScroll:true}); } },0); $('#bNext').style.display='none'; $('#catchVerdict').innerHTML=''; $('#catchDish').innerHTML=''; }
 // ============ 釣果カード・図鑑 ============
-function showCatch(f,isRec,all=[f],first=false){ const sp=f.sp; $('#catch').classList.remove('hide');
+function showCatch(f,isRec,all=[f],first=false,O={}){ const sp=f.sp; $('#catch').classList.remove('hide');
   const c=$('#catchCv'), r=c.getBoundingClientRect(); c.width=r.width*DPR; c.height=r.height*DPR; const x=c.getContext('2d'); x.setTransform(DPR,0,0,DPR,0,0);
-  const w=r.width, h=r.height, L=sp.zone.t==='flat'?Math.min(w*.78,h*.7/(sp.look.h+.16)):w*.78; drawCard(x,w,h,f,L);
+  const w=r.width, h=r.height, L=sp.zone.t==='flat'?Math.min(w*.78,h*.7/(sp.look.h+.16)):w*.78; drawCard(x,w,h,f,L); if(O.restore&&!photoOf(sp)) setTimeout(()=>{ if(!$('#catch').classList.contains('hide')&&photoOf(sp)) drawCard(x,w,h,f,L); },900);
   const name=dispName(sp,f.size); $('#catchName').innerHTML=name+(sp.alias?`<small>（${sp.alias}）</small>`:'')+(f.nuptial?'<small>婚姻色のオス</small>':'');
   const wt=f.w>=1?(f.w).toFixed(2)+'kg':Math.round(f.w*1000)+'g';
   const multi=all.length>1?`<br><span class="rec">${all.length}匹の多点掛け！</span>　${all.map(m=>m.size.toFixed(0)).join('・')}cm　合計${all.reduce((a,m)=>a+m.w,0).toFixed(2)}kg`:'';
   const lab=sp.sizeLab?sp.sizeLab+' ':'';
-  $('#catchSize').innerHTML=`${all.length>1?'最大 ':''}${lab}${f.size.toFixed(1)}cm ／ ${wt}`+(isRec?'<span class="rec">自己記録更新！</span>':'')+(first?'<span class="rec">図鑑に登録！</span>':'')+multi; openJudge(sp,all);
-  $('#catchDesc').textContent=sp.desc; prize(sp,f,first);
-  $('#catchMeta').textContent=`${G.point.name}・${G.clock?ymd(new Date(G.clock)).slice(5).replace('-','/')+' '+hm(new Date(G.clock)):SEASONS[G.season].name}・${RIGS[G.rigId].name}・水深${(f.hookY??f.y).toFixed(0)}m付近`;
+  $('#catchSize').innerHTML=`${all.length>1?'最大 ':''}${lab}${f.size.toFixed(1)}cm ／ ${wt}`+(isRec?'<span class="rec">自己記録更新！</span>':'')+(first?'<span class="rec">図鑑に登録！</span>':'')+multi;
+  const meta=O.meta||`${G.point.name}・${G.clock?ymd(new Date(G.clock)).slice(5).replace('-','/')+' '+hm(new Date(G.clock)):SEASONS[G.season].name}・${RIGS[G.rigId].name}・水深${(f.hookY??f.y).toFixed(0)}m付近`;
+  const C=O.C||jctx(); openJudge(sp,all,C,O.id);
+  if(!O.restore) REC.pending={id:O.id,sp:sp.id,big:all.indexOf(f),fish:all.map(m=>({size:m.size,w:m.w,nuptial:!!m.nuptial,seed:m.seed,hookY:m.hookY})),C:{d:+C.d,ll:C.ll,lake:C.lake,rig:C.rig},meta,isRec,first};
+  saveRec();
+  $('#catchDesc').textContent=sp.desc; if(O.restore){ $('#catchPrize').className=''; $('#catchPrize').innerHTML='<small>前回の釣果の続き：持ち帰るか返すかを選んでください</small>'; $('#catchPrize').className='on r1'; } else prize(sp,f,first);
+  $('#catchMeta').textContent=meta;
 }
+// 判定の途中で閉じた（再読み込みした）釣果カードを開き直す
+function restoreCatch(){ const P=REC.pending; if(!P||typeof P!=='object') return false; const sp=SP.find(s=>s.id===P.sp); if(!sp||!P.fish||!P.fish.length){ delete REC.pending; saveRec(); return false; }
+  const all=P.fish.map(m=>Object.assign({sp,state:'landed',gone:true},m)), C=Object.assign({},P.C,{d:new Date(P.C.d)});
+  showCatch(all[P.big]||all[0],P.isRec,all,P.first,{id:P.id,C,meta:P.meta,restore:1}); return true; }
 // レア・大物・称号アップのご褒美（紙ふぶき・音・帯）
 function prize(sp,f,first){ const el=$('#catchPrize'); el.className=''; el.innerHTML=''; const big=f.size>=sp.size[0]+(sp.size[1]-sp.size[0])*.9;
   const R=sp.rare||0, T0=REC.titleK||0, T=titleIdx().k; let lv=0, head='', sub=[];
@@ -1516,8 +1682,8 @@ function prize(sp,f,first){ const el=$('#catchPrize'); el.className=''; el.inner
   if(big){ lv=Math.max(lv,2); head=head?head+'　大物！':'大物！'; sub.push(`${sp.name}としては特大サイズ`); }
   if(R&&first) sub.push('図鑑に'+(R>=2?'金わく':'★')+'で登録');
   if(T>T0){ REC.titleK=T; saveRec(); lv=Math.max(lv,2); sub.push(`称号が「${TITLES[T].name}」になった`); head=head?head+'　称号アップ！':'称号アップ！'; }
-  if(!lv) return; el.innerHTML=head+(sub.length?`<small>${sub.join('　')}</small>`:''); el.className='on r'+lv;
-  SND.rare(lv); buzz('land'); const n=lv===3?90:lv===2?50:18, cols=['#ffd36a','#ff7a7a','#7affc8','#7ac8ff','#ffffff','#d08aff'];
+  if(!lv){ SND.fanfare(); return; } el.innerHTML=head+(sub.length?`<small>${sub.join('　')}</small>`:''); el.className='on r'+lv;
+  SND.rare(lv); const n=lv===3?90:lv===2?50:18, cols=['#ffd36a','#ff7a7a','#7affc8','#7ac8ff','#ffffff','#d08aff'];
   for(let i=0;i<n;i++){ const c=document.createElement('div'); c.className='confetti'; c.style.left=Math.random()*100+'vw'; c.style.background=cols[i%cols.length];
     c.style.animationDuration=(1.6+Math.random()*1.8)+'s'; c.style.animationDelay=(Math.random()*.6)+'s'; document.body.appendChild(c); setTimeout(()=>c.remove(),4200); } }
 function drawCard(x,w,h,f,L){ x.clearRect(0,0,w,h); const ph=photoOf(f.sp), flat=f.sp.zone.t==='flat'; let headLeft=!(flat&&f.sp.look.dir==='right');
@@ -1549,9 +1715,9 @@ function titleIdx(){ const got=SP.filter(sp=>REC.zukan[sp.id]), n=got.length, r=
 function titleNow(){ const {k,n,r}=titleIdx(), nx=TITLES[k+1]; let need='';
   if(nx) need=nx.all?`図鑑をぜんぶうめる（あと${SP.length-n}種）`:[n<nx.n?`あと${nx.n-n}種`:'',nx.r&&r<nx.r?`★★以上のレアをあと${nx.r-r}種`:''].filter(Boolean).join('・');
   return {name:TITLES[k].name,next:nx&&nx.name,need}; }
-let ZSCROLL=0;
-function zukanBack(){ const was=!$('#zDet').classList.contains('hide'); $('#zDet').classList.add('hide'); $('#zDet').innerHTML=''; $('#zGrid').style.display=''; $('#zStat').style.display=''; if(was) $('#zukan').scrollTop=ZSCROLL; }
-function zukanDetail(sp){ const z=REC.zukan[sp.id]; if(!z) return; const det=$('#zDet'), ds=DISH[sp.id]; ZSCROLL=$('#zukan').scrollTop;
+let ZSCROLL=[0,0];
+function zukanBack(){ const was=!$('#zDet').classList.contains('hide'); $('#zDet').classList.add('hide'); $('#zDet').innerHTML=''; $('#zGrid').style.display=''; $('#zStat').style.display=''; if(was){ $('#zukan').scrollTop=ZSCROLL[0]; $('#zukan .card').scrollTop=ZSCROLL[1]; } }
+function zukanDetail(sp){ const z=REC.zukan[sp.id]; if(!z) return; const det=$('#zDet'), ds=DISH[sp.id]; ZSCROLL=[$('#zukan').scrollTop,$('#zukan .card').scrollTop];
   $('#zGrid').style.display='none'; $('#zStat').style.display='none'; det.classList.remove('hide');
   det.innerHTML=`<button class="sbtn" id="bZBack">← 一覧へ</button><canvas></canvas><h2>${sp.name}${sp.alias?'<span style="font-size:14px;color:var(--sub)">（'+sp.alias+'）</span>':''}</h2>
     <div class="zrec">最大 ${z.best.toFixed(1)}cm・これまで ${z.n}匹</div><div class="zdesc"></div>`+(ds?`<div class="zdish"><span class="dt">料理</span>${ds}${rawNote(sp,ds)}</div><img alt="">`:'');
@@ -1561,7 +1727,10 @@ function zukanDetail(sp){ const z=REC.zukan[sp.id]; if(!z) return; const det=$('
   if(ds) putDish(det.querySelector('img'),sp.id);
   det.parentElement.scrollTop=0; $('#zukan').scrollTop=0; }
 function hint(sp){ return (sp.rare>=2?'めったに釣れない・':'')+hint0(sp); }
-function hint0(sp){ const s=['春','夏','秋','冬'].filter((_,i)=>sp.season[i]>=.8*Math.max(1,Math.max(...sp.season)/1.5)).join('・')||'—'; const best=sp.pt?POINTS.reduce((a,p)=>(sp.pt[p.id]??1)>(sp.pt[a.id]??1)?p:a):null; const hab=sp.water==='lake'?'洞爺湖':sp.water==='both'?'洞爺湖・海の岸近く':best&&(sp.pt[best.id]??1)>1?best.name:sp.zone.t==='flat'?'砂地の底':sp.zone.t==='bottom'?(sp.dmin>=50?'深場の底':'岩場の底近く'):'中層'; const rig=Object.entries(sp.rig).sort((a,b)=>b[1]-a[1])[0][0]; return `${hab}・${s}・${RIGS[rig].name}`; }
+function tanaTxt(sp){ const z=sp.zone; return z.t==='abs'?`水面から${z.top}〜${z.bot}m`:z.t==='flat'?'底':z.t==='mid'?`水深の${Math.round(z.top*10)}〜${Math.round(z.bot*10)}割`:z.b>2.5?`底から${z.a}〜${z.b}m`:'底近く'; }
+function hint0(sp){ if(sp.water==='lake'){ const k=(sp.pt.kogan??1)>=(sp.pt.kooki??1)?'kogan':'kooki'; const s=['春','夏','秋','冬'].filter((_,i)=>sp.season[i]>=.8*Math.max(1,Math.max(...sp.season)/1.5)).join('・')||'—'; const rig=Object.entries(sp.rig).sort((a,b)=>b[1]-a[1])[0][0];
+    return `洞爺湖の◆${spotName(k)}・${tanaTxt(sp)}・${s}・${RIGS[rig].name}`; }
+  const s=['春','夏','秋','冬'].filter((_,i)=>sp.season[i]>=.8*Math.max(1,Math.max(...sp.season)/1.5)).join('・')||'—'; const best=sp.pt?POINTS.reduce((a,p)=>(sp.pt[p.id]??1)>(sp.pt[a.id]??1)?p:a):null; const hab=sp.water==='lake'?'洞爺湖':sp.water==='both'?'洞爺湖・海の岸近く':best&&(sp.pt[best.id]??1)>1?'◆'+best.name+(sp.zone.t==='abs'||sp.zone.t==='mid'?`（${tanaTxt(sp)}）`:''):sp.zone.t==='flat'?'砂地の底':sp.zone.t==='bottom'?(sp.dmin>=50?'深場の底':'岩場の底近く'):`中層（${tanaTxt(sp)}）`; const rig=Object.entries(sp.rig).sort((a,b)=>b[1]-a[1])[0][0]; return `${hab}・${s}・${RIGS[rig].name}`; }
 
 // ============ 出船前の地図（ポイント選び）・潮のグラフ・航跡の小地図 ============
 const MAP={clat:42.315,clon:140.965,mpp:28};
@@ -1596,6 +1765,11 @@ function renderMap(){ const cv=$('#map'); if(!cv) return; const r=cv.getBounding
       const [lx,ly]=llMap(42.585,140.742,w,h); x.font='bold 13px sans-serif'; x.fillStyle='#24415a'; x.fillText('洞爺湖',lx,ly); } }
   // 前に行った地点
   for(const s of REC.spots||[]){ const [px,py]=llMap(s.lat,s.lon,w,h); x.fillStyle='rgba(255,255,255,.75)'; x.beginPath(); x.arc(px,py,4,0,Math.PI*2); x.fill(); }
+  // 代表ポイント（◆と名前）
+  x.font='bold 11px sans-serif'; x.lineJoin='round';
+  for(const p of SPOTS){ const [px,py]=llMap(p.lat,p.lon,w,h); if(px<-80||px>w+80||py<-20||py>h+20) continue;
+    x.fillStyle='#ffe36a'; x.strokeStyle='#24415a'; x.lineWidth=1.5; x.beginPath(); x.moveTo(px,py-6); x.lineTo(px+6,py); x.lineTo(px,py+6); x.lineTo(px-6,py); x.closePath(); x.fill(); x.stroke();
+    const t=spotName(p.k), tw=x.measureText(t).width, tx=px+tw+12>w-(py<h*.6?110:0)?px-tw-9:px+9; x.lineWidth=3; x.strokeStyle='rgba(10,30,45,.85)'; x.strokeText(t,tx,py+4); x.fillStyle='#fff6c8'; x.fillText(t,tx,py+4); }
   // 選んだ地点
   if(G.spot){ const [px,py]=llMap(G.spot.lat,G.spot.lon,w,h); x.fillStyle='#ff7b2c'; x.strokeStyle='#fff'; x.lineWidth=2;
     x.beginPath(); x.moveTo(px,py); x.bezierCurveTo(px-10,py-14,px-9,py-26,px,py-26); x.bezierCurveTo(px+9,py-26,px+10,py-14,px,py); x.fill(); x.stroke();
@@ -1605,13 +1779,19 @@ function renderMap(){ const cv=$('#map'); if(!cv) return; const r=cv.getBounding
   x.fillStyle='rgba(0,0,0,.45)'; x.fillRect(8,h-28,L+16,20); x.fillStyle='#fff'; x.fillRect(16,h-14,L,3); x.font='11px sans-serif'; x.fillText(len>=1000?len/1000+'km':len+'m',18+L/2-12,h-17);
   x.fillStyle='rgba(0,0,0,.45)'; x.fillRect(8,8,22,26); x.fillStyle='#fff'; x.font='bold 12px sans-serif'; x.fillText('N',14,22); x.beginPath(); x.moveTo(19,10); x.lineTo(15,15); x.lineTo(23,15); x.fill();
   x.fillStyle='rgba(255,255,255,.75)'; x.font='10px sans-serif'; x.fillText('GEBCO・約400m格子の目安（根や瀬は出ません。洞爺湖の水深は推定）',8,h-34); }
-function setSpot(lat,lon,keepType){ const d=depthLL(lat,lon); if(d==null||d<3){ $('#spotInfo').innerHTML='<span style="color:#ffb547">そこは陸か岸ぎわです。海か湖の上を選んでください。</span>'; return; }
-  if(inKinryo(lat,lon)){ $('#spotInfo').innerHTML='<span style="color:#ffb547">そこは洞爺湖の禁漁区（中島のまわり2,000m以内）。一年中釣りができません。赤い範囲の外を選んでください。</span>'; return; }
-  const guess=guessBottom(lat,lon)||'sand'; G.spot={lat,lon,type:keepType||guess,guess,lake:isLake(lat,lon)}; spotInfo(); renderMap(); drawTide(); }
+function keepMsg(){ return G.spot?`<br><span class="muted">出船は前に選んだ地点のまま（${spotLabel()}）</span>`:''; }
+function spotLabel(){ const s=G.spot; if(!s) return 'まだ選んでいません'; const d=depthLL(s.lat,s.lon); return `${s.lake?'洞爺湖・':'室蘭沖・'}${s.name?s.name+'・':''}${llText(s.lat,s.lon)}・水深 約${Math.round(d)}m・${BOTTOM_NAME[s.type]}`; }
+function goSpot(){ const el=$('#goSpot'); if(!el) return; const d=G.startClock?new Date(G.startClock):null; el.innerHTML=`<b>出船地点</b> ${spotLabel()}`+(d?`<br>${d.getMonth()+1}/${d.getDate()} ${hm(d)}・${RIGS[G.rigId].name.replace(/（.*）/,'')}`:''); }
+function setSpot(lat,lon,keepType,name){ const d=depthLL(lat,lon); if(d==null||d<3){ $('#spotInfo').innerHTML='<span style="color:#ffb547">そこは陸か岸ぎわです。海か湖の上を選んでください。</span>'+keepMsg(); return; }
+  if(inKinryo(lat,lon)){ $('#spotInfo').innerHTML='<span style="color:#ffb547">そこは洞爺湖の禁漁区（中島のまわり2,000m以内）。一年中釣りができません。赤い範囲の外を選んでください。</span>'+keepMsg(); return; }
+  const guess=guessBottom(lat,lon)||'sand'; G.spot={lat,lon,type:keepType||guess,guess,lake:isLake(lat,lon),...(name?{name}:{})}; spotInfo(); renderMap(); drawTide(); }
 function spotInfo(){ const s=G.spot, el=$('#spotInfo'); if(!s){ el.textContent='地図をタップして釣り場を選んでください。'; return; }
   const d=depthLL(s.lat,s.lon), cls=pointClass(s.type,d);
-  el.innerHTML=(s.lake?'<b>洞爺湖</b>　':'')+`<b>${llText(s.lat,s.lon)}</b>　水深 約${Math.round(d)}m${s.lake?'（推定）':''}　底質：`+['rock','sand','mud'].map(t=>`<button class="sbtn${t===s.type?' on':''}" data-bt="${t}">${BOTTOM_NAME[t]}${t===s.guess?'（推定）':''}</button>`).join(' ')+`<br><span class="muted">→ ${CLASS_NOTE[s.lake?pointClass(s.type,d,true):cls]}${d>55?'・電動リール':''}</span>`+(s.lake?'<br><span style="color:#9fe3ff">洞爺湖：遊漁券が必要。船釣りはマス類 6/1〜6/30・12/1〜3/31、ワカサギ 5/1〜8/31・11/1〜3/31、4時〜19時。マス類15cm以下・ワカサギ5cm以下は返す。船外機の船は月浦から出す</span>':'')+(sakuraZone(s.lat,s.lon)?`<br><span style="color:#9fe3ff">さくらます船釣りライセンス海域（${sakuraZone(s.lat,s.lon)}海域）。12/15〜3/15 はライセンス船でないとサクラマスを狙えない</span>`:'');
-  el.querySelectorAll('[data-bt]').forEach(b=>b.onclick=()=>{ s.type=b.dataset.bt; spotInfo(); }); }
+  el.innerHTML=(s.lake?'<b>洞爺湖</b>　':'')+(s.name?`<b>${s.name}</b>　`:'')+`<b>${llText(s.lat,s.lon)}</b>　水深 約${Math.round(d)}m${s.lake?'（推定）':''}　底質：`+['rock','sand','mud'].map(t=>`<button class="sbtn${t===s.type?' on':''}" data-bt="${t}">${BOTTOM_NAME[t]}${t===s.guess?'（推定）':''}</button>`).join(' ')+`<br><span class="muted">→ ${CLASS_NOTE[s.lake?pointClass(s.type,d,true):cls]}${d>55?'・電動リール':''}</span>`+(s.lake?'<br><span style="color:#9fe3ff">洞爺湖：遊漁券はマス類とワカサギで別。船釣りはマス類 6/1〜6/30・12/1〜3/31（針は竿1本に3個まで＝サビキ不可）、ワカサギ 5/1〜8/31・11/1〜3/31、4時〜19時。マス類15cm以下・ワカサギ5cm以下は返す。禁漁区は中島のまわりだけ地図に表示（ほか4か所は位置未収録・看板で確かめる）。船外機の船は月浦から出す</span>':'')+(sakuraZone(s.lat,s.lon)?`<br><span style="color:#9fe3ff">さくらます船釣りライセンス海域（${sakuraZone(s.lat,s.lon)}海域）。12/15〜3/15 はライセンス船でないとサクラマスを狙えない</span>`:'');
+  el.insertAdjacentHTML('beforeend',`<div class="spotbtns"><span class="muted">代表ポイント（図鑑の手がかりと同じ名前・地図の◆）：</span>`+SPOTS.filter(p=>!!p.type===!s.lake).map(p=>`<button class="sbtn${s.name===spotName(p.k)?' on':''}" data-sp="${p.k}">◆ ${spotName(p.k)}</button>`).join(' ')+'</div>');
+  el.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>goPoint(SPOTS.find(p=>p.k===b.dataset.sp))); bgLoad(bgPick(s));
+  el.querySelectorAll('[data-bt]').forEach(b=>b.onclick=()=>{ s.type=b.dataset.bt; delete s.name; spotInfo(); }); goSpot(); }
+function goPoint(p){ [MAP.clat,MAP.clon]=[p.lat,p.lon]; setSpot(p.lat,p.lon,p.type,spotName(p.k)); renderMap(); }
 function initMapUI(){ const cv=$('#map'); let drag=null;
   cv.addEventListener('pointerdown',e=>{ cv.setPointerCapture(e.pointerId); drag={x:e.clientX,y:e.clientY,lat:MAP.clat,lon:MAP.clon,moved:false}; });
   cv.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; if(Math.hypot(dx,dy)>6) drag.moved=true;
@@ -1619,24 +1799,27 @@ function initMapUI(){ const cv=$('#map'); let drag=null;
   cv.addEventListener('pointerup',e=>{ if(drag&&!drag.moved){ const r=cv.getBoundingClientRect(); const [la,lo]=mapLL(e.clientX-r.left,e.clientY-r.top,r.width,r.height);
       // 前に行った地点の近くを押したらそこを選ぶ
       const near=(REC.spots||[]).find(s=>{ const [px,py]=llMap(s.lat,s.lon,r.width,r.height); return Math.hypot(px-(e.clientX-r.left),py-(e.clientY-r.top))<10; });
-      if(near) setSpot(near.lat,near.lon,near.type); else setSpot(la,lo); } drag=null; });
+      const pin=SPOTS.find(p=>{ const [px,py]=llMap(p.lat,p.lon,r.width,r.height); return Math.hypot(px-(e.clientX-r.left),py-(e.clientY-r.top))<14; });
+      if(pin) setSpot(pin.lat,pin.lon,pin.type,spotName(pin.k)); else if(near) setSpot(near.lat,near.lon,near.type); else setSpot(la,lo); } drag=null; });
   cv.addEventListener('wheel',e=>{ e.preventDefault(); zoomMap(e.deltaY>0?1.25:.8); },{passive:false});
   $('#mzIn').onclick=()=>zoomMap(.7); $('#mzOut').onclick=()=>zoomMap(1.4);
   // 日時
   const days=Object.keys(TIDE).sort(); const di=$('#inDate'); if(days.length){ di.min=days[0]; di.max=days[days.length-1]; }
   const ts=$('#inTime'); for(let m=0;m<24*60;m+=30){ const o=document.createElement('option'); o.value=m; o.textContent=`${String(m/60|0).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; ts.appendChild(o); }
   const now=new Date(); di.value=ymd(now); ts.value=Math.min(23*60+30,Math.round((now.getHours()*60+now.getMinutes())/30)*30);
-  di.onchange=ts.onchange=()=>{ readClock(); drawTide(); }; readClock();
+  di.onchange=ts.onchange=()=>{ readClock(); drawTide(); goSpot(); }; readClock();
   if(!G.spot){ const s=(REC.spots||[])[0]; if(s) setSpot(s.lat,s.lon,s.type); else setSpot(42.300,140.960); }
   if(G.spot&&G.spot.lake){ [MAP.clat,MAP.clon]=LAKE_C; renderMap(); }
   const go=(c,sp)=>{ [MAP.clat,MAP.clon]=c; MAP.mpp=28; setSpot(sp[0],sp[1]); renderMap(); };
   $('#mGoLake').onclick=()=>go(LAKE_C,LAKE_SPOT); $('#mGoSea').onclick=()=>go(SEA_C,[42.300,140.960]); }
 function zoomMap(f){ MAP.mpp=clamp(MAP.mpp*f,6,160); renderMap(); }
 function readClock(){ const v=$('#inDate').value; if(!v) return; const [y,m,d]=v.split('-').map(Number), min=+$('#inTime').value; G.startClock=new Date(y,m-1,d,min/60|0,min%60).getTime(); }
-function drawTide(){ const cv=$('#tideCv'), r=cv.getBoundingClientRect(); if(!r.width||!G.startClock) return; const w=r.width, h=r.height; cv.width=w*DPR; cv.height=h*DPR;
-  const x=cv.getContext('2d'); x.setTransform(DPR,0,0,DPR,0,0); x.clearRect(0,0,w,h); const d=new Date(G.startClock), day=TIDE[ymd(d)];
-  const info=$('#tideInfo'), sun=sunTimes(d,42.32,140.97);
-  if(G.spot&&G.spot.lake){ info.innerHTML=`<b>洞爺湖</b>　湖には潮の満ち引きがありません。船は風でゆっくり流されます。　日の出 ${hm(sun.rise)}・日の入 ${hm(sun.set)}　｜　${hm(d)} は ${timeBand(d)}`; return; }
+function drawTide(){ const cv=$('#tideCv'), lake=!!(G.spot&&G.spot.lake); cv.style.display=lake?'none':''; if(!G.startClock) return;
+  const d=new Date(G.startClock), day=TIDE[ymd(d)], info=$('#tideInfo'), sun=sunTimes(d,42.32,140.97);
+  if(lake){ info.innerHTML=`<b>洞爺湖</b>　湖には潮の満ち引きがありません。船は風でゆっくり流されます。　日の出 ${hm(sun.rise)}・日の入 ${hm(sun.set)}　｜　${hm(d)} は ${timeBand(d)}`; return; }
+  const r=cv.getBoundingClientRect(); if(!r.width) return; const w=r.width, h=r.height; cv.width=w*DPR; cv.height=h*DPR;
+  const x=cv.getContext('2d'); x.setTransform(DPR,0,0,DPR,0,0); x.clearRect(0,0,w,h);
+  if(false){ info.innerHTML=`<b>洞爺湖</b>　湖には潮の満ち引きがありません。船は風でゆっくり流されます。　日の出 ${hm(sun.rise)}・日の入 ${hm(sun.set)}　｜　${hm(d)} は ${timeBand(d)}`; return; }
   if(!day){ info.textContent='この日の潮位データはありません（2026〜2027年のみ）。潮は作り物で動きます。'; return; }
   const pad=26, X=hh=>pad+(w-pad-8)*hh/24, vals=day[0], mn=Math.min(...vals)-10, mx=Math.max(...vals)+10, Y=v=>h-16-(h-30)*(v-mn)/(mx-mn);
   // 夜は暗く
@@ -1669,16 +1852,16 @@ function saveSpot(s){ REC.spots=[{lat:s.lat,lon:s.lon,type:s.type},...(REC.spots
 // ============ メニュー ============
 function buildMenu(){
   const mk=(box,items,isSel,onSel,lab)=>{ const el=$(box); el.innerHTML=''; for(const it of items){ const b=document.createElement('button'); b.className='ch'+(isSel(it)?' sel':''); b.innerHTML=lab(it); b.onclick=()=>{ onSel(it); buildMenu(); }; el.appendChild(b);} };
-  mk('#chRig',Object.keys(RIGS),k=>k===G.rigId,k=>G.rigId=k,k=>`<b>${RIGS[k].name}</b><span>${RIGS[k].desc}</span>`);
-  REC.lic=REC.lic||{}; const LIC={sakura:['さくらます船釣りライセンス船','胆振の沖の制限海域（地図の水色）で 12/15〜3/15 にサクラマスを狙える'],tuna:['クロマグロ大型魚の遊漁届出','水産庁へ届出済み。30kg以上を持ち帰れる（ほかの条件もある）'],toya:['洞爺湖の遊漁券','洞爺湖漁協の遊漁券を買った（船釣りのマス類 1日1,500円・ワカサギ 500円）。ないと湖では釣れない']};
+  setTimeout(goSpot,0); mk('#chRig',Object.keys(RIGS),k=>k===G.rigId,k=>G.rigId=k,k=>`<b>${RIGS[k].name}</b><span>${RIGS[k].desc}</span>`);
+  REC.lic=REC.lic||{}; const LIC={sakura:['さくらます船釣りライセンス船','胆振の沖の制限海域（地図の水色）で 12/15〜3/15 にサクラマスを狙える'],tuna:['クロマグロ大型魚の遊漁届出','水産庁へ届出済み。30kg以上を持ち帰れる（ほかの条件もある）'],toyaMasu:['洞爺湖の遊漁券（マス類）','ヒメマス・ヤマベ・ニジマス用。船釣り1日1,500円'],toyaWaka:['洞爺湖の遊漁券（ワカサギ）','ワカサギ用。1日500円。マス類は釣れない']};
   mk('#chLic',Object.keys(LIC),k=>!!REC.lic[k],k=>{ REC.lic[k]=!REC.lic[k]; saveRec(); },k=>`<b>${REC.lic[k]?'☑':'☐'} ${LIC[k][0]}</b><span>${LIC[k][1]}</span>`);
 }
-function startGame(){ SND.init(); closeRigPop(); setTimeout(rigLabel,0); G.lake=!!(G.useReal&&G.spot&&isLake(G.spot.lat,G.spot.lon)); $('#tideLab').textContent=G.lake?'食い':'潮';
+function startGame(){ if(REC.pending&&typeof REC.pending==='object'){ if($('#catch').classList.contains('hide')&&!restoreCatch()){} else return; } SND.init(); closeRigPop(); setTimeout(rigLabel,0); G.lake=!!(G.useReal&&G.spot&&isLake(G.spot.lat,G.spot.lon)); G.bg=G.useReal?bgPick(G.spot):null; bgLoad(G.bg); $('#tideLab').textContent=G.lake?'食い':'潮';
   if(G.useReal&&G.spot){ readClock(); G.hdg=chooseHeading(G.spot.lat,G.spot.lon); G.point=makeRealPoint(G.spot); G.clock=G.startClock; G.season=monthSeason(new Date(G.clock).getMonth()); saveSpot(G.spot); mmBase=null; $('#mmBox').style.display='block'; }
   else { G.clock=null; G.ffR=null; $('#mmBox').style.display='none'; }
   G.nab=null; G.run=null; NAB.cool=rand(25,60); updateSea(); $('#menu').classList.add('hide'); G.mode='play'; G.drift=G.point.start; G.camX=G.drift; G.t=0; G.count=0; G.fight=null; G.bite=null; G.snag=null; G.camY=2; resetRig(); populate(); initParts(); ffBg=null; resize();
-  G.drag={bait:3,jig:3.5,sabiki:2}[G.rigId]; if(G.point.real){ G.ffR=calcFFR(); setTimeout(()=>toast(`${dir8(G.hdg)}へ流れています`,1600),1900); }
-  $('#iPlace').textContent=`${G.point.name}・${SEASONS[G.season].name}・${RIGS[G.rigId].name}`; toast('<kbd>落とす</kbd>で仕掛けを投入',1800); }
+  G.drag={bait:3,jig:3.5,sabiki:2,bake:4}[G.rigId]; if(G.point.real){ G.ffR=calcFFR(); setTimeout(()=>toast(`${dir8(G.hdg)}へ流れています`,1600),1900); }
+  G.nbT=0; $('#iPlace').textContent=`${G.point.name}・${SEASONS[G.season].name}・${RIGS[G.rigId].name}`; if(REC.tutDone) toast('<kbd>落とす</kbd>で仕掛けを投入',1800); }
 
 // ============ 入力 ============
 function holdBtn(el,on,off){ el.addEventListener('pointerdown',e=>{ e.preventDefault(); el.setPointerCapture(e.pointerId); on(); }); for(const ev of ['pointerup','pointercancel','lostpointercapture']) el.addEventListener(ev,()=>off()); }
@@ -1691,19 +1874,21 @@ $('#bNab').addEventListener('pointerdown',e=>{e.preventDefault();chaseNabura();}
 $('#dMinus').onclick=()=>setDrag(G.drag-.5); $('#dPlus').onclick=()=>setDrag(G.drag+.5);
 $('#bStart').onclick=()=>{ G.useReal=true; startGame(); };
 $('#bRedrift').onclick=()=>{ if(G.bite){ toast('アタリ中！ 先に合わせよう',900); return; } if(G.state==='surface'||G.state==='idle'||G.state==='falling') redrift(); else toast('やりとり中は流し直せません',900); };
-$('#bMenu').onclick=()=>{ G.mode='menu'; G.nab=null; G.run=null; buildMenu(); $('#menu').classList.remove('hide'); G.reel=false; renderMap(); drawTide(); };
-$('#bZukan').onclick=$('#bZukan2').onclick=()=>{ if(G.mode==='play') G.mode='pause'; openZukan(); };
-$('#bZClose').onclick=()=>{ zukanBack(); $('#zukan').classList.add('hide'); if(G.mode==='pause') G.mode='play'; };
-const BACK=[...document.body.children].filter(el=>el.id!=='catch'&&el.tagName!=='SCRIPT');
-new MutationObserver(()=>{ const on=!$('#catch').classList.contains('hide'); for(const el of BACK) el.inert=on; }).observe($('#catch'),{attributes:true,attributeFilter:['class']});
+$('#bMenu').onclick=()=>{ G.mode='menu'; coach(''); G.nab=null; G.run=null; buildMenu(); $('#menu').classList.remove('hide'); G.reel=false; renderMap(); drawTide(); };
+let ZOPENER=null;
+$('#bZukan').onclick=$('#bZukan2').onclick=e=>{ ZOPENER=e.currentTarget; if(G.mode==='play') G.mode='pause'; openZukan(); setTimeout(()=>$('#bZClose').focus({preventScroll:true}),0); };
+$('#bZClose').onclick=()=>{ zukanBack(); $('#zukan').classList.add('hide'); if(G.mode==='pause') G.mode='play'; if(ZOPENER) setTimeout(()=>ZOPENER.focus({preventScroll:true}),0); };
+const BACK=[...document.body.children].filter(el=>el.tagName!=='SCRIPT');
+function updInert(){ const top=!$('#catch').classList.contains('hide')?$('#catch'):!$('#zukan').classList.contains('hide')?$('#zukan'):null; for(const el of BACK) el.inert=!!top&&el!==top; }
+for(const id of ['#catch','#zukan']) new MutationObserver(updInert).observe($(id),{attributes:true,attributeFilter:['class']});
 $('#bNext').onclick=()=>{ document.querySelectorAll('.confetti').forEach(c=>c.remove()); if(JUDGE&&!JUDGE.done) return; $('#catch').classList.add('hide'); resetRig(); };
 $('#bKeep').onclick=()=>decide(true); $('#bRel').onclick=()=>decide(false); $('#bPart').onclick=()=>decide('part');
 let RESET_T=0;
 $('#bReset').onclick=()=>{ const now=Date.now(), m=$('#resetMsg');
   if(now-RESET_T>4000){ RESET_T=now; $('#bReset').textContent='本当に消す？（もう一度押す）'; $('#bReset').style.color='#ff9a9a'; m.textContent='図鑑・釣果・判定の成績が消えます';
     setTimeout(()=>{ if(Date.now()-RESET_T>=4000){ $('#bReset').textContent='記録をリセット'; $('#bReset').style.color=''; m.textContent=''; } },4100); return; }
-  RESET_T=0; REC.zukan={}; REC.log=[]; for(const k of ['judge','tunaBag','sakuraDay','pending']) delete REC[k]; REC.titleK=0; G.count=0; saveRec();
-  $('#bReset').textContent='記録をリセット'; $('#bReset').style.color=''; m.textContent='まっさらにしました（音・振動・許可の設定は残しています）'; };
+  RESET_T=0; REC.zukan={}; REC.log=[]; for(const k of ['judge','tunaBag','sakuraDay','pending','tutDone']) delete REC[k]; REC.titleK=0; G.count=0; saveRec();
+  $('#bReset').textContent='記録をリセット'; $('#bReset').style.color=''; m.textContent='まっさらにしました（音・振動・許可の設定は残しています。初回の案内はまた出ます）'; };
 const rigShort=k=>RIGS[k].name.replace(/（.*）/,'');
 function rigLabel(){ $('#bRig').textContent=rigShort(G.rigId)+' ▾'; }
 function canChangeRig(){ return (G.mode==='play'||(G.mode==='pause'&&G.rigPop))&&!G.bite&&!G.run&&(G.state==='surface'||G.state==='idle'||G.state==='falling'); }
@@ -1722,12 +1907,16 @@ const vibLab=()=>{ $('#bVib').textContent='振動：'+(REC.vib===false?'OFF':'ON
 $('#bVib').onclick=()=>{ REC.vib=REC.vib===false; saveRec(); vibLab(); if(REC.vib) buzz('hit'); };
 $('#bMore').onclick=()=>$('#info').classList.toggle('open');
 // 魚探・竿先・航跡：題名をタップでたたむ／ひらく（端末に覚えておく）
-if(REC.pending){ for(const e of REC.log) if(e.keep===undefined&&e.at>Date.now()-864e5) e.keep=-1; delete REC.pending; saveRec(); }
+if(REC.pending&&typeof REC.pending!=='object'){ for(const e of REC.log) if(e.keep===undefined&&e.at>Date.now()-864e5) e.keep=-1; delete REC.pending; saveRec(); }
+if(REC.lic&&REC.lic.toya!==undefined){ if(REC.lic.toya){ REC.lic.toyaMasu=true; REC.lic.toyaWaka=true; } delete REC.lic.toya; saveRec(); }
+if(REC.tutDone===undefined&&REC.log&&REC.log.length){ REC.tutDone=1; saveRec(); }
+if(G.mode==='menu') restoreCatch();
 if(REC.titleK===undefined){ REC.titleK=titleIdx().k; saveRec(); }
 REC.ui=REC.ui||{};
 for(const id of ['ffBox','rodBox','mmBox']){ const el=$('#'+id); if(REC.ui[id]) el.classList.add('min');
   el.querySelector('.t').addEventListener('click',()=>{ const on=!el.classList.contains('min'); el.classList.toggle('min',on); el.classList.remove('flash'); REC.ui[id]=on; saveRec(); resize(); }); }
-addEventListener('keydown',e=>{ if(G.mode!=='play'){ if(e.code==='Enter'&&G.mode==='menu'&&!/^(INPUT|SELECT|BUTTON|LABEL|A)$/.test(e.target.tagName)){ G.useReal=true; startGame(); } else if((e.code==='Space'||e.code==='Enter')&&!$('#catch').classList.contains('hide')&&(!JUDGE||JUDGE.done)){ e.preventDefault(); $('#bNext').click(); } return; }
+addEventListener('keydown',e=>{ if(!$('#zukan').classList.contains('hide')&&$('#catch').classList.contains('hide')){ if(e.code==='Escape') $('#bZClose').click(); return; }
+  if(G.mode!=='play'&&$('#catch').classList.contains('hide')){ if(e.code==='Enter'&&G.mode==='menu'&&!/^(INPUT|SELECT|BUTTON|LABEL|A)$/.test(e.target.tagName)){ G.useReal=true; startGame(); } return; }
   if(!$('#catch').classList.contains('hide')){ if(e.code==='Digit1'||e.code==='Numpad1') decide(true); else if(e.code==='Digit2'||e.code==='Numpad2') decide(false); else if((e.code==='Digit3'||e.code==='Numpad3')&&v_part(JUDGE)) decide('part'); else if((e.code==='Space'||e.code==='Enter')&&(!JUDGE||JUDGE.done)){ e.preventDefault(); $('#bNext').click(); } return; }
   if(e.repeat&&e.code!=='ArrowUp'&&e.code!=='KeyW') return;
   switch(e.code){ case 'Space': e.preventDefault(); awase(); break; case 'ArrowUp': case 'KeyW': e.preventDefault(); SND.init(); G.reel=true; G.auto=false; break;
@@ -1740,9 +1929,9 @@ addEventListener('blur',()=>{ G.reel=false; });
 function step(dt){ G.t+=dt; G.drift+=G.driftV*dt; if(G.clock) G.clock+=dt*1000*TIME_SCALE;
   if(G.nab){ G.nab.t+=dt; G.nab.x+=G.nab.v*dt; if(bottomAt(G.nab.x)<8) G.nab.v*=-1; } if(G.run) updateRun(dt);
   G.seaAcc=(G.seaAcc||0)+dt; if(G.seaAcc>1){ G.seaAcc=0; updateSea(); drawMini(); nabTick();
-    if(G.point.real&&(G.state==='surface'||G.state==='idle'||G.state==='falling')){ const [la,lo]=offsetLL(G.point.spot.lat,G.point.spot.lon,G.hdg,G.drift), d=depthLL(la,lo);
+    if(G.point.real&&!G.bite&&(G.state==='surface'||G.state==='idle'||G.state==='falling')){ const [la,lo]=offsetLL(G.point.spot.lat,G.point.spot.lon,G.hdg,G.drift), d=depthLL(la,lo);
       if(d==null) redrift('海図の外に出たので流し直した'); else if(d<3.5) redrift('浅くなったので流し直した'); else if(d<6&&!G.shallowWarned){ G.shallowWarned=true; toast('だいぶ浅くなってきた',1200,'','流し直しも考えよう'); } else if(d>=6) G.shallowWarned=false; } }
-  updateRig(dt); updateFish(dt); updateBite(dt); updateBubbles(dt);
+  updateRig(dt); updateFish(dt); updateBite(dt); updateBubbles(dt); noBiteHint(dt);
   if(G.state==='fight') updateFight(dt); else if(G.state==='rooted') updateRooted(dt); else if(G.state==='landing') updateLanding(dt); else if(G.state==='snag') updateSnag(dt);
   G.ffAcc+=dt; if(G.ffAcc>.09){ G.ffAcc=0; updateFF(); nabStock(); maintainFish(); } }
 let last=performance.now();
