@@ -254,7 +254,7 @@ body.phone.land #gauge{bottom:calc(60px + env(safe-area-inset-bottom));width:min
   <div class="card">
     <h1>室蘭沖 ボート釣り</h1>
     <div id="tripSum"></div>
-    <p class="lead">プレジャーボートで室蘭の海へ。地図の「洞爺湖」から湖でも釣れる。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.32）</span></p>
+    <p class="lead">プレジャーボートで室蘭の海へ。地図の「洞爺湖」から湖でも釣れる。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.33）</span></p>
     <h2>ポイント（地図をタップ。ドラッグで移動、＋－で拡大縮小）</h2>
     <div id="mapWrap"><canvas id="map"></canvas><div class="mapbtns"><button class="sbtn" id="mzIn">＋</button><button class="sbtn" id="mzOut">－</button><button class="sbtn place" id="mGoSea">室蘭沖</button><button class="sbtn place" id="mGoLake">洞爺湖</button></div></div>
     <div class="mapnote">地図：GEBCO・約400m格子の目安（根や瀬は出ません。洞爺湖の水深は推定）。◆は代表ポイント、赤は禁漁区（中島のまわり以外は漁協の図から写した目安）、橙は河口規制（河口の位置は目安）</div>
@@ -535,12 +535,16 @@ const SP=[
  {id:'ugui',rule:'ugui',photo:'L',water:'both',seaK:.3,pt:{kogan:1.5,kooki:.3,gansho:1,sunachi:1,okine:0,fukaba:0},name:'ウグイ',habitat:{rock:1,sand:1,mud:.6},dmin:1,dmax:30,zone:{t:'bottom',a:0,b:4},season:[1,1,.8,.4],abund:.8,school:[1,3],
   rig:{bait:1,jig:.15,sabiki:.6},size:[15,45],mode:27,lw:[.011,3],power:.7,bite:'gon',fight:'shake',spd:.6,
   look:{kind:'hokke',h:.22,back:'#5a5a48',side:'#c0bcb0',belly:'#f0e8e0',fin:'#c09070',pat:[]},
-  desc:'川・湖から海の岸近くまで、どこにでもいるコイの仲間。海へ下るものもいて、室蘭の海でも岸近くの浅場で釣れる。春の産卵期には体に赤い筋が出る（婚姻色）。小骨が多く、持ち帰る人は少ないが、甘露煮にして食べる地域もある。'},
+  desc:'川・湖から海の岸近くまで、どこにでもいるコイの仲間。海へ下るものもいて、室蘭の海でも岸近くの浅場で釣れる。春の産卵期には体に赤い筋が出る（婚姻色）。小骨が多く、持ち帰る人は少ないが、甘露煮にして食べる地域がある。'},
+ {id:'warazuka',photo:'L',pt:{sunachi:1.4,fukaba:1.4,okine:.5,gansho:.25},name:'ワラズカ',alias:'ナガヅカ',habitat:{rock:.35,sand:1,mud:1},dmin:5,dmax:300,zone:{t:'bottom',a:0,b:2},season:[1,.3,.7,.9],abund:.5,school:[1,3],
+  rig:{bait:1,jig:.4,sabiki:.2},size:[40,80],mode:58,lw:[.0035,3],power:.65,bite:'gon',fight:'shake',spd:.45,
+  look:{kind:'hokke',h:.11,back:'#5e5034',side:'#a08858',belly:'#e6d8a8',fin:'#6e6040',pat:['mottleFine']},
+  desc:'ウナギのように細長い、タウエガジの仲間（標準和名ナガヅカ）。北海道の沿岸の砂や泥の底（水深300mまで）にすむ。噴火湾では春（4〜5月）に浅い岩場で産卵し、夏は200〜300mの深場へ移って、秋から冬にまた岸へ寄ってくる。白くしまった身は、かまぼこなどのすり身にする。卵は強い毒があるので食べない。'},
 ];
 // バケへの食いつきやすさ（本人の実感 2026-11-21：バケと言えばヒラメ、この辺りではサクラマスも定番、マダラ・ソイも可能性あり。ほかは仮の値）。表にない魚は エサ×0.5 と ジグ×0.4 の大きいほう
 const BAKE_PREF={hirame:1,sakuramasu:.9,madara:.6,kurosoi:.55,shimazoi:.45,mazoi:.55,sukesou:.35,ainame:.5,hokke:.5,toubetsu:.6,gisukajika:.6,yanaginomai:.4,hoshizame:.5,kasube:.4,donko:.5,anago:.4,hakkaku:.3,
   matsukawa:.4,buri:.4,maika:.4,mizudako:.4,hitode:.4,fugu:.4,gaya:.2,souhachi:.2,akagarei:.2,namata:.2,magarei:.15,kurogashira:.15,ishigarei:.15,asaba:.15,sunagarei:.1,
-  saba:.2,sake:.2,shiira:.05,kuromaguro:.02,maiwashi:.02,katakuchi:.02,hatahata:.05,kegani:.3,oozuwai:.3,watari:.2,himemasu:.2,yamabe:.3,niji:.4,brown:.4,wakasagi:0,ugui:.3};
+  saba:.2,sake:.2,shiira:.05,kuromaguro:.02,maiwashi:.02,katakuchi:.02,hatahata:.05,kegani:.3,oozuwai:.3,watari:.2,himemasu:.2,yamabe:.3,niji:.4,brown:.4,wakasagi:0,ugui:.3,warazuka:.35};
 for(const s of SP) if(s.rig.bake==null) s.rig.bake=BAKE_PREF[s.id]??Math.max(s.rig.bait*.5,s.rig.jig*.4);
 const SPI=Object.fromEntries(SP.map(s=>[s.id,s]));
 function dispName(sp,size){ if(sp.id==='buri') return size<60?'フクラギ':'ブリ'; return sp.name; }
@@ -717,7 +721,7 @@ addEventListener('storage',e=>{ if(e.key!==STORE||!e.newValue) return; let s; tr
   const myS={}; if(same) for(const k of SETK) if(JSON.stringify(REC[k])!==BASE[k]) myS[k]=REC[k];
   for(const k of Object.keys(REC)) if(!(k in s)) delete REC[k]; Object.assign(REC,s); validateRec(); for(const id in (s.pendings||{})) SEENP.add(+id); for(const e of (Array.isArray(s.log)?s.log:[])) if(e&&typeof e==='object') SEENL.add(logKey(e)); BASE=setSnap(s); if(Object.keys(myS).length){ Object.assign(REC,myS); saveRec(); }
   if((REC.resetAt||0)!==oldGen){ G.dz={}; G.dj={ok:0,ng:0}; G.dsd={}; staleCard(); }
-  else if(mine.length){ const pend=G.pend||new Set(), dz=G.dz||(G.dz={}); for(const x of mine){ REC.log.push(x); if(!pend.has(keyL(x))){ const a=dz[x.id]||(dz[x.id]={n:0,best:0}); a.n++; a.best=Math.max(a.best,x.size); } }
+  else if(mine.length){ const pend=G.pend||new Set(), dz=G.dz||(G.dz={}); for(const x of mine) REC.log.push(x);
     REC.log.sort((a,b)=>b.at-a.at); REC.log=REC.log.slice(0,100); const done=new Set([...(REC.doneIds||[]),...myD]); REC.doneIds=[...done].slice(-30); REC.pendings=REC.pendings||{}; for(const id in myP) if(!(id in REC.pendings)&&!done.has(+id)&&!SEENP.has(+id)) REC.pendings[id]=myP[id]; saveRec(); }
   if((REC.resetAt||0)===oldGen){ let ch=false; const done=new Set([...(REC.doneIds||[]),...myD]); if(myD.some(id=>!(REC.doneIds||[]).includes(id))){ REC.doneIds=[...done].slice(-30); ch=true; }
     for(const id in (REC.pendings||{})) if(done.has(+id)){ delete REC.pendings[id]; ch=true; } for(const x of REC.log){ const m=myJ.get(keyL(x)); if(m&&x.keep===undefined){ Object.assign(x,m); ch=true; } } if(ch) saveRec(); }
@@ -1705,6 +1709,7 @@ const DISH={
  watari:'塩ゆで・蒸しガニ・味噌汁・パスタ。内子（卵）のあるメスは特においしい',
  kuromaguro:'刺身・寿司・漬け丼・ステーキ。大きな魚なので血抜きと冷やし込みが大事',
  kegani:'（漁業者がとったものは塩ゆでが定番）', oozuwai:'（漁業者がとったものは塩ゆで・カニ汁が定番）',
+ warazuka:'すり身（つみれ・かまぼこ）。白くしまった身をたたいてすり身にし、汁物や揚げ物に。卵は強い毒があるので食べない',
  hitode:'食べない。持ち帰らない', fugu:'毒がある。ふぐ処理の資格がある人しか調理できない',
 };
 const RAWNOTE='<span class="raw">※生（刺身・なめろう・ルイベなど）で食べるときは寄生虫（アニサキス）に注意。予防は −20℃で24時間以上の冷凍か、十分な加熱。冷やすだけ・目で見て取るだけでは防げない。</span>';
