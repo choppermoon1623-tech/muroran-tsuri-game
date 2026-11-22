@@ -254,7 +254,7 @@ body.phone.land #gauge{bottom:calc(60px + env(safe-area-inset-bottom));width:min
   <div class="card">
     <h1>室蘭沖 ボート釣り</h1>
     <div id="tripSum"></div>
-    <p class="lead">プレジャーボートで室蘭の海へ。地図の「洞爺湖」から湖でも釣れる。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.31）</span></p>
+    <p class="lead">プレジャーボートで室蘭の海へ。地図の「洞爺湖」から湖でも釣れる。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.32）</span></p>
     <h2>ポイント（地図をタップ。ドラッグで移動、＋－で拡大縮小）</h2>
     <div id="mapWrap"><canvas id="map"></canvas><div class="mapbtns"><button class="sbtn" id="mzIn">＋</button><button class="sbtn" id="mzOut">－</button><button class="sbtn place" id="mGoSea">室蘭沖</button><button class="sbtn place" id="mGoLake">洞爺湖</button></div></div>
     <div class="mapnote">地図：GEBCO・約400m格子の目安（根や瀬は出ません。洞爺湖の水深は推定）。◆は代表ポイント、赤は禁漁区（中島のまわり以外は漁協の図から写した目安）、橙は河口規制（河口の位置は目安）</div>
@@ -709,6 +709,7 @@ function setSnap(o){ const r={}; for(const k of SETK) r[k]=JSON.stringify(o[k]);
 let BASE=setSnap(REC); // 前回、保存側とそろえたときの設定
 function logKey(e){ return e.j!=null?'j'+e.j+'|'+(e.k||0):e.at+'|'+e.id+'|'+e.size+'|'+(e.k||0); }
 const SEENL=new Set((Array.isArray(REC.log)?REC.log:[]).filter(e=>e&&typeof e==='object').map(logKey));
+let NOSTORE=false; try{ localStorage.getItem(STORE); }catch(_){ NOSTORE=true; } // 保存領域が使えない（このときは画面の中だけで遊ぶ）
 let SAVE_ERR=0; const SEENP=new Set(Object.keys((REC&&REC.pendings)||{}).map(Number)); // 保存側で一度でも見た判定待ち（消えていたら別のタブで判定・整理済み）
 addEventListener('storage',e=>{ if(e.key!==STORE||!e.newValue) return; let s; try{ s=JSON.parse(localStorage.getItem(STORE)||'null'); }catch(_){ return; } if(!s||typeof s!=='object') return;
   const oldGen=REC.resetAt||0, keyL=x=>x.j!=null?'j'+x.j+'|'+(x.k||0):x.at+'|'+x.id+'|'+x.size+'|'+(x.k||0), same=(s.resetAt||0)===oldGen;
@@ -744,7 +745,7 @@ function withLock(fn){ if(navigator.locks){ navigator.locks.request('muroran-tsu
     if(LKDB) return go(LKDB); const o=indexedDB.open('muroran-tsuri-lock',1); o.onupgradeneeded=()=>o.result.createObjectStore('l'); o.onsuccess=()=>{ LKDB=o.result; go(LKDB); }; o.onerror=run; o.onblocked=run; }catch(_){ run(); } }
 function saveRec(){ G.saveQ=1; withLock(()=>{ if(G.saveQ) saveNow(); }); }
 const EXITK=STORE+'.exit.';
-function exitSave(){ if(!G.saveQ) return; try{ localStorage.setItem(EXITK+Date.now()+'.'+Math.random().toString(36).slice(2,8),JSON.stringify({rec:REC,dz:G.dz||{},dj:G.dj||{ok:0,ng:0},dsd:G.dsd||{},seen:[...SEENP],base:BASE})); G.saveQ=0; G.dz={}; G.dj={ok:0,ng:0}; G.dsd={}; }catch(_){ } }
+function exitSave(){ if(!G.saveQ||NOSTORE) return; try{ localStorage.setItem(EXITK+Date.now()+'.'+Math.random().toString(36).slice(2,8),JSON.stringify({rec:REC,dz:G.dz||{},dj:G.dj||{ok:0,ng:0},dsd:G.dsd||{},seen:[...SEENP],base:BASE})); G.saveQ=0; G.dz={}; G.dj={ok:0,ng:0}; G.dsd={}; }catch(_){ } }
 addEventListener('pagehide',exitSave);
 function exitMerge(cur,P){ const r=P.rec, o=x=>x&&typeof x==='object'&&!Array.isArray(x), key=e=>e.j!=null?'j'+e.j+'|'+(e.k||0):e.at+'|'+e.id+'|'+e.size+'|'+(e.k||0);
   const m=new Map(); for(const e of (Array.isArray(cur.log)?cur.log:[])) if(o(e)) m.set(key(e),e); for(const e of (Array.isArray(r.log)?r.log:[])){ if(!o(e)) continue; const c=m.get(key(e)); if(!c||c.keep===undefined&&e.keep!==undefined) m.set(key(e),e); } cur.log=[...m.values()].sort((a,b)=>b.at-a.at).slice(0,100);
@@ -755,11 +756,13 @@ function exitMerge(cur,P){ const r=P.rec, o=x=>x&&typeof x==='object'&&!Array.is
   const done=new Set([...(Array.isArray(cur.doneIds)?cur.doneIds:[]),...(Array.isArray(r.doneIds)?r.doneIds:[])]); cur.doneIds=[...done].slice(-30);
   const cp=o(cur.pendings)?cur.pendings:(cur.pendings={}), seen=new Set(P.seen||[]); for(const id in (o(r.pendings)?r.pendings:{})) if(!(id in cp)&&!done.has(+id)&&!seen.has(+id)) cp[id]=r.pendings[id]; for(const id in cp) if(done.has(+id)) delete cp[id];
   for(const k of SETK) if(P.base&&JSON.stringify(r[k])!==P.base[k]){ if(k in r) cur[k]=r[k]; else delete cur[k]; } }
-function applyExits(){ const ks=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith(EXITK)) ks.push(k); } if(!ks.length) return;
-  withLock(()=>{ let cur=null; try{ cur=JSON.parse(localStorage.getItem(STORE)||'null'); }catch(_){ } if(!cur||typeof cur!=='object') cur={zukan:{},log:[]}; let n=0;
-    for(const k of ks){ let P=null; try{ P=JSON.parse(localStorage.getItem(k)||'null'); }catch(_){ } try{ localStorage.removeItem(k); }catch(_){ } if(!P||!P.rec||(P.rec.resetAt||0)!==(cur.resetAt||0)) continue; exitMerge(cur,P); n++; }
-    if(!n) return; try{ localStorage.setItem(STORE,JSON.stringify(cur)); }catch(_){ return; } for(const k of Object.keys(REC)) delete REC[k]; Object.assign(REC,{zukan:{},log:[],sound:true},cur); validateRec(); for(const id in (REC.pendings||{})) SEENP.add(+id); BASE=setSnap(REC); try{ goSpot(); if(G.mode==='menu'&&$('#catch').classList.contains('hide')&&firstPending()) restoreCatch(); }catch(_){ } }); }
-function saveNow(){ G.saveQ=0; try{ let cur=null; try{ cur=JSON.parse(localStorage.getItem(STORE)||'null'); }catch(_){ } mergeRec(cur); validateRec(); localStorage.setItem(STORE,JSON.stringify(REC)); G.dz={}; G.dj={ok:0,ng:0}; G.dsd={}; G.pend=new Set(); for(const id in (REC.pendings||{})) SEENP.add(+id); BASE=setSnap(REC); for(const e of REC.log) SEENL.add(logKey(e)); SAVE_ERR=0; }catch(e){ if(!SAVE_ERR){ SAVE_ERR=1; setTimeout(()=>toast('記録を保存できません',2800,'','ブラウザの保存領域がいっぱいか、保存できない設定です'),0); } } }
+function applyExits(){ if(NOSTORE) return; const ks=[]; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith(EXITK)) ks.push(k); } }catch(_){ return; } if(!ks.length) return;
+  withLock(()=>{ try{ let cur=null; try{ cur=JSON.parse(localStorage.getItem(STORE)||'null'); }catch(_){ } if(!cur||typeof cur!=='object') cur={zukan:{},log:[]}; const doneX=new Set(Array.isArray(cur.exitDone)?cur.exitDone:[]), used=[];
+    for(const k of ks){ used.push(k); if(doneX.has(k)) continue; let P=null; try{ P=JSON.parse(localStorage.getItem(k)||'null'); }catch(_){ } if(!P||!P.rec||(P.rec.resetAt||0)!==(cur.resetAt||0)) continue; exitMerge(cur,P); doneX.add(k); }
+    cur.exitDone=[...doneX].slice(-20); let wrote=true; try{ localStorage.setItem(STORE,JSON.stringify(cur)); }catch(_){ wrote=false; }
+    if(wrote) for(const k of used){ try{ localStorage.removeItem(k); }catch(_){ } } // 書けたときだけ差分を消す（書けなければ残し、取り込み済みの印で二重に数えない）
+    for(const k of Object.keys(REC)) delete REC[k]; Object.assign(REC,{zukan:{},log:[],sound:true},cur); validateRec(); for(const id in (REC.pendings||{})) SEENP.add(+id); BASE=setSnap(REC); try{ goSpot(); if(G.mode==='menu'&&$('#catch').classList.contains('hide')&&firstPending()) restoreCatch(); }catch(_){ } }catch(_){ } }); }
+function saveNow(){ G.saveQ=0; if(NOSTORE){ SAVE_ERR=0; if(!G.noStoreMsg){ G.noStoreMsg=1; setTimeout(()=>toast('このブラウザでは記録を保存できません',3400,'','遊べますが、ページを閉じると図鑑や釣果は消えます'),0); } return; } try{ let cur=null; try{ cur=JSON.parse(localStorage.getItem(STORE)||'null'); }catch(_){ } mergeRec(cur); validateRec(); localStorage.setItem(STORE,JSON.stringify(REC)); G.dz={}; G.dj={ok:0,ng:0}; G.dsd={}; G.pend=new Set(); for(const id in (REC.pendings||{})) SEENP.add(+id); BASE=setSnap(REC); for(const e of REC.log) SEENL.add(logKey(e)); SAVE_ERR=0; }catch(e){ if(!SAVE_ERR){ SAVE_ERR=1; setTimeout(()=>toast('記録を保存できません',2800,'','ブラウザの保存領域がいっぱいか、保存できない設定です'),0); } } }
 // 読んだ記録を項目ごとに確かめる（こわれた項目だけ捨てて、読める記録は残す）
 function validateRec(){ const o=x=>x&&typeof x==='object'&&!Array.isArray(x);
   if(!o(REC.zukan)) REC.zukan={}; for(const k in REC.zukan){ const z=REC.zukan[k]; if(!o(z)||typeof z.n!=='number'||typeof z.best!=='number') delete REC.zukan[k]; }
@@ -1855,7 +1858,7 @@ function showCatch(f,isRec,all=[f],first=false,O={}){ const sp=f.sp; $('#catch')
   const multi=all.length>1?`<br><span class="rec">${all.length}匹の多点掛け！</span>　${all.map(m=>m.size.toFixed(0)).join('・')}cm　合計${all.reduce((a,m)=>a+m.w,0).toFixed(2)}kg`:'';
   const lab=sp.sizeLab?sp.sizeLab+' ':'';
   $('#catchSize').innerHTML=`${all.length>1?'最大 ':''}${lab}${f.size.toFixed(1)}cm ／ ${wt}`+(isRec?'<span class="rec">自己記録更新！</span>':'')+(first?'<span class="rec">図鑑に登録！</span>':'')+''+multi;
-  const HT=(f.hit&&f.hit.t)||G.clock, meta=O.meta||`${G.point.name}・${HT?'ヒット '+ymd(new Date(HT)).slice(5).replace('-','/')+' '+hm(new Date(HT))+(G.clock&&Math.abs(G.clock-HT)>=6e4?'・取り込み '+hm(new Date(G.clock)):''):SEASONS[G.season].name}${f.hit&&f.hit.st?'（'+f.hit.st+'）':''}・${RIGS[G.rigId].name}・ヒットしたタナ 約${(f.hookY??f.y).toFixed(0)}m${f.hit&&f.hit.ll?'・ヒット地点 '+llText(f.hit.ll[0],f.hit.ll[1]):''}`;
+  const HT=(f.hit&&f.hit.t)||G.clock, meta=O.meta||`${G.point.name}・${HT?'ヒット '+ymd(new Date(HT)).slice(5).replace('-','/')+' '+hm(new Date(HT))+(G.clock&&Math.abs(G.clock-HT)>=6e4?'・取り込み '+hm(new Date(G.clock)):''):SEASONS[G.season].name}${f.hit&&f.hit.st?'（'+f.hit.st+'）':''}・${RIGS[G.rigId].name}・ヒットしたタナ 約${(f.hookY??f.y??0).toFixed(0)}m${f.hit&&f.hit.ll?'・ヒット地点 '+llText(f.hit.ll[0],f.hit.ll[1]):''}`;
   const C=O.C||Object.assign(jctx(),f.lic?{lic:f.lic}:{}), hitC=O.restore?(O.hitC||null):f.hit&&f.hit.t&&f.hit.t!==C.d.getTime()?Object.assign({},C,{d:new Date(f.hit.t),ll:f.hit.ll||C.ll}):null; openJudge(sp,all,C,O.id,hitC); JUDGE.tgt=!!O.tgt; JUDGE.licT=O.licT!==false; if(O.tgt&&JUDGE.v.lv!=='check'&&!JUDGE.v.chk&&!(JUDGE.v.lv==='rule'&&!/全長|cm以下|尾まで|各期間1尾/.test(JUDGE.v.why||''))&&!aimBadTuna(sp,all,hitC?hitC.d:C.d,true,O.licT!==false)) $('#catchSize').insertAdjacentHTML('beforeend','<span class="rec">◎ 狙い達成！</span>');
   if(!O.restore) (REC.pendings||(REC.pendings={}))[O.id]={id:O.id,sp:sp.id,big:all.indexOf(f),fish:all.map(m=>({size:m.size,w:m.w,nuptial:!!m.nuptial,seed:m.seed,hookY:m.hookY})),C:{d:+C.d,ll:C.ll,lake:C.lake,rig:C.rig,...(C.lic?{lic:C.lic}:{})},hitC:hitC?{d:+hitC.d,ll:hitC.ll}:null,meta,isRec,first,tgt:!!O.tgt,licT:O.licT!==false};
   saveRec();
@@ -2185,7 +2188,7 @@ $('#bReset').onclick=()=>{ const now=Date.now(), m=$('#resetMsg');
   if(now-RESET_T>4000){ RESET_T=now; $('#bReset').textContent='本当に消す？（もう一度押す）'; $('#bReset').style.color='#ff9a9a'; m.textContent='図鑑・釣果・判定の成績が消えます';
     setTimeout(()=>{ if(Date.now()-RESET_T>=4000){ $('#bReset').textContent='記録をリセット'; $('#bReset').style.color=''; m.textContent=''; } },4100); return; }
   RESET_T=0; const doReset=()=>{ const R2=JSON.parse(JSON.stringify(REC)); R2.resetAt=Date.now(); delete R2.doneIds; R2.zukan={}; R2.log=[]; for(const k of ['judge','tunaBag','sakuraDay','pending','pendings','tutDone','lastTrip']) delete R2[k]; R2.titleK=0;
-    let ok=true; try{ localStorage.setItem(STORE,JSON.stringify(R2)); }catch(_){ ok=false; }
+    let ok=true; if(!NOSTORE) try{ localStorage.setItem(STORE,JSON.stringify(R2)); }catch(_){ ok=false; }
     if(ok){ for(const k of Object.keys(REC)) delete REC[k]; Object.assign(REC,R2); G.count=0; G.dz={}; G.dj={ok:0,ng:0}; G.dsd={}; G.pend=new Set(); G.saveQ=0; SAVE_ERR=0; }
     $('#bReset').textContent='記録をリセット'; $('#bReset').style.color=''; m.textContent=!ok?'リセットを保存できませんでした。もう一度「記録をリセット」を2回押してください（ブラウザの保存領域がいっぱいか、保存できない設定です）':'まっさらにしました（音・振動・許可の設定は残しています。初回の案内はまた出ます）'; };
   withLock(doReset); };
@@ -2217,7 +2220,7 @@ $('#bMm').onclick=()=>{ const m=$('#mmBox'); m.classList.toggle('pshow'); $('#bM
 const rodLab=()=>{ $('#bRodAuto').textContent='竿先：'+((REC.ui||{}).rodMode==='on'?'常に表示':'自動'); }; setTimeout(rodLab,0);
 $('#bRodAuto').onclick=()=>{ REC.ui=REC.ui||{}; REC.ui.rodMode=REC.ui.rodMode==='on'?'auto':'on'; saveRec(); rodLab(); rodAuto(); };
 // 魚探・竿先・航跡：題名をタップでたたむ／ひらく（端末に覚えておく）
-applyExits();
+applyExits(); if(NOSTORE){ G.noStoreMsg=1; setTimeout(()=>toast('このブラウザでは記録を保存できません',3400,'','遊べますが、ページを閉じると図鑑や釣果は消えます'),600); }
 if(REC.pending&&typeof REC.pending!=='object'){ for(const e of REC.log) if(e.keep===undefined&&e.at>Date.now()-864e5) e.keep=-1; delete REC.pending; saveRec(); }
 if(REC.lic&&REC.lic.toya!==undefined){ if(REC.lic.toya){ REC.lic.toyaMasu=true; REC.lic.toyaWaka=true; } delete REC.lic.toya; saveRec(); }
 if(REC.tutDone===undefined&&REC.log&&REC.log.length){ REC.tutDone=1; saveRec(); }
