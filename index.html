@@ -252,6 +252,12 @@ body.phone.land #gauge{bottom:calc(60px + env(safe-area-inset-bottom));width:min
 .menu-options{margin:14px var(--menu-pad) 0}
 #chLic .ch b{font-size:13px}
 #menu #tripSum{margin:12px var(--menu-pad) 0}
+#verNote{margin:10px var(--menu-pad) 0;padding:7px 12px;border:1px solid var(--line);border-radius:10px;background:#0f2633;color:var(--sub);font-size:12px;line-height:1.55}
+#verNote b{color:var(--ink)}
+#verNote.new{background:#3a2a0c;border-color:#ffb547;color:#ffe2a8;font-size:13.5px;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+#verNote.new b{color:#ffd36a}
+#verNote .sbtn{background:linear-gradient(#ffda88,#ffb04f);color:#1b1206;font-weight:800;border:0}
+@media(max-height:500px) and (orientation:landscape){ #verNote:not(.new){margin-top:6px;padding:3px 10px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} }
 .menu-notes{margin:12px var(--menu-pad) 16px}
 .menu-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .menu-tools .sbtn{min-height:34px}
@@ -352,6 +358,7 @@ body.phone.land #gauge{bottom:calc(60px + env(safe-area-inset-bottom));width:min
           </div>
         </div>
       </header>
+      <div id="verNote" role="status"><b>試作 v0.36</b>　いつも最新版で遊べるよう、ときどきページを再読み込み（更新）してください。新しい版が出たら、ここでお知らせします。</div>
       <div id="tripSum"></div>
       <div class="menu-main">
         <section class="menu-block">
@@ -393,7 +400,7 @@ body.phone.land #gauge{bottom:calc(60px + env(safe-area-inset-bottom));width:min
           <p>①<kbd>落とす</kbd>で仕掛けを沈める（底に着くと「着底」）　②<kbd>巻く</kbd>でタナ（深さ）を調整。魚探の魚の反応に合わせよう　③<kbd>誘う</kbd>で仕掛けを動かす（ジグは落とすときや巻くときにも食うが、しゃくった直後がいちばん反応が出やすい）　④竿先がグッと入ったら<kbd>合わせ</kbd>　⑤やりとりは<kbd>巻く</kbd>を押し続ける。張りがドラグを超えると糸が出る。張りすぎると切れる、ゆるめるとバレる　⑥大物は水面で<kbd>合わせ</kbd>＝タモ入れ。</p>
           <p>ボートは潮で流され、実際の海底地形（GEBCO）に沿って深さが変わります。浅くなりすぎたら<kbd>流し直し</kbd>。潮がよく動く時間と朝夕のまずめ時は魚の食いが立ちます。ゲームの中では5分で1時間が進みます。岩場で底を引きずると<b>根掛かり</b>。浅くなったら巻き上げ、深くなったら落とし直して「底を取り直す」のが船釣りのコツです。</p>
         </details>
-        <div class="src">試作 v0.35 ／ 海底地形：GEBCO Compilation Group (2025) GEBCO_2025 Grid・(2020) GEBCO_2020 Grid（約400m格子のため根や瀬は表現できず、底質に合わせた起伏を足しています。洞爺湖の水深は湖の形から推定した作り物）／潮位：気象庁 潮位表「室蘭」／洞爺湖の決まり：洞爺湖漁業協同組合「遊漁について」（2026年）</div>
+        <div class="src">試作 v0.36 ／ 海底地形：GEBCO Compilation Group (2025) GEBCO_2025 Grid・(2020) GEBCO_2020 Grid（約400m格子のため根や瀬は表現できず、底質に合わせた起伏を足しています。洞爺湖の水深は湖の形から推定した作り物）／潮位：気象庁 潮位表「室蘭」／洞爺湖の決まり：洞爺湖漁業協同組合「遊漁について」（2026年）</div>
       </div>
     </div>
     <div id="goBar"><div id="goSpot"></div><button class="go" id="bStart">出船！</button></div>
@@ -829,6 +836,17 @@ function drawFlat(c,L,fish,lk,o){
 
 // ============ 記録（ブラウザ内） ============
 const STORE='muroran-tsuri-game.v1';
+// ============ 版の確認（公開先の version.json と比べる） ============
+const APP_VER='0.36';
+function verNewer(a,b){ const p=s=>String(s).split('.').map(n=>parseInt(n,10)||0), x=p(a), y=p(b); for(let i=0;i<Math.max(x.length,y.length);i++){ if((x[i]||0)!==(y[i]||0)) return (x[i]||0)>(y[i]||0); } return false; }
+function checkVer(force){ if(location.protocol==='file:'&&!window.__verTest) return; const now=Date.now(); if(!force&&now-(checkVer.t||0)<6e5) return; checkVer.t=now;
+  fetch('version.json?t='+now,{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&j.v&&verNewer(j.v,APP_VER)) showNewVer(String(j.v)); }).catch(()=>{ }); }
+function showNewVer(v){ const el=document.getElementById('verNote'); if(!el||el.dataset.v===v) return; el.dataset.v=v; el.className='new';
+  el.innerHTML=`<span><b>新しい版（v${v}）が出ています</b>　いまは v${APP_VER}。更新すると最新版になります（図鑑や釣果はそのまま）</span><button class="sbtn" id="bUpd">更新する</button>`;
+  document.getElementById('bUpd').onclick=()=>{ try{ if(G.saveQ) saveNow(); }catch(_){ } location.replace(location.pathname+'?v='+encodeURIComponent(v)); };
+  try{ if(G.mode==='play'&&!G.fight&&!G.bite) toast('新しい版が出ています',2000,'','釣行を終えたら、出船画面の「更新する」で最新版に'); }catch(_){ } }
+addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') checkVer(); });
+addEventListener('pageshow',e=>{ if(e.persisted) checkVer(true); });
 let REC={zukan:{},log:[],sound:true};
 try{ const s=JSON.parse(localStorage.getItem(STORE)||'null'); if(s) REC=Object.assign(REC,s); }catch(e){}
 const SETK=['sound','calm','vib','lic','ui','target','tgtSeq','spots','tutDone','titleK'], SUBK=['lic','ui'];
@@ -2496,7 +2514,7 @@ $('#bMm').onclick=()=>{ const m=$('#mmBox'); m.classList.toggle('pshow'); $('#bM
 const rodLab=()=>{ $('#bRodAuto').textContent='竿先：'+((REC.ui||{}).rodMode==='on'?'常に表示':'自動'); }; setTimeout(rodLab,0);
 $('#bRodAuto').onclick=()=>{ REC.ui=REC.ui||{}; REC.ui.rodMode=REC.ui.rodMode==='on'?'auto':'on'; saveRec(); rodLab(); rodAuto(); };
 // 魚探・竿先・航跡：題名をタップでたたむ／ひらく（端末に覚えておく）
-applyExits(); if(NOSTORE){ G.noStoreMsg=1; try{ goSpot(); }catch(_){ } setTimeout(()=>toast('このブラウザでは記録を保存できません',3400,'','遊べますが、ページを閉じると図鑑や釣果は消えます'),600); }
+applyExits(); setTimeout(()=>checkVer(true),1500); if(NOSTORE){ G.noStoreMsg=1; try{ goSpot(); }catch(_){ } setTimeout(()=>toast('このブラウザでは記録を保存できません',3400,'','遊べますが、ページを閉じると図鑑や釣果は消えます'),600); }
 if(REC.pending&&typeof REC.pending!=='object'){ for(const e of REC.log) if(e.keep===undefined&&e.at>Date.now()-864e5) e.keep=-1; delete REC.pending; saveRec(); }
 if(REC.lic&&REC.lic.toya!==undefined){ if(REC.lic.toya){ REC.lic.toyaMasu=true; REC.lic.toyaWaka=true; } delete REC.lic.toya; saveRec(); }
 if(REC.tutDone===undefined&&REC.log&&REC.log.length){ REC.tutDone=1; saveRec(); }
@@ -2552,7 +2570,7 @@ function frame(now){ const dt=Math.min(.05,(now-last)/1000); last=now; if(innerW
 resize(); buildMenu(); initMapUI(); renderMap(); drawTide(); populate(); initParts(); requestAnimationFrame(frame);
 addEventListener('resize',()=>{ if(G.mode==='menu'){ renderMap(); drawTide(); } });
 // テスト用
-window.G=G; window.SPI=SPI; window.__pts=POINTS; window.__dbg={startDolphins,endDolphins,dolTick,dolNear,judge,decide:k=>decideCore(k,JUDGE,true),sakuraZone,tunaPeriod,startNabura,chaseNabura,endNabura,nabStock,setSpot,redrift,updateSea,step,populate,resetRig,sasou,bottomAt,startBite,hookFish,landFish,awase,clutch,startGame,drawFish,showCatch,makeFish};
+window.G=G; window.SPI=SPI; window.__pts=POINTS; window.__dbg={checkVer,showNewVer,verNewer,startDolphins,endDolphins,dolTick,dolNear,judge,decide:k=>decideCore(k,JUDGE,true),sakuraZone,tunaPeriod,startNabura,chaseNabura,endNabura,nabStock,setSpot,redrift,updateSea,step,populate,resetRig,sasou,bottomAt,startBite,hookFish,landFish,awase,clutch,startGame,drawFish,showCatch,makeFish};
 </script>
 </body>
 </html>
