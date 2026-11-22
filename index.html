@@ -254,7 +254,7 @@ body.phone.land #gauge{bottom:calc(60px + env(safe-area-inset-bottom));width:min
   <div class="card">
     <h1>室蘭沖 ボート釣り</h1>
     <div id="tripSum"></div>
-    <p class="lead">プレジャーボートで室蘭の海へ。地図の「洞爺湖」から湖でも釣れる。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.30）</span></p>
+    <p class="lead">プレジャーボートで室蘭の海へ。地図の「洞爺湖」から湖でも釣れる。魚探で魚を探し、タナを合わせ、竿先のアタリを見て合わせる。<span style="opacity:.7">（試作 v0.31）</span></p>
     <h2>ポイント（地図をタップ。ドラッグで移動、＋－で拡大縮小）</h2>
     <div id="mapWrap"><canvas id="map"></canvas><div class="mapbtns"><button class="sbtn" id="mzIn">＋</button><button class="sbtn" id="mzOut">－</button><button class="sbtn place" id="mGoSea">室蘭沖</button><button class="sbtn place" id="mGoLake">洞爺湖</button></div></div>
     <div class="mapnote">地図：GEBCO・約400m格子の目安（根や瀬は出ません。洞爺湖の水深は推定）。◆は代表ポイント、赤は禁漁区（中島のまわり以外は漁協の図から写した目安）、橙は河口規制（河口の位置は目安）</div>
@@ -704,11 +704,17 @@ function drawFlat(c,L,fish,lk,o){
 const STORE='muroran-tsuri-game.v1';
 let REC={zukan:{},log:[],sound:true};
 try{ const s=JSON.parse(localStorage.getItem(STORE)||'null'); if(s) REC=Object.assign(REC,s); }catch(e){}
+const SETK=['sound','calm','lic','ui','target','tgtSeq','spots','tutDone','titleK'];
+function setSnap(o){ const r={}; for(const k of SETK) r[k]=JSON.stringify(o[k]); return r; }
+let BASE=setSnap(REC); // 前回、保存側とそろえたときの設定
+function logKey(e){ return e.j!=null?'j'+e.j+'|'+(e.k||0):e.at+'|'+e.id+'|'+e.size+'|'+(e.k||0); }
+const SEENL=new Set((Array.isArray(REC.log)?REC.log:[]).filter(e=>e&&typeof e==='object').map(logKey));
 let SAVE_ERR=0; const SEENP=new Set(Object.keys((REC&&REC.pendings)||{}).map(Number)); // 保存側で一度でも見た判定待ち（消えていたら別のタブで判定・整理済み）
 addEventListener('storage',e=>{ if(e.key!==STORE||!e.newValue) return; let s; try{ s=JSON.parse(localStorage.getItem(STORE)||'null'); }catch(_){ return; } if(!s||typeof s!=='object') return;
   const oldGen=REC.resetAt||0, keyL=x=>x.j!=null?'j'+x.j+'|'+(x.k||0):x.at+'|'+x.id+'|'+x.size+'|'+(x.k||0), same=(s.resetAt||0)===oldGen;
-  const ks=new Set(Array.isArray(s.log)?s.log.filter(x=>x&&typeof x==='object').map(keyL):[]), mine=same?REC.log.filter(x=>!ks.has(keyL(x))&&x.at>Date.now()-6e5):[], myP=Object.assign({},REC.pendings||{}), myD=REC.doneIds||[], myJ=new Map(REC.log.filter(x=>x.keep!==undefined).map(x=>[keyL(x),Object.fromEntries(['keep','ans','res'].filter(k=>x[k]!==undefined).map(k=>[k,x[k]]))]));
-  for(const k of Object.keys(REC)) if(!(k in s)) delete REC[k]; Object.assign(REC,s); validateRec(); for(const id in (s.pendings||{})) SEENP.add(+id);
+  const ks=new Set(Array.isArray(s.log)?s.log.filter(x=>x&&typeof x==='object').map(keyL):[]), mine=same?REC.log.filter(x=>!ks.has(keyL(x))&&!SEENL.has(keyL(x))):[], myP=Object.assign({},REC.pendings||{}), myD=REC.doneIds||[], myJ=new Map(REC.log.filter(x=>x.keep!==undefined).map(x=>[keyL(x),Object.fromEntries(['keep','ans','res'].filter(k=>x[k]!==undefined).map(k=>[k,x[k]]))]));
+  const myS={}; if(same) for(const k of SETK) if(JSON.stringify(REC[k])!==BASE[k]) myS[k]=REC[k];
+  for(const k of Object.keys(REC)) if(!(k in s)) delete REC[k]; Object.assign(REC,s); validateRec(); for(const id in (s.pendings||{})) SEENP.add(+id); for(const e of (Array.isArray(s.log)?s.log:[])) if(e&&typeof e==='object') SEENL.add(logKey(e)); BASE=setSnap(s); if(Object.keys(myS).length){ Object.assign(REC,myS); saveRec(); }
   if((REC.resetAt||0)!==oldGen){ G.dz={}; G.dj={ok:0,ng:0}; G.dsd={}; staleCard(); }
   else if(mine.length){ const pend=G.pend||new Set(), dz=G.dz||(G.dz={}); for(const x of mine){ REC.log.push(x); if(!pend.has(keyL(x))){ const a=dz[x.id]||(dz[x.id]={n:0,best:0}); a.n++; a.best=Math.max(a.best,x.size); } }
     REC.log.sort((a,b)=>b.at-a.at); REC.log=REC.log.slice(0,100); const done=new Set([...(REC.doneIds||[]),...myD]); REC.doneIds=[...done].slice(-30); REC.pendings=REC.pendings||{}; for(const id in myP) if(!(id in REC.pendings)&&!done.has(+id)&&!SEENP.has(+id)) REC.pendings[id]=myP[id]; saveRec(); }
@@ -729,15 +735,31 @@ function mergeRec(cur){ const o=x=>x&&typeof x==='object'&&!Array.isArray(x); if
   const done=new Set([...(REC.doneIds||[]),...(Array.isArray(cur.doneIds)?cur.doneIds:[])]); REC.doneIds=[...done].slice(-30);
   const cp=o(cur.pendings)?cur.pendings:{}; if(o(cur.pending)) cp[cur.pending.id]=cur.pending; REC.pendings=o(REC.pendings)?REC.pendings:{}; for(const id in cp) if(!(id in REC.pendings)&&!done.has(+id)) REC.pendings[id]=cp[id];
   for(const id in REC.pendings) if(done.has(+id)||!(id in cp)&&SEENP.has(+id)) delete REC.pendings[id]; for(const id in cp) SEENP.add(+id);
-  if(!REC.lastTrip&&o(cur.lastTrip)) REC.lastTrip=cur.lastTrip; }
+  if(!REC.lastTrip&&o(cur.lastTrip)) REC.lastTrip=cur.lastTrip;
+  for(const k of SETK) if(JSON.stringify(REC[k])===BASE[k]){ if(k in cur) REC[k]=cur[k]; else delete REC[k]; } }
 let LKDB=null;
 function withLock(fn){ if(navigator.locks){ navigator.locks.request('muroran-tsuri-rec',()=>{ fn(); }); return; }
   let done=false; const run=()=>{ if(!done){ done=true; fn(); } };
   try{ const go=db=>{ try{ const tx=db.transaction('l','readwrite'), r=tx.objectStore('l').put(Date.now(),'k'); r.onsuccess=run; r.onerror=run; tx.onabort=run; }catch(_){ run(); } };
     if(LKDB) return go(LKDB); const o=indexedDB.open('muroran-tsuri-lock',1); o.onupgradeneeded=()=>o.result.createObjectStore('l'); o.onsuccess=()=>{ LKDB=o.result; go(LKDB); }; o.onerror=run; o.onblocked=run; }catch(_){ run(); } }
 function saveRec(){ G.saveQ=1; withLock(()=>{ if(G.saveQ) saveNow(); }); }
-addEventListener('pagehide',()=>{ if(G.saveQ) saveNow(); }); document.addEventListener('visibilitychange',()=>{ if(document.hidden&&G.saveQ) saveNow(); });
-function saveNow(){ G.saveQ=0; try{ let cur=null; try{ cur=JSON.parse(localStorage.getItem(STORE)||'null'); }catch(_){ } mergeRec(cur); validateRec(); localStorage.setItem(STORE,JSON.stringify(REC)); G.dz={}; G.dj={ok:0,ng:0}; G.dsd={}; G.pend=new Set(); for(const id in (REC.pendings||{})) SEENP.add(+id); SAVE_ERR=0; }catch(e){ if(!SAVE_ERR){ SAVE_ERR=1; setTimeout(()=>toast('記録を保存できません',2800,'','ブラウザの保存領域がいっぱいか、保存できない設定です'),0); } } }
+const EXITK=STORE+'.exit.';
+function exitSave(){ if(!G.saveQ) return; try{ localStorage.setItem(EXITK+Date.now()+'.'+Math.random().toString(36).slice(2,8),JSON.stringify({rec:REC,dz:G.dz||{},dj:G.dj||{ok:0,ng:0},dsd:G.dsd||{},seen:[...SEENP],base:BASE})); G.saveQ=0; G.dz={}; G.dj={ok:0,ng:0}; G.dsd={}; }catch(_){ } }
+addEventListener('pagehide',exitSave);
+function exitMerge(cur,P){ const r=P.rec, o=x=>x&&typeof x==='object'&&!Array.isArray(x), key=e=>e.j!=null?'j'+e.j+'|'+(e.k||0):e.at+'|'+e.id+'|'+e.size+'|'+(e.k||0);
+  const m=new Map(); for(const e of (Array.isArray(cur.log)?cur.log:[])) if(o(e)) m.set(key(e),e); for(const e of (Array.isArray(r.log)?r.log:[])){ if(!o(e)) continue; const c=m.get(key(e)); if(!c||c.keep===undefined&&e.keep!==undefined) m.set(key(e),e); } cur.log=[...m.values()].sort((a,b)=>b.at-a.at).slice(0,100);
+  if(!o(cur.zukan)) cur.zukan={}; for(const k in (P.dz||{})){ const a=cur.zukan[k]||(cur.zukan[k]={n:0,best:0}); a.n+=P.dz[k].n||0; a.best=Math.max(a.best,P.dz[k].best||0); }
+  if(P.dj&&(P.dj.ok||P.dj.ng)){ const j=o(cur.judge)?cur.judge:(cur.judge={ok:0,ng:0}); j.ok+=P.dj.ok||0; j.ng+=P.dj.ng||0; }
+  for(const d in (P.dsd||{})){ const s=o(cur.sakuraDay)?cur.sakuraDay:(cur.sakuraDay={}); s[d]=(s[d]||0)+P.dsd[d]; }
+  if(o(r.tunaBag)) cur.tunaBag=Object.assign({},r.tunaBag,o(cur.tunaBag)?cur.tunaBag:{});
+  const done=new Set([...(Array.isArray(cur.doneIds)?cur.doneIds:[]),...(Array.isArray(r.doneIds)?r.doneIds:[])]); cur.doneIds=[...done].slice(-30);
+  const cp=o(cur.pendings)?cur.pendings:(cur.pendings={}), seen=new Set(P.seen||[]); for(const id in (o(r.pendings)?r.pendings:{})) if(!(id in cp)&&!done.has(+id)&&!seen.has(+id)) cp[id]=r.pendings[id]; for(const id in cp) if(done.has(+id)) delete cp[id];
+  for(const k of SETK) if(P.base&&JSON.stringify(r[k])!==P.base[k]){ if(k in r) cur[k]=r[k]; else delete cur[k]; } }
+function applyExits(){ const ks=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith(EXITK)) ks.push(k); } if(!ks.length) return;
+  withLock(()=>{ let cur=null; try{ cur=JSON.parse(localStorage.getItem(STORE)||'null'); }catch(_){ } if(!cur||typeof cur!=='object') cur={zukan:{},log:[]}; let n=0;
+    for(const k of ks){ let P=null; try{ P=JSON.parse(localStorage.getItem(k)||'null'); }catch(_){ } try{ localStorage.removeItem(k); }catch(_){ } if(!P||!P.rec||(P.rec.resetAt||0)!==(cur.resetAt||0)) continue; exitMerge(cur,P); n++; }
+    if(!n) return; try{ localStorage.setItem(STORE,JSON.stringify(cur)); }catch(_){ return; } for(const k of Object.keys(REC)) delete REC[k]; Object.assign(REC,{zukan:{},log:[],sound:true},cur); validateRec(); for(const id in (REC.pendings||{})) SEENP.add(+id); BASE=setSnap(REC); try{ goSpot(); if(G.mode==='menu'&&$('#catch').classList.contains('hide')&&firstPending()) restoreCatch(); }catch(_){ } }); }
+function saveNow(){ G.saveQ=0; try{ let cur=null; try{ cur=JSON.parse(localStorage.getItem(STORE)||'null'); }catch(_){ } mergeRec(cur); validateRec(); localStorage.setItem(STORE,JSON.stringify(REC)); G.dz={}; G.dj={ok:0,ng:0}; G.dsd={}; G.pend=new Set(); for(const id in (REC.pendings||{})) SEENP.add(+id); BASE=setSnap(REC); for(const e of REC.log) SEENL.add(logKey(e)); SAVE_ERR=0; }catch(e){ if(!SAVE_ERR){ SAVE_ERR=1; setTimeout(()=>toast('記録を保存できません',2800,'','ブラウザの保存領域がいっぱいか、保存できない設定です'),0); } } }
 // 読んだ記録を項目ごとに確かめる（こわれた項目だけ捨てて、読める記録は残す）
 function validateRec(){ const o=x=>x&&typeof x==='object'&&!Array.isArray(x);
   if(!o(REC.zukan)) REC.zukan={}; for(const k in REC.zukan){ const z=REC.zukan[k]; if(!o(z)||typeof z.n!=='number'||typeof z.best!=='number') delete REC.zukan[k]; }
@@ -1082,7 +1104,7 @@ function kaishu(){ SND.init(); if(G.bite){ toast('アタリ中！ 先に合わ�
 function setDrag(d){ G.drag=clamp(Math.round(d*2)/2,.5,10); }
 
 // ============ やりとり ============
-function hookFish(q){ const f=G.bite.fish; G.bite=null; f.state='hooked'; { const ll=boatLL(), st=G.clock&&!G.lake?tideStage(new Date(G.clock)):null; f.hit={t:G.clock||null,ll,st:st?st.label:''}; f.tgt=REC.target===f.sp.id; f.licT=!!(REC.lic&&REC.lic.tuna&&REC.lic.tunaBoat); f.lic=Object.assign({},REC.lic||{}); } G.state='fight'; G.auto=false;
+function hookFish(q){ const f=G.bite.fish; G.bite=null; f.state='hooked'; { const ll=boatLL(), st=G.clock&&!G.lake?tideStage(new Date(G.clock)):null; f.hit={t:G.clock||null,ll,st:st?st.label:''}; f.tgt=REC.target===f.sp.id; f.tgtSeq=REC.tgtSeq||0; f.licT=!!(REC.lic&&REC.lic.tuna&&REC.lic.tunaBoat); f.lic=Object.assign({},REC.lic||{}); } G.state='fight'; G.auto=false;
   const L=Math.max(1.5,G.rig.y);
   const F=G.fight={f,q,len:L,stam:1,phase:'run',pt:rand(1.2,2.4),mul:f.sp.fight==='dive'?1.7:1.4,dir:Math.random()<.5?1:-1,pull:0,ten:0,slack:0,t:0,ang:0,ft:0,extra:[]};
   const hk=rigDef().hooks.length, sp=f.sp;
@@ -1153,7 +1175,7 @@ function landFish(){ syncReset(); const F=G.fight, all=[F.f,...(F.extra||[])]; G
   REC.log=REC.log.slice(0,100); for(let i=0;i<ki;i++) (G.pend||(G.pend=new Set())).add('j'+cid+'|'+i); if(G.trip) for(const m of all) G.trip.c.push({id:sp.id,size:m.size,y:Math.round(m.hookY??m.y),r:G.rigId});
   const big=all.reduce((a,m)=>m.size>a.size?m:a,all[0]); const isRec=!first&&big.size>prev;
   if(!REC.tutDone){ REC.tutDone=1; coach(''); }
-  const tgt=!!F.f.tgt; if(tgt&&REC.target===sp.id){ REC.target=null; placeLabel(); } // 保存は showCatch でまとめて1回。達成はカードに出す
+  const tgt=!!F.f.tgt; if(tgt&&REC.target===sp.id&&(REC.tgtSeq||0)===(F.f.tgtSeq||0)){ REC.target=null; placeLabel(); } // 保存は showCatch でまとめて1回。達成はカードに出す
   buzz('land'); showCatch(big,isRec,all,first,{id:cid,tgt,licT:F.f.licT!==false}); if(sp.id==='maika') toast('墨をはいた！',1400); }
 function resetRig(){ G.autoResume=false; G.kinWarned=false; G.state='surface'; G.rig.y=.3; G.rig.anchor=.3; G.rig.off=0; G.rig.baitGone=false; G.auto=false; G.bite=null; }
 
@@ -1762,7 +1784,7 @@ function judge(sp,all,C=jctx()){ const small=all.reduce((a,m)=>m.size<a.size?m:a
     if(ymd(d)>TUNA_CHECKED) return R('check',`この日（${ymd(d)}）が大型魚の採捕禁止期間かどうかは、ゲームでは分からない（公示を確かめたのは${TUNA_CHECKED}まで）。禁止期間は上限に近づくと追加で公示されるので、実際は水産庁の公示を確かめる。迷ったら返す。`,'水産庁・太平洋広域漁業調整委員会 会長公示');
     if(tunaBanned(d)) return R('rule','いまは大型魚の採捕禁止期間（その時期の上限に近づいたと公示された）。ほかの魚を狙っていて掛かったら、すぐ海へ返す。','太平洋広域漁業調整委員会 会長公示');
     if((REC.tunaBag||{})[tunaPeriod(d)]) return R('rule','大型魚は1人「各期間1尾」まで（4・5月／6・7月／8・9月／10・11月／12・1月／2・3月）。この期間はもう1尾持ち帰った。','水産庁（令和8年4月からのバッグリミット）');
-    return F('届出済み・30kg以上・採捕禁止期間でない・この期間の1尾目なので、持ち帰ってよい。','水産庁','陸揚げから1日以内に水産庁へ採捕を報告する。採捕禁止期間は上限に近づくと公示で追加されるので、出船前に確かめる。'); }
+    return F('届出済み・30kg以上・採捕禁止期間でない・この期間の1尾目なので、持ち帰ってよい。','水産庁','陸揚げ後1日以内に、釣った本人が水産庁へ採捕を報告する（水産庁「採捕報告の方法について」）。採捕禁止期間は上限に近づくと公示で追加されるので、出船前に確かめる。'); }
   if(sp.zakoMin&&small.size<sp.zakoMin) return R('manner',`小さいもの（${sp.zakoMin}cmくらいまで）は雑魚あつかい。持ち帰る人は少ない。大きいものは持ち帰って食べる。`);
   if(sp.mannerMin&&small.size<sp.mannerMin) return R('manner',`漁業者は資源管理協定で全長${sp.mannerMin}cm未満を海へ返している。釣り人も小さいものは逃がそう。`,'北海道「フィッシングルール2026」p.12');
   if(sp.rule==='tako') return R('manner','タコは北海道の多くの浜で、漁業者の「共同漁業権」の対象。漁業権の区域（岸寄りの海）で漁業者以外がとると、漁業権の侵害になる。区域の外の沖なら問題にならないとされるが、場所によるので、このゲームでは「迷ったら返す」。実際は振興局の水産課（胆振は0143-24-9809）や「海しる」で区域を確かめる。','漁業法（漁業権）・胆振総合振興局水産課');
@@ -1777,7 +1799,7 @@ const TOYA_KINRYO='禁漁区（地図の赤い範囲）は漁協の図から写�
 function judgeLake(sp,all,R,F,C){ const v=judgeLake0(sp,all,R,F,C);
   if((sp.id==='brown'||sp.id==='ugui')&&!/禁漁区（|は時間外/.test(v.why)){ v.chk=1; if(!/【要確認】/.test(v.why)) v.why+=sp.id==='brown'?' 【要確認】ブラウントラウトは漁協の決まりの表にない魚。このゲームではマス類（ヒメマス・ヤマベ・ニジマス）と同じ決まりで判定している。':' 【要確認】ウグイは漁協の決まりの表にない魚。'; }
   return v; }
-function judgeLake0(sp,all,R,F,C){ const d=C.d, lic=REC.lic||{}, m=d.getMonth()+1, hh=d.getHours(), ll=C.ll;
+function judgeLake0(sp,all,R,F,C){ const d=C.d, lic=C.lic||REC.lic||{}, m=d.getMonth()+1, hh=d.getHours(), ll=C.ll;
   const kz=ll&&kinryoZone(ll[0],ll[1]); if(kz) return kz.startsWith('①')?R('rule',`ここは洞爺湖の禁漁区（${kz}）。禁漁区では一年中、釣りをしてはいけない。`,TOYA_SRC):R('check',`漁協の図の禁漁区（${kz}）にかかっている可能性がある。位置は図から写した目安なので要確認。禁漁区の中なら釣ってはいけない。迷ったら返す。`,TOYA_SRC);
   if(hh<4||hh>=19) return R('rule',`洞爺湖で釣りをしてよいのは4時〜19時。いま${hm(d)}は時間外。`,TOYA_SRC);
   if(sp.id==='ugui') return Object.assign(F('【要確認】ウグイは漁協の決まりの表（マス類・ワカサギ・エビ）にのっていない。このゲームでは持ち帰るかは自由にしたが、実際は漁協に確かめる。小骨が多いが、甘露煮にする地域もある。',TOYA_SRC,TOYA_KINRYO),{chk:1});
@@ -1806,11 +1828,11 @@ function decideCore(keep,J=JUDGE,locked=false){ if(!J||J.done||J!==JUDGE) return
   else if(v.need==='release'&&keep){ mark=v.lv==='rule'?'✕ ルール違反':v.lv==='danger'?'✕ 持ち帰らないで。海へ返した（食べると命にかかわる）':v.lv==='check'?'？ 要確認：この日の決まりはゲームでは分からない':'△ 持ち帰ってもよいが…'; cls=v.lv==='rule'||v.lv==='danger'?'ng':'so'; }
   else if(v.need==='release'){ mark=v.lv==='check'?`◯ 迷ったら返す（${J.C.lake?'湖':'海'}へ返した）`:`◯ 正解！ ${J.C.lake?'湖':'海'}へ返した`; cls='ok'; }
   else { mark=keep?'持ち帰り':'リリース'; cls='ok'; }
-  const aimBan=aimBadTuna(sp,J.all||[{w:0}],J.hitC?J.hitC.d:d,!!J.tgt,J.licT!==false); if(aimBan&&!keep){ mark='△ 海へ返した。ただし'+aimBan; cls='so'; }
+  const aimBan=aimBadTuna(sp,J.all||[{w:0}],J.hitC?J.hitC.d:d,!!J.tgt,J.licT!==false); if(aimBan&&!keep){ mark='△ 海へ返した。ただし'+aimBan; cls='so'; } if(sp.rule==='trash'&&keep&&!part){ mark='△ 持ち帰らずに海へ返した（ヒトデは食べない）'; cls='so'; }
   if(v.chk){ if(v.need==='release'&&keep&&!part){ mark='△ マス類の決まりに当てはめると違反'; cls='so'; } mark='？ 要確認　'+mark; }
   if(v.need==='release'&&v.lv!=='check'&&!v.chk&&!aimBan){ const st=REC.judge||(REC.judge={ok:0,ng:0}), dj=G.dj||(G.dj={ok:0,ng:0}); if(keep&&!part){ st.ng++; dj.ng++; } else { st.ok++; dj.ok++; } }
   if(keep){ if(sp.rule==='tuna'&&v.need==='free'&&!aimBan){ (REC.tunaBag||(REC.tunaBag={}))[tunaPeriod(d)]=1; } if(sp.rule==='sakura'&&v.sakuraCount){ const k=ymd(d); (REC.sakuraDay||(REC.sakuraDay={}))[k]=((REC.sakuraDay||{})[k]||0)+J.n; const dd=G.dsd||(G.dsd={}); dd[k]=(dd[k]||0)+J.n; } }
-  if(J.id) REC.doneIds=[...(REC.doneIds||[]),J.id].slice(-30); const ents=J.id?REC.log.filter(e=>e.j===J.id):REC.log.slice(0,J.n); const bad=v.need==='release'&&(v.lv==='rule'||v.lv==='danger')&&!v.chk||!!aimBan&&!!keep, unk=v.lv==='check'||!!v.chk; for(const e of ents){ e.ans=part?'part':keep?1:0; e.keep=part?(e.size>=v.part.min?(unk?-1:1):0):!keep||bad?0:unk?-1:1; e.res=aimBan?'ng':part?'ok':bad&&keep?'ng':v.lv==='check'||v.chk?'chk':'ok'; } if(REC.pendings&&J.id) delete REC.pendings[J.id]; saveNow(); if(SAVE_ERR){ const r=JSON.parse(SNAP[0]); for(const k of Object.keys(REC)) delete REC[k]; Object.assign(REC,r); G.dj=JSON.parse(SNAP[1]); G.dsd=JSON.parse(SNAP[2]); J.done=false;
+  if(J.id) REC.doneIds=[...(REC.doneIds||[]),J.id].slice(-30); const ents=J.id?REC.log.filter(e=>e.j===J.id):REC.log.slice(0,J.n); const bad=v.need==='release'&&(v.lv==='rule'||v.lv==='danger')&&!v.chk||!!aimBan&&!!keep||sp.rule==='trash'&&!!keep, unk=v.lv==='check'||!!v.chk; for(const e of ents){ e.ans=part?'part':keep?1:0; e.keep=part?(e.size>=v.part.min?(unk?-1:1):0):!keep||bad?0:unk?-1:1; e.res=aimBan?'ng':part?'ok':bad&&keep?'ng':v.lv==='check'||v.chk?'chk':'ok'; } if(REC.pendings&&J.id) delete REC.pendings[J.id]; saveNow(); if(SAVE_ERR){ const r=JSON.parse(SNAP[0]); for(const k of Object.keys(REC)) delete REC[k]; Object.assign(REC,r); G.dj=JSON.parse(SNAP[1]); G.dsd=JSON.parse(SNAP[2]); J.done=false;
     $('#catchVerdict').innerHTML='<div class="mk ng">記録を保存できなかったので、まだ確定していない。保存できる状態にして、もう一度選んでください（ブラウザの保存領域がいっぱいか、保存できない設定です）</div>'; return; }
   $('#catchJudge').style.display='none'; $('#bNext').style.display=''; $('#bNext').focus({preventScroll:true});
   const why=v.why?`<div class="why">${v.why}</div>`:''; const src=v.src?`<div class="src2">根拠：${v.src}</div>`:''; const note=(v.note&&keep&&!part?`<div class="why">${v.note}</div>`:'')+(unk&&keep?'<div class="why">記録には「持ち帰り（要確認・未確定）」として残す。実際は決まりを確かめてから。</div>':'');
@@ -1834,7 +1856,7 @@ function showCatch(f,isRec,all=[f],first=false,O={}){ const sp=f.sp; $('#catch')
   const lab=sp.sizeLab?sp.sizeLab+' ':'';
   $('#catchSize').innerHTML=`${all.length>1?'最大 ':''}${lab}${f.size.toFixed(1)}cm ／ ${wt}`+(isRec?'<span class="rec">自己記録更新！</span>':'')+(first?'<span class="rec">図鑑に登録！</span>':'')+''+multi;
   const HT=(f.hit&&f.hit.t)||G.clock, meta=O.meta||`${G.point.name}・${HT?'ヒット '+ymd(new Date(HT)).slice(5).replace('-','/')+' '+hm(new Date(HT))+(G.clock&&Math.abs(G.clock-HT)>=6e4?'・取り込み '+hm(new Date(G.clock)):''):SEASONS[G.season].name}${f.hit&&f.hit.st?'（'+f.hit.st+'）':''}・${RIGS[G.rigId].name}・ヒットしたタナ 約${(f.hookY??f.y).toFixed(0)}m${f.hit&&f.hit.ll?'・ヒット地点 '+llText(f.hit.ll[0],f.hit.ll[1]):''}`;
-  const C=O.C||Object.assign(jctx(),sp.rule==='tuna'&&f.lic?{lic:f.lic}:{}), hitC=O.restore?(O.hitC||null):f.hit&&f.hit.t&&f.hit.t!==C.d.getTime()?Object.assign({},C,{d:new Date(f.hit.t),ll:f.hit.ll||C.ll}):null; openJudge(sp,all,C,O.id,hitC); JUDGE.tgt=!!O.tgt; JUDGE.licT=O.licT!==false; if(O.tgt&&JUDGE.v.lv!=='check'&&!JUDGE.v.chk&&!aimBadTuna(sp,all,hitC?hitC.d:C.d,true,O.licT!==false)) $('#catchSize').insertAdjacentHTML('beforeend','<span class="rec">◎ 狙い達成！</span>');
+  const C=O.C||Object.assign(jctx(),f.lic?{lic:f.lic}:{}), hitC=O.restore?(O.hitC||null):f.hit&&f.hit.t&&f.hit.t!==C.d.getTime()?Object.assign({},C,{d:new Date(f.hit.t),ll:f.hit.ll||C.ll}):null; openJudge(sp,all,C,O.id,hitC); JUDGE.tgt=!!O.tgt; JUDGE.licT=O.licT!==false; if(O.tgt&&JUDGE.v.lv!=='check'&&!JUDGE.v.chk&&!(JUDGE.v.lv==='rule'&&!/全長|cm以下|尾まで|各期間1尾/.test(JUDGE.v.why||''))&&!aimBadTuna(sp,all,hitC?hitC.d:C.d,true,O.licT!==false)) $('#catchSize').insertAdjacentHTML('beforeend','<span class="rec">◎ 狙い達成！</span>');
   if(!O.restore) (REC.pendings||(REC.pendings={}))[O.id]={id:O.id,sp:sp.id,big:all.indexOf(f),fish:all.map(m=>({size:m.size,w:m.w,nuptial:!!m.nuptial,seed:m.seed,hookY:m.hookY})),C:{d:+C.d,ll:C.ll,lake:C.lake,rig:C.rig,...(C.lic?{lic:C.lic}:{})},hitC:hitC?{d:+hitC.d,ll:hitC.ll}:null,meta,isRec,first,tgt:!!O.tgt,licT:O.licT!==false};
   saveRec();
   $('#catchDesc').textContent=sp.desc; if(O.restore){ $('#catchPrize').className=''; $('#catchPrize').innerHTML='<small>前回の釣果の続き：持ち帰るか返すかを選んでください</small>'; $('#catchPrize').className='on r1'; } else prize(sp,f,first);
@@ -1874,12 +1896,12 @@ function redrawCard(){ if(!CARD||$('#catch').classList.contains('hide')) return;
   const x=c.getContext('2d'); x.setTransform(DPR,0,0,DPR,0,0); const w=r.width, h=r.height, L=sp.zone.t==='flat'?Math.min(w*.78,h*.7/(sp.look.h+.16)):w*.78; drawCard(x,w,h,f,L); }
 function openZukan(){ openZukan0(); [...$('#zGrid').children].forEach((d,i)=>{ const sp=SP[i]; if(!sp) return; const b=document.createElement('button'); b.className='sbtn ztgt'+(REC.target===sp.id?' on':''); b.textContent=REC.target===sp.id?'◎ 狙い中（もう一度で外す）':'この魚を狙う';
     b.setAttribute('aria-pressed',REC.target===sp.id?'true':'false');
-    b.onclick=e=>{ e.stopPropagation(); const s0=$('#zukan').scrollTop, s1=$('#zukan .card').scrollTop; REC.target=REC.target===sp.id?null:sp.id; saveRec(); goSpot(); placeLabel(); openZukan();
+    b.onclick=e=>{ e.stopPropagation(); const s0=$('#zukan').scrollTop, s1=$('#zukan .card').scrollTop; REC.target=REC.target===sp.id?null:sp.id; REC.tgtSeq=(REC.tgtSeq||0)+1; saveRec(); goSpot(); placeLabel(); openZukan();
       $('#zukan').scrollTop=s0; $('#zukan .card').scrollTop=s1; const nb=$('#zGrid').children[i]&&$('#zGrid').children[i].querySelector('.ztgt'); if(nb) nb.focus({preventScroll:true}); }; d.appendChild(b);
     if(REC.target===sp.id&&sp.rule==='tuna'){ const t=tunaWarn(tunaDate()); if(t){ const n=document.createElement('div'); n.className='znote'; n.setAttribute('role','note'); n.textContent=t; d.appendChild(n); } } }); }
 function driftDepths(s){ const t=G.startClock||Date.now(), lk=!!s.lake, hs=lk?null:chooseHeading(s.lat,s.lon,tideHdg(s.lat,s.lon,t),true), key=[s.lat,s.lon,s.type,lk,Math.round(t/9e5),hs].join(); if(driftDepths.k===key) return driftDepths.v;
   const hd=lk?chooseHeading(s.lat,s.lon):hs, d=new Date(t), cm=lk?null:tideCm(d), tm=cm==null?0:(cm-tideMean(d))/100, seed=hash(s.lat*977+s.lon*131)*100; const zs=[], xs=[];
-  if(hd!=null) for(let x=-40;x<=240;x+=8){ const [la,lo]=offsetLL(s.lat,s.lon,hd,x); let z=depthLL(la,lo); if(z==null) z=150; zs.push(Math.max(1.2,z+tm+microRelief(s.type,x,seed))); xs.push(x); }
+  if(hd!=null) for(let x=-40;x<=240;x+=(x>=-24&&x<26?.5:4)){ const [la,lo]=offsetLL(s.lat,s.lon,hd,x); let z=depthLL(la,lo); if(z==null) z=150; zs.push(Math.max(1.2,z+tm+microRelief(s.type,x,seed))); xs.push(x); }
   const v=hd==null?null:[Math.min(...zs),Math.max(...zs),zs,xs]; driftDepths.k=key; driftDepths.v=v; return v; }
 function tgtWhy(sp,s){ const d=depthLL(s.lat,s.lon)||20, r=driftDepths(s)||[d,d]; return depthFrac(sp,r)<.2?`流す先の水深 約${Math.round(r[0])}〜${Math.round(r[1])}m。この魚は${sp.dmin}〜${sp.dmax}m`:BOTTOM_NAME[s.type]; }
 function depthFrac(sp,r,near){ const zs=r[2]||[r[0],r[1]], xs=r[3]||[], L=zs.map((z,i)=>[xs[i]??0,z]).filter(a=>!near||a[0]>=-24&&a[0]<=26); return L.length?L.filter(a=>a[1]>=sp.dmin&&a[1]<=sp.dmax).length/L.length:0; }
@@ -1973,17 +1995,17 @@ function renderMap(){ const cv=$('#map'); if(!cv) return; const r=cv.getBounding
   // 河口規制（区域は資料の数字、河口の位置は目安）
   for(const k of KAKOU){ x.beginPath(); kakouCorners(k).forEach(([a,b],i)=>{ const [px,py]=llMap(a,b,w,h); i?x.lineTo(px,py):x.moveTo(px,py); }); x.closePath(); x.fillStyle='rgba(255,160,60,.35)'; x.fill(); x.strokeStyle='rgba(255,190,110,.95)'; x.lineWidth=1; x.stroke();
     if(MAP.mpp<70){ const [px,py]=llMap(k.ll[0],k.ll[1],w,h); x.font='10px sans-serif'; x.fillStyle='#ffd9a8'; x.fillText(k.n+' 河口規制',px+6,py-6); } }
-  { let vis=false; const LB=[], fL=s=>s.replace(/-0?/g,'/'); x.font='11px sans-serif'; const oneL=`A・B：サクラマス ライセンス海域（R8：${fL(SAKURA_FY[0])}〜${fL(SAKURA_FY[1])}）`, linesL=x.measureText(oneL).width<=w-24?[oneL]:['A・B：サクラマス ライセンス海域',`R8：${fL(SAKURA_FY[0])}〜${fL(SAKURA_FY[1])}`], bwL=Math.max(...linesL.map(s=>x.measureText(s).width))+10, bhL=linesL.length*14+6, visPts=P=>{ const pp=P.map(([la,lo])=>llMap(la,lo,w,h)), o=[]; for(let i=0;i<pp.length;i++){ const [x1,y1]=pp[i],[x2,y2]=pp[(i+1)%pp.length]; for(let t=0;t<=1;t+=.01){ const X=x1+(x2-x1)*t, Y=y1+(y2-y1)*t; if(X>0&&X<w&&Y>0&&Y<h) o.push([X,Y]); } } return o; },
-      legTop=[SAKURA_A,SAKURA_B].some(P=>{ const v=visPts(P); return v.length&&v.every(([X,Y])=>X<8+bwL+14&&Y>h-40-bhL); }), byL=legTop?40:h-34-bhL; for(const [P,lab] of [[SAKURA_A,'A'],[SAKURA_B,'B']]){ const pts=P.map(([la,lo])=>llMap(la,lo,w,h)), inP=(X,Y)=>{ let c=false; for(let i=0,j=pts.length-1;i<pts.length;j=i++){ const [xi,yi]=pts[i],[xj,yj]=pts[j]; if((yi>Y)!==(yj>Y)&&X<(xj-xi)*(Y-yi)/(yj-yi)+xi) c=!c; } return c; };
+  { let vis=false; const Ls=([100,200,500,1000,2000,5000,10000].find(v=>v/MAP.mpp>70)||10000)/MAP.mpp, LB=[], fL=s=>s.replace(/-0?/g,'/'); x.font='11px sans-serif'; const oneL=`A・B：サクラマス ライセンス海域（R8：${fL(SAKURA_FY[0])}〜${fL(SAKURA_FY[1])}）`, linesL=x.measureText(oneL).width<=w-24?[oneL]:['A・B：サクラマス ライセンス海域',`R8：${fL(SAKURA_FY[0])}〜${fL(SAKURA_FY[1])}`], bwL=Math.max(...linesL.map(s=>x.measureText(s).width))+10, bhL=linesL.length*14+6, visPts=P=>{ const pp=P.map(([la,lo])=>llMap(la,lo,w,h)), o=[]; for(let i=0;i<pp.length;i++){ const [x1,y1]=pp[i],[x2,y2]=pp[(i+1)%pp.length]; for(let t=0;t<=1;t+=.01){ const X=x1+(x2-x1)*t, Y=y1+(y2-y1)*t; if(X>0&&X<w&&Y>0&&Y<h) o.push([X,Y]); } } return o; },
+      legTop=[SAKURA_A,SAKURA_B].some(P=>{ const v=visPts(P); return v.length&&v.every(([X,Y])=>X<8+bwL+14&&Y>h-40-bhL); }), scaleR=MAP.scaleR=[SAKURA_A,SAKURA_B].some(P=>{ const v=visPts(P); return v.length&&v.every(([X,Y])=>X<=8+Ls+20&&Y>=h-32); }), byL=legTop?40:h-34-bhL; for(const [P,lab] of [[SAKURA_A,'A'],[SAKURA_B,'B']]){ const pts=P.map(([la,lo])=>llMap(la,lo,w,h)), inP=(X,Y)=>{ let c=false; for(let i=0,j=pts.length-1;i<pts.length;j=i++){ const [xi,yi]=pts[i],[xj,yj]=pts[j]; if((yi>Y)!==(yj>Y)&&X<(xj-xi)*(Y-yi)/(yj-yi)+xi) c=!c; } return c; };
       let in0=null; for(let gy=1;gy<12&&!in0;gy++) for(let gx=1;gx<12&&!in0;gx++){ const X=w*gx/12, Y=h*gy/12; if(inP(X,Y)) in0=[X,Y]; }
       const clipM=(x1,y1,x2,y2)=>{ let t0=0,t1=1; const dx=x2-x1, dy=y2-y1; for(const [pp,qq] of [[-dx,x1],[dx,w-x1],[-dy,y1],[dy,h-y1]]){ if(pp===0){ if(qq<0) return null; continue; } const r=qq/pp; if(pp<0){ if(r>t1) return null; if(r>t0) t0=r; } else { if(r<t0) return null; if(r<t1) t1=r; } } if(t1<t0) return null; const t=(t0+t1)/2; return [x1+dx*t,y1+dy*t]; };
       let eIn=null; for(let i=0;i<pts.length&&!eIn;i++){ const [x1,y1]=pts[i],[x2,y2]=pts[(i+1)%pts.length]; eIn=clipM(x1,y1,x2,y2); }
       if(!eIn&&!in0) continue; vis=true;
-      let cx=pts.reduce((a,p)=>a+p[0],0)/pts.length, cy=pts.reduce((a,p)=>a+p[1],0)/pts.length; const inLeg=(X,Y)=>X<8+bwL+14&&Y>byL-6&&Y<byL+bhL+6||X<132&&Y>h-32; let in1=null; for(let gy=1;gy<12&&!in1;gy++) for(let gx=1;gx<12&&!in1;gx++){ const X=w*gx/12, Y=h*gy/12; if(inP(X,Y)&&!inLeg(X,Y)) in1=[X,Y]; }
+      let cx=pts.reduce((a,p)=>a+p[0],0)/pts.length, cy=pts.reduce((a,p)=>a+p[1],0)/pts.length; const inLeg=(X,Y)=>X<8+bwL+14&&Y>byL-6&&Y<byL+bhL+6||(scaleR?X>=w-Ls-30:X<=8+Ls+20)&&Y>=h-32; let in1=null; for(let gy=1;gy<12&&!in1;gy++) for(let gx=1;gx<12&&!in1;gx++){ const X=w*gx/12, Y=h*gy/12; if(inP(X,Y)&&!inLeg(X,Y)) in1=[X,Y]; }
       let e1=null; for(let i=0;i<pts.length&&!e1;i++){ const [x1,y1]=pts[i],[x2,y2]=pts[(i+1)%pts.length]; for(let t=0;t<=1&&!e1;t+=.01){ const X=x1+(x2-x1)*t, Y=y1+(y2-y1)*t; if(X>2&&X<w-2&&Y>2&&Y<h-2&&!inLeg(X,Y)) e1=[X,Y]; } }
       const org=cx>0&&cx<w&&cy>0&&cy<h&&!inLeg(cx,cy)?[cx,cy]:(in1||e1||in0||eIn); if(!(cx>14&&cx<w-74&&cy>20&&cy<h-60)||inLeg(cx,cy)) [cx,cy]=org; cx=clamp(cx,12,w-12); cy=clamp(cy,16,h-8); if(cx>w-62&&cy<190) cx=w-66; if(cx<40&&cy<42) cx=44;
-      { const [ox,oy]=org; if(inLeg(cx,cy)) cy=cx<132&&cy>h-32?h-46:legTop?Math.min(h-40,byL+bhL+16):byL-14; for(const [dx,dy] of [[0,0],[0,24],[0,-24],[26,0],[-26,0],[26,24],[-26,24],[26,-24],[-26,-24],[0,48],[0,-48],[52,0],[-52,0]]){ const X=clamp(cx+dx,12,w-12), Y=clamp(cy+dy,16,h-8);
-          if(!LB.some(([a,b])=>Math.abs(a-X)<22&&Math.abs(b-Y)<22)&&!inLeg(X,Y)&&(inLeg(ox,oy)||[.2,.4,.6,.8].every(t=>!inLeg(ox+(X-ox)*t,oy+(Y-oy)*t)))&&!(X>w-62&&Y<190)&&!(X<40&&Y<42)){ cx=X; cy=Y; break; } }
+      { const [ox,oy]=org; if(inLeg(cx,cy)) cy=cy>=h-32?h-46:legTop?Math.min(h-40,byL+bhL+16):byL-14; for(const [dx,dy] of [[0,0],[0,24],[0,-24],[26,0],[-26,0],[26,24],[-26,24],[26,-24],[-26,-24],[0,48],[0,-48],[52,0],[-52,0]]){ const X=clamp(cx+dx,12,w-12), Y=clamp(cy+dy,16,h-8);
+          if(!LB.some(([a,b])=>Math.abs(a-X)<22&&Math.abs(b-Y)<22)&&!inLeg(X,Y)&&(inLeg(ox,oy)||Array.from({length:19},(_,i)=>(i+1)/20).every(t=>!inLeg(ox+(X-ox)*t,oy+(Y-oy)*t)))&&!(X>w-62&&Y<190)&&!(X<40&&Y<42)){ cx=X; cy=Y; break; } }
         LB.push([cx,cy]); if(Math.hypot(cx-ox,cy-oy)>12){ x.strokeStyle='rgba(220,250,255,.75)'; x.lineWidth=1; x.beginPath(); x.moveTo(ox,oy); x.lineTo(cx,cy+(oy>cy?3:-12)); x.stroke(); } }
       x.font='bold 15px sans-serif'; x.textAlign='center'; x.lineWidth=3; x.strokeStyle='rgba(0,20,40,.85)'; x.strokeText(lab,cx,cy); x.fillStyle='#dffaff'; x.fillText(lab,cx,cy); x.textAlign='left'; }
     if(vis){ const f=s=>s.replace(/-0?/g,'/'), t1='A・B：サクラマス ライセンス海域', t2=`R8：${f(SAKURA_FY[0])}〜${f(SAKURA_FY[1])}`; x.font='11px sans-serif'; const one=t1+'（'+t2+'）', lines=x.measureText(one).width<=w-24?[one]:[t1,t2];
@@ -2012,7 +2034,7 @@ function renderMap(){ const cv=$('#map'); if(!cv) return; const r=cv.getBounding
     x.fillStyle='#fff'; x.beginPath(); x.arc(px,py-17,3.5,0,Math.PI*2); x.fill(); }
   // 縮尺と方位
   const nice=[100,200,500,1000,2000,5000,10000], len=nice.find(v=>v/MAP.mpp>70)||10000, L=len/MAP.mpp;
-  x.fillStyle='rgba(0,0,0,.45)'; x.fillRect(8,h-28,L+16,20); x.fillStyle='#fff'; x.fillRect(16,h-14,L,3); x.font='11px sans-serif'; x.fillText(len>=1000?len/1000+'km':len+'m',18+L/2-12,h-17);
+  x.fillStyle='rgba(0,0,0,.45)'; const sx=MAP.scaleR?w-L-24:8; x.fillRect(sx,h-28,L+16,20); x.fillStyle='#fff'; x.fillRect(sx+8,h-14,L,3); x.font='11px sans-serif'; x.fillText(len>=1000?len/1000+'km':len+'m',sx+10+L/2-12,h-17);
   x.fillStyle='rgba(0,0,0,.45)'; x.fillRect(8,8,22,26); x.fillStyle='#fff'; x.font='bold 12px sans-serif'; x.fillText('N',14,22); x.beginPath(); x.moveTo(19,10); x.lineTo(15,15); x.lineTo(23,15); x.fill();
  }
 function keepMsg(){ return G.spot?`<br><span class="muted">出船は前に選んだ地点のまま（${spotLabel()}）</span>`:''; }
@@ -2041,11 +2063,11 @@ function initMapUI(){ const cv=$('#map'); let drag=null;
   cv.tabIndex=0; cv.setAttribute('aria-label','地図。矢印キーで動かし、Enterで真ん中の地点を選ぶ'); cv.addEventListener('focus',()=>{ MAP.kb=true; renderMap(); }); cv.addEventListener('blur',()=>{ MAP.kb=false; renderMap(); });
   cv.addEventListener('keydown',e=>{ const st=MAP.mpp*24, mv={ArrowUp:[st,0],ArrowDown:[-st,0],ArrowLeft:[0,-st],ArrowRight:[0,st]}[e.key];
     if(mv){ e.preventDefault(); MAP.clat+=mv[0]/M_LAT; MAP.clon+=mv[1]/mLon(MAP.clat); renderMap(); } else if(e.key==='Enter'){ e.preventDefault(); e.stopPropagation(); setSpot(MAP.clat,MAP.clon); } else if(e.key==='+'||e.key==='-'){ zoomMap(e.key==='+'?.7:1.4); } });
-  cv.addEventListener('pointerdown',e=>{ if(drag&&drag.id!==e.pointerId) return; cv.setPointerCapture(e.pointerId); drag={id:e.pointerId,x:e.clientX,y:e.clientY,lat:MAP.clat,lon:MAP.clon,moved:false}; });
+  cv.addEventListener('pointerdown',e=>{ if(drag&&drag.id!==e.pointerId) return; try{ cv.setPointerCapture(e.pointerId); }catch(_){ } drag={id:e.pointerId,x:e.clientX,y:e.clientY,lat:MAP.clat,lon:MAP.clon,moved:false}; });
   cv.addEventListener('pointermove',e=>{ if(!drag||e.pointerId!==drag.id) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; if(Math.hypot(dx,dy)>6) drag.moved=true;
-    if(drag.moved&&!mapBusy){ MAP.clat=drag.lat+dy*MAP.mpp/M_LAT; MAP.clon=drag.lon-dx*MAP.mpp/mLon(MAP.clat); mapBusy=true; requestAnimationFrame(()=>{ renderMap(); mapBusy=false; }); } });
+    if(drag.moved){ MAP.clat=drag.lat+dy*MAP.mpp/M_LAT; MAP.clon=drag.lon-dx*MAP.mpp/mLon(MAP.clat); if(!mapBusy){ mapBusy=true; requestAnimationFrame(()=>{ renderMap(); mapBusy=false; }); } } });
   cv.addEventListener('pointercancel',e=>{ if(drag&&e.pointerId===drag.id) drag=null; });
-  cv.addEventListener('pointerup',e=>{ if(drag&&e.pointerId!==drag.id) return; if(drag&&!drag.moved){ const r=cv.getBoundingClientRect(); const [la,lo]=mapLL(e.clientX-r.left,e.clientY-r.top,r.width,r.height);
+  cv.addEventListener('pointerup',e=>{ if(drag&&e.pointerId!==drag.id) return; if(drag&&drag.moved) renderMap(); if(drag&&!drag.moved){ const r=cv.getBoundingClientRect(); const [la,lo]=mapLL(e.clientX-r.left,e.clientY-r.top,r.width,r.height);
       // 前に行った地点の近くを押したらそこを選ぶ
       const near=(REC.spots||[]).find(s=>{ const [px,py]=llMap(s.lat,s.lon,r.width,r.height); return Math.hypot(px-(e.clientX-r.left),py-(e.clientY-r.top))<10; });
       const pin=SPOTS.map(p=>{ const [px,py]=llMap(p.lat,p.lon,r.width,r.height); return [p,Math.hypot(px-(e.clientX-r.left),py-(e.clientY-r.top))]; }).filter(a=>a[1]<14).sort((a,b)=>a[1]-b[1]).map(a=>a[0])[0];
@@ -2195,6 +2217,7 @@ $('#bMm').onclick=()=>{ const m=$('#mmBox'); m.classList.toggle('pshow'); $('#bM
 const rodLab=()=>{ $('#bRodAuto').textContent='竿先：'+((REC.ui||{}).rodMode==='on'?'常に表示':'自動'); }; setTimeout(rodLab,0);
 $('#bRodAuto').onclick=()=>{ REC.ui=REC.ui||{}; REC.ui.rodMode=REC.ui.rodMode==='on'?'auto':'on'; saveRec(); rodLab(); rodAuto(); };
 // 魚探・竿先・航跡：題名をタップでたたむ／ひらく（端末に覚えておく）
+applyExits();
 if(REC.pending&&typeof REC.pending!=='object'){ for(const e of REC.log) if(e.keep===undefined&&e.at>Date.now()-864e5) e.keep=-1; delete REC.pending; saveRec(); }
 if(REC.lic&&REC.lic.toya!==undefined){ if(REC.lic.toya){ REC.lic.toyaMasu=true; REC.lic.toyaWaka=true; } delete REC.lic.toya; saveRec(); }
 if(REC.tutDone===undefined&&REC.log&&REC.log.length){ REC.tutDone=1; saveRec(); }
