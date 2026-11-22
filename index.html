@@ -1388,6 +1388,9 @@ function drawScene(){
   if((G.light??1)<1&&y0>0){ c.fillStyle=`rgba(2,6,22,${(1-G.light)*.45})`; c.fillRect(0,0,W,y0+6); }
   drawNightLights(V,y0);
 }
+const FLOOR_ART=['rock_a','rock_b','rock_c','shell'].map(name=>{
+  const img=new Image(); img.src=`img/floor/v2/${name}.webp`; return img;
+});
 function drawFloor(V){ const c=ctx, t=G.point.type; const pts=[];
   for(let X=-8;X<=W+8;X+=6){ const wx=G.camX+(X-V.cx)/V.sc; pts.push([X,sy(V,bottomAt(wx)),wx]); }
   if(pts.every(p=>p[1]>H+20)) return;
@@ -1406,7 +1409,12 @@ function drawFloor(V){ const c=ctx, t=G.point.type; const pts=[];
       c.restore(); } }
   const x0=Math.floor(G.camX+(-V.cx)/V.sc)-2, x1=Math.ceil(G.camX+(W-V.cx)/V.sc)+2;
   if(t==='rock'){ for(let i=x0*2;i<=x1*2;i++){ const wx=i*.5, h=hash(i); if(h<.35) continue; const b=bottomAt(wx), r=(.25+hash(i+7)*.7)*V.sc;
-      const X=sx(V,wx), Y=sy(V,b)+r*.35, n=7; const rg=c.createLinearGradient(0,Y-r,0,Y+r*.3); const k=hash(i+3);
+      const X=sx(V,wx), Y=sy(V,b)+r*.35, stone=FLOOR_ART[Math.floor(hash(i+15)*3)];
+      if(stone.naturalWidth){
+        const w=r*2.5, h=w*stone.naturalHeight/stone.naturalWidth;
+        c.drawImage(stone,X-w/2,Y-h,w,h); continue;
+      }
+      const n=7, rg=c.createLinearGradient(0,Y-r,0,Y+r*.3), k=hash(i+3);
       rg.addColorStop(0,`rgb(${78+k*30|0},${74+k*24|0},${62+k*18|0})`); rg.addColorStop(1,`rgb(${34+k*10|0},${32+k*8|0},${28+k*6|0})`); c.fillStyle=rg; c.beginPath();
       for(let j=0;j<=n;j++){ const a=Math.PI+j/n*Math.PI, rr=r*(.75+hash(i*13+j)*.45); const px=X+Math.cos(a)*rr*1.25, py=Y+Math.sin(a)*rr*(.65+hash(i+j)*.25); j?c.lineTo(px,py):c.moveTo(px,py); }
       c.closePath(); c.fill(); c.fillStyle=patAt(TEX.np,X,Y,V.sc*.035); c.fill(); { const hl=c.createLinearGradient(0,Y-r,0,Y); hl.addColorStop(0,'rgba(230,240,220,.16)'); hl.addColorStop(.5,'rgba(0,0,0,0)'); hl.addColorStop(1,'rgba(0,0,0,.25)'); c.fillStyle=hl; c.fill(); }
@@ -1418,26 +1426,47 @@ function drawFloor(V){ const c=ctx, t=G.point.type; const pts=[];
       const kg=c.createLinearGradient(0,Y,0,Y-hgt), br=hash(i+11)<.6; kg.addColorStop(0,br?'rgba(62,52,22,.95)':'rgba(40,62,34,.95)'); kg.addColorStop(1,br?'rgba(128,112,52,.7)':'rgba(84,118,64,.7)'); c.fillStyle=kg;
       c.beginPath(); L.forEach((p,j)=>j?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1])); for(let j=Rr.length-1;j>=0;j--) c.lineTo(Rr[j][0],Rr[j][1]); c.closePath(); c.fill(); } }
   else if(t==='sand'){ c.strokeStyle='rgba(255,240,200,.18)'; c.lineWidth=1.2; for(let i=x0*3;i<=x1*3;i++){ const wx=i/3, b=bottomAt(wx); if(hash(i)<.4) continue; const X=sx(V,wx), Y=sy(V,b)+V.sc*(.15+hash(i+2)*.6); c.beginPath(); c.moveTo(X-V.sc*.15,Y); c.quadraticCurveTo(X,Y-V.sc*.06,X+V.sc*.15,Y); c.stroke(); }
-    for(let i=x0;i<=x1;i++){ if(hash(i+70)<.8) continue; const b=bottomAt(i); c.fillStyle='rgba(240,230,210,.6)'; c.beginPath(); c.ellipse(sx(V,i),sy(V,b)+2,V.sc*.06,V.sc*.04,0,0,Math.PI*2); c.fill(); } }
+    for(let i=x0;i<=x1;i++){ if(hash(i+70)<.8) continue; const b=bottomAt(i), X=sx(V,i), Y=sy(V,b)+V.sc*.12, shell=FLOOR_ART[3];
+      if(shell.naturalWidth){ const w=V.sc*(.13+hash(i+71)*.14), h=w*shell.naturalHeight/shell.naturalWidth; c.drawImage(shell,X-w/2,Y-h*.67,w,h); }
+      else { c.fillStyle='rgba(240,230,210,.6)'; c.beginPath(); c.ellipse(X,Y,V.sc*.06,V.sc*.04,0,0,Math.PI*2); c.fill(); } } }
   else { c.fillStyle='rgba(90,100,70,.25)'; for(let i=x0*2;i<=x1*2;i++){ if(hash(i)<.5) continue; const wx=i/2; c.fillRect(sx(V,wx),sy(V,bottomAt(wx))+V.sc*.2*hash(i+1),V.sc*.3,2); } }
 }
 // ============ 空・船・水面・仕掛け（v0.5 で描き直し） ============
 const SKY={日中:['#5d9ed2','#d6e9f2','#9fb6c2','#7d97a3'],朝まずめ:['#27406e','#f3b27c','#6b6a80','#4c4e66'],夕まずめ:['#2c3768','#ef8f5e','#6a5a72','#4a4058'],夜:['#02060e','#13223a','#0c1624','#070d18']};
-// 背景の絵（本人のAI生成・_work/make_bg.py）。船の地点にいちばん近い名所（5km以内）、なければ沖から見た駒ヶ岳。湖は南側なら有珠山、北側なら羊蹄山
-// ll は名所のおよその位置（銀屏風・金屏風は目安）。base は絵の中で水際になる行（ここをゲームの水面に合わせる）。[昼,夜]
-const BG={shiratori:{ll:[42.345,140.935],base:[690,715],name:'白鳥大橋と大黒島'},ginbyobu:{ll:[42.305,140.965],base:[655,655],name:'銀屏風'},chikyu:{ll:[42.300,141.000],base:[660,665],name:'地球岬'},
-  kinbyobu:{ll:[42.318,141.030],base:[630,628],name:'金屏風'},komagatake:{base:[650,645],name:'駒ヶ岳'},yotei:{base:[500,500],name:'羊蹄山'},usu:{base:[600,600],name:'有珠山'}};
+// 水面に合わせる行と、陸地の最も高い行を画像の高さに対する比率で指定する。[昼,夜]
+const BG={
+  shiratori:{ll:[42.345,140.935],base:[.80,.80],top:[.47,.47],name:'白鳥大橋と大黒島'},
+  ginbyobu:{ll:[42.305,140.965],base:[.825,.825],top:[.39,.39],name:'銀屏風'},
+  chikyu:{ll:[42.300,141.000],base:[.84,.84],top:[.35,.35],lamp:[[.509,.38],[.509,.38]],name:'地球岬'},
+  kinbyobu:{ll:[42.318,141.030],base:[.855,.855],top:[.34,.34],name:'金屏風'},
+  komagatake:{base:[.825,.825],top:[.52,.52],name:'駒ヶ岳'},
+  yotei:{base:[.815,.815],top:[.43,.43],name:'羊蹄山'},
+  usu:{base:[.815,.815],top:[.41,.41],name:'有珠山'}
+};
 function bgPick(s){ if(!s) return null; if(s.lake) return s.lat<42.59?'usu':'yotei'; let best='komagatake', bd=5000;
   for(const k in BG){ const b=BG[k]; if(!b.ll) continue; const d=Math.hypot((b.ll[0]-s.lat)*M_LAT,(b.ll[1]-s.lon)*mLon(s.lat)); if(d<bd){ bd=d; best=k; } } return best; }
-function bgLoad(k){ const b=k&&BG[k]; if(!b||b.img) return; b.img=['day','night'].map(t=>{ const im=new Image(); im.src=`img/bg/${k}_${t}.webp`; return im; }); }
-function drawBg(c,y0,s){ const b=G.bg&&BG[G.bg]; if(!b||!b.img) return false; const n=G.band==='夜'?1:0, im=b.img[n]; if(!im.complete||!im.naturalWidth) return false;
-  const iw=im.naturalWidth, base=b.base[n], k=Math.max(W*1.12/iw,(y0+2)/base), w=iw*k, room=(w-W)/2, x=-room+clamp(-G.drift*s*.012,-room,room);
-  c.drawImage(im,x,y0-base*k,w,im.naturalHeight*k);
+function bgLoad(k){
+  const b=k&&BG[k]; if(!b||b.img) return;
+  b.img=['day','night'].map(t=>{ const im=new Image(); im.src=`img/bg/v2/${k}_${t}.webp`; return im; });
+}
+function drawBg(c,y0,s){
+  const b=G.bg&&BG[G.bg]; if(!b||!b.img) return false;
+  const n=G.band==='夜'?1:0, im=b.img[n]; if(!im.complete||!im.naturalWidth) return false;
+  const ih=im.naturalHeight, iw=im.naturalWidth, base=b.base[n]*ih, skyline=b.top[n]*ih;
+  const k=Math.max(W*1.12/iw,(y0+2)/base), w=iw*k, room=(w-W)/2;
+  const x=-room+clamp(-G.drift*s*.012,-room,room);
+  // 空の帯が狭い横画面でも、灯台や山頂が見える高さに収める。
+  const ky=clamp(y0*.84/(base-skyline),k*.40,k), y=y0-base*ky;
+  c.drawImage(im,x,y,w,ih*ky);
+  G.skyHeight=clamp(y+skyline*ky,0,y0);
+  const lamp=b.lamp?.[n];
+  G.lighthouse=lamp?{x:x+w*lamp[0],y:y+ih*ky*lamp[1]}:null;
   if(G.band==='朝まずめ'||G.band==='夕まずめ'){ const g=c.createLinearGradient(0,0,0,y0); g.addColorStop(0,'#4a4f8c'); g.addColorStop(.65,'#e9a08a'); g.addColorStop(1,'#ffc79a');
     c.save(); c.globalCompositeOperation='multiply'; c.fillStyle=g; c.fillRect(0,0,W,y0+1); c.globalCompositeOperation='screen';
     const sx0=G.band==='朝まずめ'?W*.85:W*.15, sg=c.createRadialGradient(sx0,y0,0,sx0,y0,W*.45); sg.addColorStop(0,'rgba(255,170,90,.55)'); sg.addColorStop(1,'rgba(255,150,90,0)'); c.fillStyle=sg; c.fillRect(0,0,W,y0+1); c.restore(); }
-  G.lighthouse=null; return true; }
+  return true; }
 function drawSky(V,y0){ const c=ctx, col=SKY[G.band||'日中'], s=V.sc; if(drawBg(c,y0,s)) return;
+  G.skyHeight=y0*.58;
   const g=c.createLinearGradient(0,0,0,y0); g.addColorStop(0,col[0]); g.addColorStop(1,col[1]); c.fillStyle=g; c.fillRect(0,0,W,y0);
   // 太陽（昼・まずめ）
   if(G.band==='日中'||!G.band){ const sxp=W*.8, syp=Math.max(20,y0*.22); const sg=c.createRadialGradient(sxp,syp,0,sxp,syp,60); sg.addColorStop(0,'rgba(255,255,240,.95)'); sg.addColorStop(.25,'rgba(255,250,220,.5)'); sg.addColorStop(1,'rgba(255,250,220,0)'); c.fillStyle=sg; c.fillRect(sxp-60,syp-60,120,120); }
@@ -1463,10 +1492,10 @@ function farSea(c,y0,hb,col,s){ const hz=c.createLinearGradient(0,hb-s*1.6,0,hb)
   if(!n){ c.fillStyle='rgba(255,255,255,.55)'; for(let i=0;i<40;i++){ const yy=hb+(y0-hb)*Math.pow(hash(i+3),1.6), xx=((hash(i)*W+G.t*6*(hash(i+1)-.5))%W+W)%W, ww=s*(.08+.35*(yy-hb)/(y0-hb+1)); if(Math.sin(G.t*2.2+i*1.9)>.35) c.fillRect(xx,yy,ww,1); } } }
 function hexA(h,a){ const v=parseInt(h.slice(1),16); return `rgba(${v>>16&255},${v>>8&255},${v&255},${a})`; }
 // 夜の明かり（暗さを重ねたあとに描く）
-function drawNightLights(V,y0){ const c=ctx; if(y0<=0) return; const s=V.sc;
-  if(G.band==='夜'){ for(let i=0;i<60;i++){ const x=hash(i*3.1)*W, y=hash(i*7.7)*y0*.85; const a=.4+.4*Math.sin(G.t*2+i); c.fillStyle=`rgba(255,255,240,${a})`; c.fillRect(x,y,1.4,1.4); }
+function drawNightLights(V,y0){ const c=ctx; if(y0<=0) return; const s=V.sc, sky=G.skyHeight;
+  if(G.band==='夜'&&sky>12){ for(let i=0;i<60;i++){ const x=hash(i*3.1)*W, y=hash(i*7.7)*sky; const a=.23+.42*Math.sin(G.t*2+i)**2; c.fillStyle=`rgba(255,255,240,${a})`; c.fillRect(x,y,1.2,1.2); }
     // 月（月齢で欠ける）
-    const age=G.clock?moonAge(new Date(G.clock)):10, ph=age/29.53, mx=W*.68, my=y0*.25, r=13;
+    const age=G.clock?moonAge(new Date(G.clock)):10, ph=age/29.53, mx=W*.68, my=sky*.52, r=Math.min(13,sky*.23);
     const k=Math.cos(ph*2*Math.PI); c.fillStyle='rgba(60,70,90,.5)'; c.beginPath(); c.arc(mx,my,r,0,Math.PI*2); c.fill();
     c.fillStyle='rgba(255,250,220,.95)'; for(let y=-r;y<r;y+=.5){ const hw=Math.sqrt(r*r-(y+.25)**2), a=ph<.5?hw*k:-hw, b=ph<.5?hw:-hw*k; if(b>a) c.fillRect(mx+a,my+y,b-a,.6); } }
   if(G.band==='夜'||G.band==='朝まずめ'||G.band==='夕まずめ'){ const L=G.lighthouse; if(L){ const f=Math.max(0,Math.sin(G.t*.63)); if(f>.85){ const a=(f-.85)/.15; const g=c.createRadialGradient(L.x,L.y,0,L.x,L.y,40); g.addColorStop(0,`rgba(255,255,220,${a})`); g.addColorStop(1,'rgba(255,255,220,0)'); c.fillStyle=g; c.fillRect(L.x-40,L.y-40,80,80); } }
@@ -1581,35 +1610,81 @@ function drawSinker(c,X,Y,k){ // ナス型オモリ（Yが底）
   c.beginPath(); c.moveTo(X,Y-k*6.2); c.bezierCurveTo(X+k*.9,Y-k*5.6,X+k*2.6,Y-k*2.8,X+k*2.3,Y-k*1.1); c.quadraticCurveTo(X+k*1.8,Y,X,Y); c.quadraticCurveTo(X-k*1.8,Y,X-k*2.3,Y-k*1.1); c.bezierCurveTo(X-k*2.6,Y-k*2.8,X-k*.9,Y-k*5.6,X,Y-k*6.2); c.fill();
   c.strokeStyle='#9aa0a5'; c.lineWidth=Math.max(1,k*.35); c.beginPath(); c.arc(X,Y-k*6.8,k*.6,0,Math.PI*2); c.stroke();
   c.strokeStyle='#c8a050'; c.beginPath(); c.ellipse(X,Y-k*8.2,k*.45,k*.9,0,0,Math.PI*2); c.stroke(); } // スナップ付きサルカン
-// 仕掛けの絵（本人のAI生成・_work/make_rig.py で部品に切り分け）。ゲームの針の位置に合わせて組み立てる。読めなければ手描き
-const RIGSPR={"bait_br0":{"w":346,"h":156,"ax":327,"ay":26,"hook":[39,137],"left":true},"bait_br1":{"w":354,"h":146,"ax":18,"ay":26,"hook":[312,127],"left":false},"bait_br2":{"w":350,"h":152,"ax":331,"ay":26,"hook":[39,133],"left":true},"bait_top":{"w":85,"h":187,"ax":42,"ay":185},"bait_sinker":{"w":193,"h":368,"ax":99,"ay":2,"bot":[99,365]},"sabiki_br0":{"w":238,"h":102,"ax":219,"ay":25,"hook":[57,83],"left":true},"sabiki_br1":{"w":238,"h":101,"ax":18,"ay":25,"hook":[179,82],"left":false},"sabiki_br2":{"w":237,"h":103,"ax":218,"ay":24,"hook":[57,84],"left":true},"sabiki_br3":{"w":239,"h":102,"ax":18,"ay":24,"hook":[179,83],"left":false},"sabiki_br4":{"w":237,"h":106,"ax":218,"ay":24,"hook":[57,87],"left":true},"sabiki_top":{"w":85,"h":187,"ax":42,"ay":185},"sabiki_sinker":{"w":185,"h":384,"ax":93,"ay":2,"bot":[93,381]},"baitk_br0":{"w":368,"h":225,"ax":349,"ay":86,"hook":[19,206],"left":true},"baitk_br1":{"w":371,"h":218,"ax":18,"ay":41,"hook":[352,199],"left":false},"baitk_br2":{"w":368,"h":227,"ax":349,"ay":34,"hook":[19,208],"left":true},"baitk_top":{"w":85,"h":192,"ax":42,"ay":190},"baitk_sinker":{"w":422,"h":384,"ax":345,"ay":2,"bot":[345,381]},"baiti_br0":{"w":363,"h":183,"ax":344,"ay":34,"hook":[22,164],"left":true},"baiti_br1":{"w":365,"h":167,"ax":18,"ay":36,"hook":[344,148],"left":false},"baiti_br2":{"w":361,"h":194,"ax":342,"ay":35,"hook":[23,175],"left":true},"baiti_top":{"w":85,"h":192,"ax":42,"ay":190},"baiti_sinker":{"w":148,"h":383,"ax":73,"ay":2,"bot":[73,380]},"bake_on":{"w":1087,"h":344,"ax":200,"ay":4,"bot":[200,339]},"bake_off":{"w":1087,"h":344,"ax":200,"ay":4,"bot":[200,339]},"jig":{"w":1193,"h":1206,"ax":615,"ay":25,"c":[620,452]}}; for(const n in RIGSPR){ const o=RIGSPR[n], im=new Image(); im.onload=()=>{ o.ok=true; }; im.src=`img/rig/${n}.webp`; o.img=im; }
-const rs=n=>{ const o=RIGSPR[n]; return o&&o.ok?o:null; };
-const bakeU=k=>k*20/580;
-function jigAng(){ const r=G.rig, fall=G.state==='falling', jerk=G.t-r.lastAct<.9; return fall?Math.sin(G.t*8)*.55:jerk?Math.sin(G.t*13)*.4:Math.sin(G.t*1.6)*.1; }
-// 道糸を結ぶ点（仕掛けのいちばん下＝r.y からの高さ。px、上が負）：胴突き・サビキは上のサルカンの輪、ジグは頭のリング、バケは三又サルカンの上
-function rigAttach(V,k){ const id=G.rigId, r=G.rig;
-  G._ax=0; if(id==='jig'){ const J=rs('jig'); if(!J) return 0; const L=k*15, u=L/845, a=jigAng(), ox=(J.ax-J.c[0])*u, oy=(J.ay-J.c[1])*u;
-    G._ax=ox*Math.cos(a)-oy*Math.sin(a); return -L*.5+ox*Math.sin(a)+oy*Math.cos(a); }
-  if(id==='bake'){ const B=rs('bake_on'); return B?-(B.bot[1]-B.ay)*bakeU(k):0; }
-  const T=rs(id+'_top'); if(!T) return 0; const hk=rigDef().hooks; return (sy(V,r.y-hk[hk.length-1]-.35)-sy(V,r.y))-(T.ay-2)*k*9/352; }
-function brSpr(set,left,j){ const a=(left?[0,2,4]:[1,3]).map(i=>rs(set+'_br'+i)).filter(Boolean); return a.length?a[j%a.length]:null; }
-function drawPart(c,o,x,y,u,ang=0){ c.save(); c.translate(x,y); if(ang) c.rotate(ang); c.drawImage(o.img,-o.ax*u,-o.ay*u,o.w*u,o.h*u); c.restore(); }
-function drawRigAndLine(V){ const c=ctx, r=G.rig, s=V.sc, k=s*FISHX*.0115; // 1cmあたりのpx（魚と同じく大きめに描く）
-  const y0=sy(V,0); const tip=G.tip&&y0>-5?G.tip:{x:sx(V,G.drift+2.3),y:y0-s*2.4};
-  const ry=sy(V,r.y); let ex,ey; if(G.fight&&G.fight.f){ ex=sx(V,G.fight.f.x+.45*G.fight.f.size/100*FISHX*G.fight.f.face); ey=sy(V,G.fight.f.y); } else { ex=sx(V,rigX()); ey=ry+rigAttach(V,k); ex+=G._ax||0; }
+// 透過の仕掛け素材。ax/ay は道糸・枝スの結び目。
+const RIGSPR={
+  bare:{"ax":128.41,"ay":4.76,"length":250.95},
+  saury:{"ax":106.25,"ay":3.79,"length":252.8},
+  worm:{"ax":99.01,"ay":3.64,"length":253.09},
+  sabiki_pink:{"ax":112.62,"ay":4.43,"length":251.58},
+  sabiki_pearl:{"ax":113.51,"ay":4.43,"length":251.58},
+  sabiki_green:{"ax":113.51,"ay":4.44,"length":251.57},
+  swivel:{"ax":41.14,"ay":3.57,"length":252.14},
+  sinker:{"ax":67.25,"ay":3.0,"length":254.3},
+  jig:{"ax":113.97,"ay":3.79,"length":416.78,"cx":114.35,"cy":246.66},
+  bake_on:{"ax":160.57,"ay":3.97,"length":391.57,"bottom":176.42},
+  bake_off:{"ax":166.09,"ay":4.12,"length":406.68,"bottom":183.29},
+};
+for(const [name,sprite] of Object.entries(RIGSPR)){
+  sprite.img=new Image();
+  sprite.img.src=`img/rig/v2/${name}.webp`;
+}
+const rs=name=>{ const sprite=RIGSPR[name]; return sprite?.img.naturalWidth?sprite:null; };
+const RIG_BRANCHES={
+  bait:['saury','worm','saury'],
+  bare:['bare','bare','bare'],
+  sabiki:['sabiki_pink','sabiki_pearl','sabiki_green']
+};
+function jigAng(){
+  const r=G.rig, fall=G.state==='falling', jerk=G.t-r.lastAct<.9;
+  return fall?Math.sin(G.t*8)*.55:jerk?Math.sin(G.t*13)*.4:Math.sin(G.t*1.6)*.1;
+}
+function drawPart(c,sprite,x,y,scale,angle=0,flip=false){
+  c.save(); c.translate(x,y); c.rotate(angle);
+  c.scale(flip?-scale:scale,scale);
+  c.drawImage(sprite.img,-sprite.ax,-sprite.ay); c.restore();
+}
+function drawRigAndLine(V){
+  const c=ctx, r=G.rig, id=G.rigId, s=V.sc, k=s*FISHX*.0115;
+  const y0=sy(V,0), tip=G.tip&&y0>-5?G.tip:{x:sx(V,G.drift+2.3),y:y0-s*2.4};
+  const ry=sy(V,r.y), X=sx(V,rigX());
+  const hooks=rigDef().hooks, topY=sy(V,r.y-hooks[hooks.length-1]-.35);
+  const jig=id==='jig'&&rs('jig'), bake=id==='bake'&&rs(r.baitGone?'bake_off':'bake_on');
+  const armNames=RIG_BRANCHES[id==='bait'&&r.baitGone?'bare':id];
+  const arms=armNames?.map(rs), swivel=arms&&rs('swivel'), sinker=arms&&rs('sinker');
+  const hasParts=swivel&&sinker&&arms.every(Boolean);
+  const ang=id==='jig'?jigAng():0, L=k*15, su=jig?L/jig.length:0, bu=bake?k*19/bake.length:0;
+  let ex=X, ey=ry;
+  if(G.fight){
+    ex=sx(V,G.fight.f.x+.45*G.fight.f.size/100*FISHX*G.fight.f.face);
+    ey=sy(V,G.fight.f.y);
+  } else if(jig){
+    const ox=(jig.ax-jig.cx)*su, oy=(jig.ay-jig.cy)*su;
+    ex+=ox*Math.cos(ang)-oy*Math.sin(ang);
+    ey+=-L*.5+ox*Math.sin(ang)+oy*Math.cos(ang);
+  } else if(bake) ey-=(bake.bottom-bake.ay)*bu;
+  else if(hasParts) ey=topY-k*4;
   const ent=tip.x+s*.08;
   c.strokeStyle='rgba(255,240,140,.85)'; c.lineWidth=1.1; c.beginPath(); c.moveTo(tip.x,tip.y); c.quadraticCurveTo(tip.x+s*.05,(tip.y+y0)/2,ent,y0); c.stroke();
   c.strokeStyle='rgba(255,240,140,.6)'; c.beginPath(); c.moveTo(ent,y0); c.quadraticCurveTo(ent+(ex-ent)*.2+Math.sin(G.t*.7)*6,(y0+ey)/2,ex,ey); c.stroke();
   if(G.fight) return;
-  const X=ex, Y=ey;
-  if(G.rigId==='bake'){ const B=rs(r.baitGone?'bake_off':'bake_on')||rs('bake_on');
-    if(B){ const jerk=G.t-r.lastAct<.9, ang=G.state==='falling'?-.2+Math.sin(G.t*6)*.08:jerk?Math.sin(G.t*12)*.15:Math.sin(G.t*1.4+.5)*.035; drawPart(c,B,X,Y,bakeU(k),ang); return; }
-    drawSinker(c,X,ry,k); return; }
-  if(G.rigId==='jig'){ const fall=G.state==='falling', jerk=G.t-r.lastAct<.9; const ang=jigAng();
-    const L=k*15, w=L*.13, J=rs('jig');
-    if(J){ const u=L/845; c.save(); c.translate(sx(V,rigX()),ry-L*.5); c.rotate(ang); c.drawImage(J.img,-J.c[0]*u,-J.c[1]*u,J.w*u,J.h*u);
-      if(fall||jerk){ c.globalCompositeOperation='lighter'; c.globalAlpha=.18+.22*Math.max(0,Math.sin(G.t*22)); c.drawImage(J.img,-J.c[0]*u,-J.c[1]*u,J.w*u,J.h*u); } c.restore(); return; }
-    c.save(); c.translate(X,Y-L*.5); c.rotate(ang);
+  if(id==='bake'){
+    if(bake){
+      const jerk=G.t-r.lastAct<.9, tilt=G.state==='falling'?-.2+Math.sin(G.t*6)*.08:jerk?Math.sin(G.t*12)*.15:Math.sin(G.t*1.4+.5)*.035;
+      drawPart(c,bake,ex,ey,bu,tilt);
+    } else drawSinker(c,X,ry,k);
+    return;
+  }
+  if(id==='jig'){
+    const fall=G.state==='falling', jerk=G.t-r.lastAct<.9, w=L*.13;
+    if(jig){
+      drawPart(c,jig,ex,ey,su,ang);
+      if(fall||jerk){
+        c.save(); c.globalCompositeOperation='lighter'; c.globalAlpha=.10+.24*Math.max(0,Math.sin(G.t*22));
+        drawPart(c,jig,ex,ey,su,ang); c.restore();
+      }
+      return;
+    }
+    c.save(); c.translate(X,ry-L*.5); c.rotate(ang);
     // リーダー・ソリッドリング・アシストフック
     c.strokeStyle='#c8ced2'; c.lineWidth=Math.max(1,k*.3); c.beginPath(); c.arc(0,-L/2-k*1.1,k*.7,0,Math.PI*2); c.stroke();
     c.strokeStyle='#e8732c'; c.lineWidth=Math.max(1,k*.4); c.beginPath(); c.moveTo(0,-L/2-k*.6); c.quadraticCurveTo(-k*1.4,-L/2+k*.6,-k*1.6,-L/2+k*2.2); c.moveTo(0,-L/2-k*.6); c.quadraticCurveTo(k*1.4,-L/2+k*.6,k*1.6,-L/2+k*2.2); c.stroke();
@@ -1619,24 +1694,30 @@ function drawRigAndLine(V){ const c=ctx, r=G.rig, s=V.sc, k=s*FISHX*.0115; // 1c
     c.save(); c.clip(body); c.globalCompositeOperation='lighter'; for(let i=-6;i<8;i++){ const o=i*L*.09+((G.t*30)%(L*.09)); const hue=(i*40+G.t*120)%360; c.strokeStyle=`hsla(${hue},90%,70%,.35)`; c.lineWidth=k*.6; c.beginPath(); c.moveTo(-w,o); c.lineTo(w,o-L*.15); c.stroke(); } c.restore();
     c.fillStyle='#ffd23a'; c.beginPath(); c.arc(0,-L*.36,w*.42,0,Math.PI*2); c.fill(); c.fillStyle='#111'; c.beginPath(); c.arc(0,-L*.36,w*.22,0,Math.PI*2); c.fill();
     c.restore(); return; }
-  // 胴突き・サビキ（絵）：上のサルカン・幹糸・枝（左右）・エサ・オモリ
-  { const id=G.rigId, T=rs(id+'_top'), S=rs(id+'_sinker'), Ls=[0,2,4].map(i=>rs(id+'_br'+i)).filter(Boolean), Rs=[1,3].map(i=>rs(id+'_br'+i)).filter(Boolean);
-    if(T&&S&&Ls.length&&Rs.length){ const u=k*9/352, hk=rigDef().hooks, topY=sy(V,r.y-hk[hk.length-1]-.35), sTop=ry-(S.bot[1]-S.ay)*u;
-      c.strokeStyle='rgba(150,195,240,.5)'; c.lineWidth=Math.max(.8,u*12); const ub=u*(id==='sabiki'?1.5:1.2); c.beginPath(); c.moveTo(X,topY); c.lineTo(X,sTop+u*6); c.stroke();
-      drawPart(c,T,X,topY,u);
-      hk.forEach((h,i)=>{ const hy=sy(V,r.y-h), left=i%2===0, eb=id==='bait'&&!r.baitGone?brSpr(i%2?'baiti':'baitk',left,i>>1):null, o=eb||(left?Ls[(i>>1)%Ls.length]:Rs[(i>>1)%Rs.length]), sw=Math.sin(G.t*1.8+i)*(id==='bait'?.1:.2)*(left?-1:1);
-        drawPart(c,o,X,hy,ub,sw);
-        const dx=(o.hook[0]-o.ax)*ub, dy=(o.hook[1]-o.ay)*ub, hx=X+dx*Math.cos(sw)-dy*Math.sin(sw), hyy=hy+dx*Math.sin(sw)+dy*Math.cos(sw), dir=left?-1:1;
-        if(id==='bait'&&!r.baitGone&&!eb){ c.save(); c.translate(hx,hyy+k*.3); c.rotate(Math.sin(G.t*3+i)*.35+dir*.2); const bw=k*1.3, bl=k*4.6;
-          const bg=c.createLinearGradient(-bw,0,bw,0); bg.addColorStop(0,'#5c7a99'); bg.addColorStop(.35,'#d6e0ea'); bg.addColorStop(.55,'#e9a090'); bg.addColorStop(1,'#c46a5e'); c.fillStyle=bg;
-          c.beginPath(); c.moveTo(-bw*.8,-bl*.15); c.lineTo(bw*.8,-bl*.2); c.lineTo(bw,bl*.8); c.lineTo(-bw*.6,bl); c.closePath(); c.fill(); c.restore(); }
-        if(id==='sabiki'&&Math.sin(G.t*4+i*1.7)>.75){ c.fillStyle='rgba(255,255,255,.9)'; c.beginPath(); c.arc(hx-dir*k*.8,hyy-k*.8,k*.55,0,Math.PI*2); c.fill(); } });
-      drawPart(c,S,X,sTop,u); return; } }
+  // 幹糸と枝スを描き、各スプライトのハリの輪までつなぐ。
+  if(hasParts){
+    const sinkerY=ry-k*8.8, bait=id==='bait';
+    c.strokeStyle='rgba(194,225,238,.67)'; c.lineWidth=Math.max(.85,k*.24);
+    c.beginPath(); c.moveTo(X,topY); c.lineTo(X,sinkerY); c.stroke();
+    drawPart(c,swivel,X,ey,k*4/swivel.length);
+    drawPart(c,sinker,X,sinkerY,k*8.8/sinker.length);
+    hooks.forEach((h,i)=>{
+      const hy=sy(V,r.y-h), dir=i%2?1:-1, swing=Math.sin(G.t*1.8+i);
+      const dx=dir*k*(bait?8.2:5.2)*(1+swing*.07), dy=k*(1.35+swing*.52);
+      c.beginPath(); c.moveTo(X,hy); c.quadraticCurveTo(X+dx*.58,hy-k*.3,X+dx,hy+dy); c.stroke();
+      const hook=arms[i%arms.length], size=bait?(r.baitGone?4.1:5.1):3.8;
+      drawPart(c,hook,X+dx,hy+dy,k*size/hook.length,dir*swing*.19,dir>0);
+      if(!bait&&Math.sin(G.t*4+i*1.7)>.86){
+        c.fillStyle='rgba(240,250,255,.8)'; c.beginPath();
+        c.arc(X+dx,hy+dy+k*1.1,k*.42,0,Math.PI*2); c.fill();
+      }
+    });
+    return;
+  }
   // 胴突き・サビキ（手描き）：幹糸・枝ス・ハリ・エサ／スキン・オモリ
-  const hk=rigDef().hooks, topY=sy(V,r.y-hk[hk.length-1]-.35);
-  c.strokeStyle='rgba(235,245,255,.55)'; c.lineWidth=1; c.beginPath(); c.moveTo(X,Y-k*8.8); c.lineTo(X,topY); c.stroke();
+  c.strokeStyle='rgba(235,245,255,.55)'; c.lineWidth=1; c.beginPath(); c.moveTo(X,ry-k*8.8); c.lineTo(X,topY); c.stroke();
   c.strokeStyle='#c8a050'; c.lineWidth=Math.max(1,k*.35); c.beginPath(); c.ellipse(X,topY,k*.45,k*.9,0,0,Math.PI*2); c.stroke(); // 上のサルカン
-  hk.forEach((h,i)=>{ const hy=sy(V,r.y-h), dir=i%2?1:-1, sw=Math.sin(G.t*1.8+i)*.15, len=(G.rigId==='bait'?.28:.13)*s, hx=X+dir*len*(.9+sw*.3), hyy=hy+len*.35;
+  hooks.forEach((h,i)=>{ const hy=sy(V,r.y-h), dir=i%2?1:-1, sw=Math.sin(G.t*1.8+i)*.15, len=(G.rigId==='bait'?.28:.13)*s, hx=X+dir*len*(.9+sw*.3), hyy=hy+len*.35;
     c.strokeStyle='rgba(235,245,255,.5)'; c.lineWidth=1; c.beginPath(); c.moveTo(X,hy); c.quadraticCurveTo(X+dir*len*.5,hy+len*.05,hx,hyy); c.stroke();
     if(G.rigId==='bait'){ c.fillStyle=i%2?'#ff4d6a':'#4dff7a'; c.beginPath(); c.arc(hx,hyy,k*.55,0,Math.PI*2); c.fill();
       drawHook(c,hx,hyy+k*.5,k*.8,dir);
@@ -1647,7 +1728,7 @@ function drawRigAndLine(V){ const c=ctx, r=G.rig, s=V.sc, k=s*FISHX*.0115; // 1c
       c.fillStyle=col; c.beginPath(); c.ellipse(0,k*1.8,k*.75,k*2.2,0,0,Math.PI*2); c.fill();
       if(Math.sin(G.t*4+i*1.7)>.75){ c.fillStyle='rgba(255,255,255,.95)'; c.beginPath(); c.arc(0,k*1.2,k*.6,0,Math.PI*2); c.fill(); }
       drawHook(c,0,k*.2,k*.7,dir); c.restore(); } });
-  drawSinker(c,X,Y,k);
+  drawSinker(c,X,ry,k);
 }
 // 泡（仕掛けが落ちるときと誘ったとき）
 function updateBubbles(dt){ G.bub=G.bub||[]; const r=G.rig;
