@@ -358,7 +358,7 @@ body.phone.land #gauge{bottom:calc(60px + env(safe-area-inset-bottom));width:min
           </div>
         </div>
       </header>
-      <div id="verNote" role="status"><b>試作 v0.36</b>　いつも最新版で遊べるよう、ときどきページを再読み込み（更新）してください。新しい版が出たら、ここでお知らせします。</div>
+      <div id="verNote" role="status"><b>試作 v0.37</b>　いつも最新版で遊べるよう、ときどきページを再読み込み（更新）してください。新しい版が出たら、ここでお知らせします。</div>
       <div id="tripSum"></div>
       <div class="menu-main">
         <section class="menu-block">
@@ -400,7 +400,7 @@ body.phone.land #gauge{bottom:calc(60px + env(safe-area-inset-bottom));width:min
           <p>①<kbd>落とす</kbd>で仕掛けを沈める（底に着くと「着底」）　②<kbd>巻く</kbd>でタナ（深さ）を調整。魚探の魚の反応に合わせよう　③<kbd>誘う</kbd>で仕掛けを動かす（ジグは落とすときや巻くときにも食うが、しゃくった直後がいちばん反応が出やすい）　④竿先がグッと入ったら<kbd>合わせ</kbd>　⑤やりとりは<kbd>巻く</kbd>を押し続ける。張りがドラグを超えると糸が出る。張りすぎると切れる、ゆるめるとバレる　⑥大物は水面で<kbd>合わせ</kbd>＝タモ入れ。</p>
           <p>ボートは潮で流され、実際の海底地形（GEBCO）に沿って深さが変わります。浅くなりすぎたら<kbd>流し直し</kbd>。潮がよく動く時間と朝夕のまずめ時は魚の食いが立ちます。ゲームの中では5分で1時間が進みます。岩場で底を引きずると<b>根掛かり</b>。浅くなったら巻き上げ、深くなったら落とし直して「底を取り直す」のが船釣りのコツです。</p>
         </details>
-        <div class="src">試作 v0.36 ／ 海底地形：GEBCO Compilation Group (2025) GEBCO_2025 Grid・(2020) GEBCO_2020 Grid（約400m格子のため根や瀬は表現できず、底質に合わせた起伏を足しています。洞爺湖の水深は湖の形から推定した作り物）／潮位：気象庁 潮位表「室蘭」／洞爺湖の決まり：洞爺湖漁業協同組合「遊漁について」（2026年）</div>
+        <div class="src">試作 v0.37 ／ 海底地形：GEBCO Compilation Group (2025) GEBCO_2025 Grid・(2020) GEBCO_2020 Grid（約400m格子のため根や瀬は表現できず、底質に合わせた起伏を足しています。洞爺湖の水深は湖の形から推定した作り物）／潮位：気象庁 潮位表「室蘭」／洞爺湖の決まり：洞爺湖漁業協同組合「遊漁について」（2026年）</div>
       </div>
     </div>
     <div id="goBar"><div id="goSpot"></div><button class="go" id="bStart">出船！</button></div>
@@ -670,11 +670,48 @@ const SP=[
   rig:{bait:1,jig:.4,sabiki:.2},size:[40,80],mode:58,lw:[.0035,3],power:.65,bite:'gon',fight:'shake',spd:.45,
   look:{kind:'hokke',h:.11,back:'#5e5034',side:'#a08858',belly:'#e6d8a8',fin:'#6e6040',pat:['mottleFine']},
   desc:'ウナギのように細長い、タウエガジの仲間（標準和名ナガヅカ）。北海道の沿岸の砂や泥の底（水深300mまで）にすむ。噴火湾では春（4〜5月）に浅い岩場で産卵し、夏は200〜300mの深場へ移って、秋から冬にまた岸へ寄ってくる。白くしまった身は、かまぼこなどのすり身にする。卵は強い毒があるので食べない。'},
+ // ---- v0.37 レアな魚 ----
+ {id:'hoteiuo',rare:2,photo:'L',sea:{bay:1,pac:.2},pt:{gansho:1.6,okine:.4,sunachi:.3,fukaba:0},where:'◆湾内の岩場（噴火湾の浅い岩場・冬）',name:'ホテイウオ',alias:'ゴッコ',habitat:{rock:1,sand:.35,mud:.15},dmin:2,dmax:40,zone:{t:'bottom',a:0,b:2.5},season:[.35,0,0,1],abund:.07,school:[1,1],
+  rig:{bait:.3,jig:.04,sabiki:.06,bake:.05},size:[20,40],mode:28,lw:[.034,3],power:.45,bite:'omoi',fight:'heavy',spd:.12,
+  look:{kind:'rock',h:.5,back:'#3e3a22',side:'#6e5e36',belly:'#c8a870',fin:'#7a6a40',pat:['spots']},
+  desc:'ゴッコとも呼ばれる、ぶよぶよした丸い魚。腹の吸盤で岩や海藻にくっつき、泳ぎは下手。ふだんは沖にいて、冬から早春（12〜3月ごろ）に岸近くの浅い岩場へ卵を産みに来る。道南の噴火湾（鹿部）から恵山・函館の沿岸が本場で、冬に網でとれる。釣りバリに掛かることはめったにない。'},
+ {id:'samegarei',rare:2,photo:'R',sea:{bay:0,pac:1},pt:{fukaba:1.2,sunachi:0,okine:.3,gansho:0},where:'◆太平洋の深場（水深200mより深い底。地図の右下、地球岬の南東沖）',name:'サメガレイ',habitat:{rock:.2,sand:.6,mud:1},dmin:150,dmax:1000,zone:{t:'flat'},season:[.8,.8,.9,1],abund:.16,school:[1,1],
+  rig:{bait:1,jig:.1,sabiki:.15},size:[28,60],mode:40,lw:[.0125,3],power:1,bite:'kotsu',fight:'heavy',spd:.3,
+  look:{kind:'flat',h:.6,dir:'right',back:'#5a4028',side:'#6a4a30',fin:'#4a3a2a',pat:['mottle']},
+  desc:'皮にいぼのような小さな突起が並び、サメの肌のようにざらざらしたカレイ。北海道や東北の太平洋側の、水深150〜1,000mの深場の底にすむ。冬の産卵期はさらに深い所へ移る。身は白くやわらかく、煮付けが定番。ひれのつけ根（えんがわ）がおいしい。'},
+ {id:'aburagarei',rare:2,photo:'R',sea:{bay:0,pac:1},pt:{fukaba:1.2,sunachi:0,okine:.3,gansho:0},where:'◆太平洋の深場（水深200mより深い底。地図の右下、地球岬の南東沖）',name:'アブラガレイ',habitat:{rock:.2,sand:.6,mud:1},dmin:120,dmax:1000,zone:{t:'flat'},season:[.8,.7,.8,1],abund:.14,school:[1,1],
+  rig:{bait:1,jig:.55,sabiki:.1,bake:.4},size:[35,85],mode:48,lw:[.0085,3],power:1.15,bite:'gon',fight:'heavy',spd:.6,
+  look:{kind:'flat',h:.42,dir:'right',back:'#3e3a36',side:'#4e4842',fin:'#3a3632',pat:['mottleFine'],bigmouth:true},
+  desc:'名前のとおり身に脂の多い、深場の大型カレイ。大きな口に鋭い歯が並び、底の近くで小魚やイカを襲う。北日本の太平洋側の、大陸棚より深い泥底にすむ。脂ののったひれのつけ根は、すしの「えんがわ」にもなる。'},
+ {id:'kinki',rare:2,photo:'L',sea:{bay:.05,pac:1},pt:{fukaba:1.2,sunachi:0,okine:.5,gansho:0},where:'◆太平洋の深場（水深200mより深い底。地図の右下、地球岬の南東沖）',name:'キンキ',alias:'キチジ',habitat:{rock:.6,sand:.8,mud:1},dmin:150,dmax:1200,zone:{t:'bottom',a:0,b:1.5},season:[.8,.6,1,.9],abund:.22,school:[1,3],
+  rig:{bait:1,jig:.15,sabiki:.35},size:[14,32],mode:21,lw:[.02,3],power:.75,bite:'gon',fight:'shake',spd:.4,
+  look:{kind:'rock',h:.32,back:'#d8301c',side:'#ee4a2a',belly:'#ffb08a',fin:'#e83a20',pat:[]},
+  desc:'標準和名はキチジ。真っ赤な体に大きな目、背びれに黒い斑点がある高級魚。道南の太平洋では大陸斜面の水深150〜1,200mにすみ、とくに200〜600mに多い。若い魚ほど浅めにいて、あまり動き回らずすみかに居つく。成長がとてもゆっくりで、体長18cmで5歳ほど。室蘭の沖合底びき網や、刺し網でとれる。'},
+ {id:'menuke',rare:2,photo:'L',sea:{bay:0,pac:1},pt:{fukaba:1.1,sunachi:0,okine:.6,gansho:0},where:'◆太平洋の深場（水深200mより深い底。地図の右下、地球岬の南東沖）',name:'メヌケ',alias:'オオサガなど',habitat:{rock:1,sand:.5,mud:.7},dmin:200,dmax:1000,zone:{t:'bottom',a:0,b:6},season:[.8,.7,.8,1],abund:.12,school:[1,3],
+  rig:{bait:1,jig:.3,sabiki:.3},size:[35,75],mode:48,lw:[.016,3],power:1.25,bite:'gon',fight:'heavy',spd:.45,
+  look:{kind:'rock',h:.34,back:'#c83c28',side:'#e8604a',belly:'#ffc0a0',fin:'#e05038',pat:['mottle']},
+  desc:'深い海にすむ大きな赤いメバルの仲間（オオサガ・アラメヌケ・バラメヌケなど）をまとめた呼び名。水深200m〜1,000mほどの岩まじりの斜面にすむ。深海から上げると水圧が下がって浮き袋がふくらみ、目が飛び出すので「目抜け」。日高・胆振の太平洋側の深場で、刺し網や深場釣りでとれる。オオサガは数が減っていて、環境省のレッドリストで準絶滅危惧。'},
+ {id:'ohyou',rare:3,photo:'R',sea:{bay:.08,pac:1},pt:{fukaba:1.3,sunachi:.9,okine:.6,gansho:.2},where:'太平洋側の深め（夏は水深30〜300m、冬は200mより深い所）の底',name:'オヒョウ',habitat:{rock:.5,sand:1,mud:.8},dmin:30,dmax:500,zone:{t:'flat'},season:[.5,1,.5,.25],abund:.035,school:[1,1],
+  rig:{bait:1,jig:.6,sabiki:.02,bake:.7},size:[50,180],mode:80,lw:[.0105,3],power:1.9,bite:'gon',fight:'heavy',spd:.7,
+  look:{kind:'flat',h:.46,dir:'right',back:'#4a3a28',side:'#5a4632',fin:'#4a3a28',pat:['mottle']},
+  desc:'ヒラメ・カレイの仲間でいちばん大きくなる魚。大きいものは全長2m以上、体重200kgをこえる。夏は水深30〜300mの沿岸でさかんにえさを食べ、冬は200mより深い所へ移って卵を産む（10月下旬〜2月上旬）。北海道ではえりも岬より東の太平洋やオホーツク海に多く、噴火湾を出た室蘭沖で掛かれば大事件。白身で脂が少なく、フライやムニエル、西京焼きに。'},
+ {id:'tachiuo',rare:3,photo:'L',sea:{bay:.5,pac:1},pt:{fukaba:1,sunachi:.8,okine:.7,gansho:.3},night:1.4,where:'太平洋側の沖の中層（夜は水面近くへ上がる）・夏の終わり〜秋',name:'タチウオ',habitat:{rock:.6,sand:1,mud:1},dmin:15,dmax:400,zone:{t:'mid',top:.35,bot:.9},zoneNight:{t:'abs',top:3,bot:25},season:[0,.35,1,.1],abund:.05,school:[1,4],teeth:.02,
+  rig:{bait:.7,jig:1,sabiki:.05,bake:.3},size:[60,130],mode:85,lw:[.00055,3],power:.75,bite:'kotsu',fight:'shake',spd:1.3,
+  look:{kind:'hokke',h:.07,back:'#b8c4cc',side:'#dde6ea',belly:'#f4f8fa',fin:'#c8d0d4',pat:[]},
+  desc:'刀のように平たく細長い、銀色の魚。頭を上にして立って泳ぐことから「立ち魚」とも。本来は暖かい海の魚だが、近年は海水温が上がって、夏の終わりから秋に北海道の太平洋側でも釣れることがある（地元の釣り人の話。くわしい記録は要確認）。若い魚の群れは、昼は底から離れた中層、夜は水面近くへ上がる。歯がとても鋭く、ハリスを切られることもある。'},
+ {id:'masunosuke',rare:3,rule:'masu',photo:'L',sea:{bay:.35,pac:1},where:'太平洋側の沖の中層・春（サクラマス釣りにまれに混じる）',name:'マスノスケ',alias:'キングサーモン',habitat:{rock:1,sand:1,mud:.8},dmin:10,dmax:300,zone:{t:'abs',top:5,bot:50},season:[1,.3,0,.35],abund:.03,school:[1,1],
+  rig:{bait:.15,jig:1,sabiki:.05,bake:.8},size:[50,105],mode:68,lw:[.0115,3],power:1.9,bite:'hit',fight:'run',spd:2.2,
+  look:{kind:'salmon',h:.24,back:'#3a4a50',side:'#b8c2c8',belly:'#f2f4f4',fin:'#4a5258',pat:['spots']},
+  desc:'英名キングサーモン。サケの仲間でいちばん大きくなる。日本の川では増えておらず、北の海から春〜初夏（4〜6月）に北海道の太平洋側へ回ってくる。定置網で少しとれるだけの高級魚。春のサクラマス釣りに、ごくまれに混じる。背中から尾びれまで黒い点が散らばり、口の中（歯ぐき）が黒い。'},
+ {id:'hiramasa',rare:3,photo:'L',nabRole:'pred',sea:{bay:.5,pac:1},pt:{okine:1.4,gansho:.8,sunachi:.6,fukaba:.4},name:'ヒラマサ',habitat:{rock:1,sand:.6,mud:.3},dmin:10,dmax:200,zone:{t:'mid',top:.15,bot:.95},season:[0,.5,1,.05],abund:.03,school:[1,3],
+  rig:{bait:.2,jig:1,sabiki:.05,bake:.3},size:[40,100],mode:55,lw:[.0115,3],power:1.75,bite:'hit',fight:'run',spd:2.7,
+  look:{kind:'yellowtail',h:.24,back:'#2e4a6a',side:'#b4c4cc',belly:'#eef2f2',fin:'#c8b040',pat:[]},
+  desc:'ブリにそっくりな、ブリの仲間でいちばん大きくなる魚。暖かい海の魚で、北海道では夏から秋に、ブリの群れにまじって若い魚がまれに釣れる（室蘭でも2024年8月に58cmの記録）。ブリとの見分け方：上あごの後ろの角が丸い、胸びれが腹びれより短い、体の黄色い帯がはっきりしている。根のまわりで掛かると、根に走って糸を切ることがある。'},
 ];
 // バケへの食いつきやすさ（本人の実感 2026-11-21：バケと言えばヒラメ、この辺りではサクラマスも定番、マダラ・ソイも可能性あり。ほかは仮の値）。表にない魚は エサ×0.5 と ジグ×0.4 の大きいほう
 const BAKE_PREF={hirame:1,sakuramasu:.9,madara:.6,kurosoi:.55,shimazoi:.45,mazoi:.55,sukesou:.35,ainame:.5,hokke:.5,toubetsu:.6,gisukajika:.6,yanaginomai:.4,hoshizame:.5,kasube:.4,donko:.5,anago:.4,hakkaku:.3,
   matsukawa:.4,buri:.4,maika:.4,mizudako:.4,hitode:.4,fugu:.4,gaya:.2,souhachi:.2,akagarei:.2,namata:.2,magarei:.15,kurogashira:.15,ishigarei:.15,asaba:.15,sunagarei:.1,
-  saba:.2,sake:.2,shiira:.05,kuromaguro:.02,maiwashi:.02,katakuchi:.02,hatahata:.05,kegani:.3,oozuwai:.3,watari:.2,himemasu:.2,yamabe:.3,niji:.4,brown:.4,wakasagi:0,ugui:.3,warazuka:.35};
+  saba:.2,sake:.2,shiira:.05,kuromaguro:.02,maiwashi:.02,katakuchi:.02,hatahata:.05,kegani:.3,oozuwai:.3,watari:.2,himemasu:.2,yamabe:.3,niji:.4,brown:.4,wakasagi:0,ugui:.3,warazuka:.35,hoteiuo:.05,samegarei:.2,kinki:.3,menuke:.4};
 for(const s of SP) if(s.rig.bake==null) s.rig.bake=BAKE_PREF[s.id]??Math.max(s.rig.bait*.5,s.rig.jig*.4);
 const SPI=Object.fromEntries(SP.map(s=>[s.id,s]));
 function dispName(sp,size){ if(sp.id==='buri') return size<60?'フクラギ':'ブリ'; return sp.name; }
@@ -837,7 +874,7 @@ function drawFlat(c,L,fish,lk,o){
 // ============ 記録（ブラウザ内） ============
 const STORE='muroran-tsuri-game.v1';
 // ============ 版の確認（公開先の version.json と比べる） ============
-const APP_VER='0.36';
+const APP_VER='0.37';
 function verNewer(a,b){ const p=s=>String(s).split('.').map(n=>parseInt(n,10)||0), x=p(a), y=p(b); for(let i=0;i<Math.max(x.length,y.length);i++){ if((x[i]||0)!==(y[i]||0)) return (x[i]||0)>(y[i]||0); } return false; }
 function checkVer(force){ if(location.protocol==='file:'&&!window.__verTest) return; const now=Date.now(); if(!force&&now-(checkVer.t||0)<6e5) return; checkVer.t=now;
   fetch('version.json?t='+now,{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&j.v&&verNewer(j.v,APP_VER)) showNewVer(String(j.v)); }).catch(()=>{ }); }
@@ -998,7 +1035,7 @@ function bottomAt(x){ return G.point.bottom(x); }
 function rigRel(){ return 2.38-Math.min(2.5,G.rig.y*.04); } // 竿先の真下あたり
 function rigX(){ return G.drift+rigRel(); }
 function activity(){ return G.act??.6; }
-function reelSpeed(fast){ const k=G.point.dendou?2.2:1; return (fast?3:.9)*k; }
+function reelSpeed(fast){ const k=G.point.dendou?2.2*(G.point.deepK||1):1; return (fast?3:.9)*k; }
 
 // ============ 本物の室蘭沖：海底地形（GEBCO_2025）と潮汐（気象庁 潮位表 室蘭） ============
 // data/bathy-data.js と data/tide-data.js は釣りナビ（muroran-boat-tsuri）と同じもの
@@ -1037,6 +1074,11 @@ function guessBottom(lat,lon){ const d=depthLL(lat,lon); if(d==null||d<2) return
   let s=0,s2=0,n=0,land=false; for(let i=-2;i<=2;i++) for(let j=-2;j<=2;j++){ const z=bathyAt(lat+i*BATHY.step,lon+j*BATHY.step); if(z==null) continue; if(z>-1){ land=true; continue; } s+=-z; s2+=z*z; n++; }
   const m=s/n, sd=Math.sqrt(Math.max(0,s2/n-m*m));
   return (sd/(m+5)>.3||(land&&d<25))?'rock':'sand'; }
+// 噴火湾の中か外か（1＝湾の中、0＝外の太平洋）。湾口は絵鞆岬（約42.33,140.94）と恵山岬（約41.80,141.17）を結ぶ線の目安。室蘭港の中は湾側
+function bayK(lat,lon){ const L=lat>=42.33?140.99:140.94+.434*(42.33-lat); return clamp((L-lon)/.05+.5,0,1); }
+// 海域による出やすさ（sea:{bay,pac} のある魚だけ）。地図を使わない練習ポイントは室蘭の湾口あたり（湾の中3割）として扱う
+function areaW(sp,ll){ if(!sp.sea) return 1; const b=ll?bayK(ll[0],ll[1]):.3; return sp.sea.bay*b+sp.sea.pac*(1-b); }
+function pointLL(){ const p=G.point; return p&&p.real&&p.spot?[p.spot.lat,p.spot.lon]:null; }
 // 釣れる魚の傾向（pt）を決めるポイントの種類
 function pointClass(type,d,lake){ if(lake) return d<40?'kogan':'kooki'; if(type==='rock') return d<25?'gansho':'okine'; return d<50?'sunachi':'fukaba'; }
 const BOTTOM_NAME={rock:'岩礁・根',sand:'砂地',mud:'泥（深場）'};
@@ -1048,12 +1090,12 @@ function microRelief(type,x,seed){
   if(type==='sand') return .35*Math.sin(x*.4+seed)+.15*Math.sin(x*1.3);
   return .15*Math.sin(x*.3+seed); }
 function makeRealPoint(sp){ const d0=depthLL(sp.lat,sp.lon)||20, seed=hash(sp.lat*977+sp.lon*131)*100;
-  const lake=isLake(sp.lat,sp.lon); return {id:pointClass(sp.type,d0,lake), real:true, lake, type:sp.type, name:lake?(sp.name?'洞爺湖・'+sp.name:'洞爺湖'):sp.name||llText(sp.lat,sp.lon), depthTxt:`${BOTTOM_NAME[sp.type]}・約${Math.round(d0)}m${lake?'（推定）':''}`, start:0, dendou:d0>55, spot:sp,
+  const lake=isLake(sp.lat,sp.lon); return {id:pointClass(sp.type,d0,lake), real:true, lake, type:sp.type, name:lake?(sp.name?'洞爺湖・'+sp.name:'洞爺湖'):sp.name||llText(sp.lat,sp.lon), depthTxt:`${BOTTOM_NAME[sp.type]}・約${Math.round(d0)}m${lake?'（推定）':''}`, start:0, dendou:d0>55, deepK:d0>120?Math.min(3,d0/120):1, spot:sp,
     bottom:x=>{ const [la,lo]=offsetLL(sp.lat,sp.lon,G.hdg,x); let d=depthLL(la,lo); if(d==null) d=150; return Math.max(1.2,d+(G.tideM||0)+microRelief(sp.type,x,seed)); } }; }
 // 代表ポイント：種類ごとに1か所。GEBCO の水深と推定底質から選んだ目安（_work/spot_scan.js）。実際の釣り場名ではない
-const SPOTS=[{k:'gansho',lat:42.311,lon:140.959,type:'rock'},{k:'okine',lat:42.290,lon:140.992,type:'rock'},{k:'sunachi',lat:42.311,lon:141.028,type:'sand'},{k:'fukaba',lat:42.260,lon:140.971,type:'mud'},
+const SPOTS=[{k:'gansho',lat:42.311,lon:140.959,type:'rock'},{k:'okine',lat:42.290,lon:140.992,type:'rock'},{k:'sunachi',lat:42.311,lon:141.028,type:'sand'},{k:'fukaba',lat:42.260,lon:140.971,type:'mud'},{k:'shinkai',lat:42.235,lon:141.300,type:'mud'},{k:'wannai',lat:42.352,lon:140.915,type:'rock'},
   {k:'kogan',lat:42.576,lon:140.808},{k:'kooki',lat:42.574,lon:140.844}];
-const LAKE_PT_NAME={kogan:'湖の岸寄り',kooki:'湖の沖'};
+const LAKE_PT_NAME={kogan:'湖の岸寄り',kooki:'湖の沖',shinkai:'太平洋の深場',wannai:'湾内の岩場'};
 const spotName=k=>LAKE_PT_NAME[k]||(POINTS.find(p=>p.id===k)||{}).name||k;
 const llText=(lat,lon)=>`N${lat.toFixed(3)} E${lon.toFixed(3)}`;
 // 流す向き：400m先まで水深5m以上を保てる向きを選ぶ
@@ -1110,7 +1152,7 @@ function updateSea(){ if(!G.clock){ G.act=clamp(.55+.45*Math.sin(G.t*2*Math.PI/2
   const st=tideStage(d); G.tideTxt=`${st?st.label:''} ${Math.round(cm)}cm`; }
 
 // ============ 魚の発生 ============
-function zoneFor(sp){ return (sp.zoneBy&&sp.zoneBy[G.season])||sp.zone; }   // 季節でタナが変わる魚（浮き宗八など）
+function zoneFor(sp){ if(sp.zoneNight&&G.band==='夜') return sp.zoneNight; return (sp.zoneBy&&sp.zoneBy[G.season])||sp.zone; }   // 季節でタナが変わる魚（浮き宗八など）
 function schoolFor(sp){ return (sp.schoolBy&&sp.schoolBy[G.season])||sp.school; }
 function ptW(sp){ return sp.pt&&sp.pt[G.point.id]!=null?sp.pt[G.point.id]:1; }  // ポイントごとの釣れやすさ
 function prefY(sp,x){ const b=bottomAt(x), z=zoneFor(sp);
@@ -1118,7 +1160,7 @@ function prefY(sp,x){ const b=bottomAt(x), z=zoneFor(sp);
   if(z.t==='flat') return b-.06;
   if(z.t==='mid') return clamp(b*rand(z.top,z.bot),1.5,b-1);
   return clamp(rand(z.top,z.bot),1.5,b-2); }
-function spWeight(sp,x){ const b=bottomAt(x); if(b<sp.dmin||b>sp.dmax) return 0; const wa=sp.water; if(G.lake?!wa:wa==='lake') return 0; return (!G.lake&&wa==='both'?sp.seaK??1:1)*sp.abund*sp.season[G.season]*(sp.habitat[G.point.type]||0)*ptW(sp)*(G.band==='夜'?(sp.night||1):1); }
+function spWeight(sp,x){ const b=bottomAt(x); if(b<sp.dmin||b>sp.dmax) return 0; const wa=sp.water; if(G.lake?!wa:wa==='lake') return 0; return (!G.lake&&wa==='both'?sp.seaK??1:1)*sp.abund*sp.season[G.season]*(sp.habitat[G.point.type]||0)*ptW(sp)*areaW(sp,pointLL())*(G.band==='夜'?(sp.night||1):1); }
 function makeFish(sp,x,y){ const size=rollSize(sp); return {sp,x,y,tx:x,ty:y,vx:0,vy:0,size,w:weightG(sp,size)/1000,seed:(Math.random()*1e9)|0,
   nuptial:sp.id==='ainame'&&G.season===2&&Math.random()<.5, face:Math.random()<.5?1:-1, state:'wander', tt:rand(0,3), ck:rand(0,.5), cool:0, swim:Math.random()*6, leader:null}; }
 function spawnAt(x){ if(dolNear()||G.dolCalm>0) return; const sp=wpick(SP,s=>spWeight(s,x)); if(!sp) return; const sc=schoolFor(sp), n=randi(sc[0],sc[1]); let lead=null;
@@ -1203,8 +1245,8 @@ function missBite(msg,why='early'){ const b=G.bite; if(!b) return; if(G.trip){ c
 const NAB={cool:40, SPEED:7};
 function nabChance(){ if(G.band==='夜'||G.lake) return 0; const sea=[.2,.8,1,0][G.season]; if(!sea) return 0;
   let p=.006*sea*(.45+activity()); if(G.band==='朝まずめ'||G.band==='夕まずめ') p*=2.2; return p; }
-const NAB_RARE={shiira:.15,kuromaguro:.2};
-function nabPick(role){ return wpick(SP.filter(s=>s.nabRole===role),s=>s.season[G.season]*(NAB_RARE[s.id]??s.abund+.3)); }
+const NAB_RARE={shiira:.15,kuromaguro:.2,hiramasa:.1};
+function nabPick(role){ return wpick(SP.filter(s=>s.nabRole===role),s=>s.season[G.season]*(NAB_RARE[s.id]??s.abund+.3)*areaW(s,pointLL())); }
 function startNabura(){ if(G.nab) return false;
   for(let k=0;k<16;k++){ const d=rand(30,85)*(Math.random()<.75?1:-1), x=G.drift+d; let ok=true;
     for(let t=.25;t<=1;t+=.25) if(bottomAt(G.drift+d*t)<10){ ok=false; break; } if(!ok) continue;
@@ -1339,7 +1381,7 @@ function updateFight(dt){
   F.ten=lerp(F.ten,t,1-Math.exp(-dt*10));
   F.vt=(F.vt||0)+dt; if(F.vt>.34&&out===0&&(F.phase==='run'||Math.abs(hs)>.08*w)&&F.ten>G.drag*.5){ F.vt=0; buzz('guigui'); } // 魚が走る・首を振るとグイグイ
   F.len+=out*dt;
-  if(reel&&out===0){ const k=G.point.dendou?2.6:1; F.len-=1.5*k*(1-.55*clamp(pe/G.drag,0,1))*dt; F.clk=(F.clk||0)+dt; if(F.clk>.07){F.clk=0;SND.click();} }
+  if(reel&&out===0){ const k=G.point.dendou?2.6*Math.sqrt(G.point.deepK||1):1; F.len-=1.5*k*(1-.55*clamp(pe/G.drag,0,1))*dt; F.clk=(F.clk||0)+dt; if(F.clk>.07){F.clk=0;SND.click();} }
   F.len=Math.max(.5,F.len);
   // スタミナ
   const den=.7+.6*sp.power*Math.sqrt(w)/2;
@@ -1372,6 +1414,7 @@ function updateLanding(dt){ const L=G.landing; L.t+=dt; const F=G.fight; F.f.swi
 function tamo(){ SND.splash(); landFish(); }
 function lose(msg,sub){ if(G.trip) G.trip.lost=(G.trip.lost||0)+1; const F=G.fight; releaseExtras(F); if(F){ const f=F.f; f.state='flee'; f.tt=3; f.ty=f.y+2; G.rig.y=f.y; G.rig.anchor=f.y; }
   G.fight=null; G.rooted=null; G.landing=null; G.state='idle'; if((G.rigId==='bait'&&Math.random()<.7)||(G.rigId==='bake'&&Math.random()<.5)) G.rig.baitGone=true; G.rodHold=0; toast(msg,1600,'',sub); }
+function teethTick(){ const F=G.fight; if(!F||G.state!=='fight'||!F.f.sp.teeth) return; if(Math.random()<F.f.sp.teeth*(G.rigId==='jig'?.5:1)) lineBreak(`${F.f.sp.name}の歯でハリスを切られた…`,'歯が鋭い魚。太いハリスやワイヤーを使う人も多い','teeth'); }
 function lineBreak(msg,sub,why='ten'){ if(G.trip) G.trip['brk_'+why]=(G.trip['brk_'+why]||0)+1; SND.snap(); buzz('brk');const F=G.fight; releaseExtras(F); if(F){ F.f.state='flee'; F.f.tt=3; }
   G.fight=null; G.rooted=null; G.landing=null; G.snag=null; G.lost++; G.state='lost'; G.lostT=1.6; G.rodHold=0; toast(msg,1800,'',sub); }
 function landFish(){ syncReset(); const F=G.fight, all=[F.f,...(F.extra||[])]; G.fight=null; G.landing=null; G.rooted=null; G.state='card';
@@ -1396,7 +1439,7 @@ function updateSnag(dt){ const S=G.snag; if(G.reel){ S.hold+=dt; G.rodHold=.7+S.
 // ============ 仕掛けの動き ============
 function updateRig(dt){ const r=G.rig, rd=rigDef(), bot=bottomAt(rigX());
   if(G.state==='lost'){ G.lostT-=dt; if(G.lostT<=0){ resetRig(); toast('仕掛けを付け直した',900); } return; }
-  if(G.state==='falling'){ r.y+=rd.fall*(G.point.dendou?1.4:1)*dt; r.anchor=r.y; r.off=0; r.lastAct=G.t;
+  if(G.state==='falling'){ r.y+=rd.fall*(G.point.dendou?1.4*(G.point.deepK||1):1)*dt; r.anchor=r.y; r.off=0; r.lastAct=G.t;
     if(r.y>=bot){ r.y=bot; r.anchor=bot; G.state='idle'; r.onBottom=true; SND.tick(); buzz('bottom'); toast(`着底　水深${bot.toFixed(1)}m`,900);
       if(G.point.type==='rock'&&Math.random()<(G.rigId==='jig'?.06:.03)) startSnag(); } return; }
   if(G.state!=='idle') return;
@@ -1993,6 +2036,15 @@ const DISH={
  kuromaguro:'刺身・寿司・漬け丼・ステーキ。大きな魚なので血抜きと冷やし込みが大事',
  kegani:'（漁業者がとったものは塩ゆでが定番）', oozuwai:'（漁業者がとったものは塩ゆで・カニ汁が定番）',
  warazuka:'すり身（つみれ・かまぼこ）。白くしまった身をたたいてすり身にし、汁物や揚げ物に。卵は強い毒があるので食べない',
+ hoteiuo:'ゴッコ汁（ぶつ切りを卵や肝と味噌で煮る、道南の冬の味）。ぬめりは熱湯をかけて取る',
+ samegarei:'煮付け（えんがわのゼラチン質がおいしい）・唐揚げ。皮のざらざらは煮るとやわらかくなる',
+ aburagarei:'すし・刺身（えんがわ）・煮付け・唐揚げ。脂が多いので塩焼きもよい',
+ kinki:'煮付け・湯煮（ゆに）・塩焼き・干物。脂ののった白身で、丸ごとの煮付けがいちばん',
+ menuke:'粕漬け・味噌漬けの焼き物・煮付け・鍋・刺身。脂ののった白身',
+ ohyou:'西京焼き・フライ・ムニエル。白身で脂が少なく、新鮮なものは刺身やすしにも',
+ tachiuo:'塩焼き・皮つきの刺身・ムニエル・煮付け。うろこがなく、銀色の皮ごと食べる',
+ masunosuke:'刺身・すし・塩焼き・ムニエル。脂がたっぷりのった身',
+ hiramasa:'刺身・しゃぶしゃぶ・照り焼き。ブリより脂がおだやかで、身がしまっている',
  hitode:'食べない。持ち帰らない', fugu:'毒がある。ふぐ処理の資格がある人しか調理できない',
 };
 const RAWNOTE='<span class="raw">※生（刺身・なめろう・ルイベなど）で食べるときは寄生虫（アニサキス）に注意。予防は −20℃で24時間以上の冷凍か、十分な加熱。冷やすだけ・目で見て取るだけでは防げない。</span>';
@@ -2079,6 +2131,7 @@ function judge(sp,all,C=jctx()){ const small=all.reduce((a,m)=>m.size<a.size?m:a
   if(sp.zakoMin&&small.size<sp.zakoMin) return R('manner',`小さいもの（${sp.zakoMin}cmくらいまで）は雑魚あつかい。持ち帰る人は少ない。大きいものは持ち帰って食べる。`);
   if(sp.mannerMin&&small.size<sp.mannerMin) return R('manner',`漁業者は資源管理協定で全長${sp.mannerMin}cm未満を海へ返している。釣り人も小さいものは逃がそう。`,'北海道「フィッシングルール2026」p.12');
   if(sp.rule==='tako') return R('manner','タコは北海道の多くの浜で、漁業者の「共同漁業権」の対象。漁業権の区域（岸寄りの海）で漁業者以外がとると、漁業権の侵害になる。区域の外の沖なら問題にならないとされるが、場所によるので、このゲームでは「迷ったら返す」。実際は振興局の水産課（胆振は0143-24-9809）や「海しる」で区域を確かめる。','漁業法（漁業権）・胆振総合振興局水産課');
+  if(sp.rule==='masu'){ const kj=kakouJudge(R,F,C.ll,d,sp.name); if(kj) return kj; return F('岸から2.5km以上の沖なので、河口規制（岸から沖へ最大2km）はかからない。持ち帰ってよい。【要確認】マスノスケはサケ・マスの仲間なので、このゲームではサケと同じ河口規制で判定している。','北海道「フィッシングルール2026」p.22'); }
   if(sp.id==='sake'){ const kj=kakouJudge(R,F,C.ll,d,'サケ'); if(kj) return kj; return F('岸から2.5km以上の沖なので、河口規制（岸から沖へ最大2km）はかからない。海で釣ったサケは持ち帰ってよい。川でサケ・マスを釣るのは禁止。河口規制の区域・期間は毎年見直されるので、最新は北海道「フィッシングルール」で確かめる。','北海道「フィッシングルール2026」p.22'); }
   if(sp.rule==='trash') return R('manner','食べない外道。持ち帰らない。');
   if(sp.rule==='ugui') return F('海のウグイは雑魚あつかいで、持ち帰る人は少ない。持ち帰るかは自由。小骨が多いので、甘露煮などにする。');
@@ -2195,9 +2248,9 @@ function driftDepths(s){ const t=G.startClock||Date.now(), lk=!!s.lake, hs=lk?nu
   const hd=lk?chooseHeading(s.lat,s.lon):hs, d=new Date(t), cm=lk?null:tideCm(d), tm=cm==null?0:(cm-tideMean(d))/100, seed=hash(s.lat*977+s.lon*131)*100; const zs=[], xs=[];
   if(hd!=null) for(let x=-40;x<=240;x+=(x>=-24&&x<26?.5:4)){ const [la,lo]=offsetLL(s.lat,s.lon,hd,x); let z=depthLL(la,lo); if(z==null) z=150; zs.push(Math.max(1.2,z+tm+microRelief(s.type,x,seed))); xs.push(x); }
   const v=hd==null?null:[Math.min(...zs),Math.max(...zs),zs,xs]; driftDepths.k=key; driftDepths.v=v; return v; }
-function tgtWhy(sp,s){ const d=depthLL(s.lat,s.lon)||20, r=driftDepths(s)||[d,d]; return depthFrac(sp,r)===0?`流す先の水深 約${Math.round(r[0])}〜${Math.round(r[1])}m。この魚は${sp.dmin}〜${sp.dmax}m`:BOTTOM_NAME[s.type]; }
+function tgtWhy(sp,s){ const d=depthLL(s.lat,s.lon)||20, r=driftDepths(s)||[d,d]; if(!s.lake&&depthFrac(sp,r)>0&&areaW(sp,[s.lat,s.lon])===0) return '噴火湾の中。この魚は湾の外の太平洋側'; return depthFrac(sp,r)===0?`流す先の水深 約${Math.round(r[0])}〜${Math.round(r[1])}m。この魚は${sp.dmin}〜${sp.dmax}m`:BOTTOM_NAME[s.type]; }
 function depthFrac(sp,r,near){ const zs=r[2]||[r[0],r[1]], xs=r[3]||[], L=zs.map((z,i)=>[xs[i]??0,z]).filter(a=>!near||a[0]>=-24&&a[0]<=26); if(!L.length) return 0; let all=0, ok=0; L.forEach((a,i)=>{ const st=i+1<L.length?Math.abs(L[i+1][0]-a[0]):i?Math.abs(a[0]-L[i-1][0]):1; all+=st; if(a[1]>=sp.dmin&&a[1]<=sp.dmax) ok+=st; }); return ok/all; } // 流す距離に対する割合
-function tgtFit(sp,s){ if(!s) return 1; const lk=!!s.lake, w=sp.water; if(w==='lake'&&!lk||!w&&lk) return 0; const d=depthLL(s.lat,s.lon)||20, k=pointClass(s.type,d,lk); { const r=driftDepths(s); if(r?depthFrac(sp,r)===0:(d<sp.dmin||d>sp.dmax)) return 0; } return (sp.habitat[s.type]||0)*(sp.pt&&sp.pt[k]!=null?sp.pt[k]:1); }
+function tgtFit(sp,s){ if(!s) return 1; const lk=!!s.lake, w=sp.water; if(w==='lake'&&!lk||!w&&lk) return 0; const d=depthLL(s.lat,s.lon)||20, k=pointClass(s.type,d,lk); { const r=driftDepths(s); if(r?depthFrac(sp,r)===0:(d<sp.dmin||d>sp.dmax)) return 0; } return (sp.habitat[s.type]||0)*(sp.pt&&sp.pt[k]!=null?sp.pt[k]:1)*(lk?1:areaW(sp,[s.lat,s.lon])); }
 function aimBadTuna(sp,all,d,tgt,licT){ if(sp.rule!=='tuna'||!tgt) return ''; const w=Math.max(...all.map(m=>m.w));
   if(w<30) return '小型魚（30kg未満）は、キャッチ＆リリース前提でも狙って釣ってはいけない（水産庁Q&A）';
   if(tunaBanned(d)) return '採捕禁止期間中は、クロマグロを狙う釣り（キャッチ＆リリース前提も）が禁止';
@@ -2257,7 +2310,7 @@ function hint0(sp){ if(sp.water==='lake'){ const k=(sp.pt.kogan??1)>=(sp.pt.kook
     const masu=sp.id!=='wakasagi'&&sp.id!=='ugui', boat=sp.id==='wakasagi'?'船は5〜8月・11〜3月、ワカサギの券':sp.id==='brown'?'漁協の表にない魚。ゲームではマス類あつかい（船は6月と12〜3月、マス類の券、針は竿1本に3本まで）＝要確認':masu?'船は6月と12〜3月、マス類の券、針は竿1本に3本まで':'漁協の表にない魚（要確認）';
     const dd=G.startClock?new Date(G.startClock):null, m=dd&&dd.getMonth()+1, ok=dd&&(sp.id==='wakasagi'?(m>=5&&m<=8||m>=11||m<=3):masu?(m===6||m===12||m<=3):null);
     return `洞爺湖の◆${spotName(k)}・${tanaTxt(sp)}・よく釣れる季節 ${s}・${RIGS[rig].name}・${boat}`+(ok===true?(dd.getHours()<4||dd.getHours()>=19?'（選んだ日は船の解禁月。ただし選んだ時刻は遊漁時間4〜19時の外）':'（選んだ日時は船の解禁月・遊漁時間内）'):ok===false?'（選んだ日は船で釣れない月）':''); }
-  const s=['春','夏','秋','冬'].filter((_,i)=>sp.season[i]>0&&sp.season[i]>=.7*Math.max(...sp.season)).join('・')||'—'; const best=sp.pt?POINTS.reduce((a,p)=>(sp.pt[p.id]??1)>(sp.pt[a.id]??1)?p:a):null; const hab=sp.water==='lake'?'洞爺湖':sp.water==='both'?'洞爺湖・海の岸近く':best&&(sp.pt[best.id]??1)>1?'◆'+best.name+`（${tanaTxt(sp)}）`:sp.zone.t==='flat'?'砂地の底':sp.zone.t==='bottom'?(sp.dmin>=50?'深場の底':'岩場の底近く'):`中層（${tanaTxt(sp)}）`; const rig=Object.entries(sp.rig).sort((a,b)=>b[1]-a[1])[0][0]; return `${hab}・${s}・${RIGS[rig].name}`+(sp.nabRole==='pred'?'・夏〜秋のなぶら（鳥山）を追うと出やすい':sp.nabRole==='bait'?'・なぶらの小魚':''); }
+  const s=['春','夏','秋','冬'].filter((_,i)=>sp.season[i]>0&&sp.season[i]>=.7*Math.max(...sp.season)).join('・')||'—'; const best=sp.pt?POINTS.reduce((a,p)=>(sp.pt[p.id]??1)>(sp.pt[a.id]??1)?p:a):null; const hab=sp.where?sp.where:sp.water==='lake'?'洞爺湖':sp.water==='both'?'洞爺湖・海の岸近く':best&&(sp.pt[best.id]??1)>1?'◆'+best.name+`（${tanaTxt(sp)}）`:sp.zone.t==='flat'?'砂地の底':sp.zone.t==='bottom'?(sp.dmin>=50?'深場の底':'岩場の底近く'):`中層（${tanaTxt(sp)}）`; const rig=Object.entries(sp.rig).sort((a,b)=>b[1]-a[1])[0][0]; return `${hab}・${s}・${RIGS[rig].name}`+(sp.nabRole==='pred'?'・夏〜秋のなぶら（鳥山）を追うと出やすい':sp.nabRole==='bait'?'・なぶらの小魚':''); }
 
 // ============ 出船前の地図（ポイント選び）・潮のグラフ・航跡の小地図 ============
 const MAP={clat:42.315,clon:140.965,mpp:28};
@@ -2542,7 +2595,7 @@ addEventListener('blur',()=>{ G.reel=false; });
 // ============ メインループ ============
 function step(dt){ G.t+=dt; G.drift+=G.driftV*dt; if(G.clock) G.clock+=dt*1000*TIME_SCALE;
   if(G.nab){ G.nab.t+=dt; G.nab.x+=G.nab.v*dt; if(bottomAt(G.nab.x)<8) G.nab.v*=-1; } if(G.run) updateRun(dt); if(G.dol) dolStep(dt);
-  G.seaAcc=(G.seaAcc||0)+dt; if(G.seaAcc>1){ G.seaAcc=0; updateSea(); drawMini(); nabTick(); dolTick(); { const bd=bottomAt(rigX()); if(G.ffR&&bd>G.ffR-6){ G.ffR=Math.ceil((bd+12)/10)*10; ffBg=null; toast(`魚探の深さの目盛りを${G.ffR}mに広げた`,1200); } }
+  G.seaAcc=(G.seaAcc||0)+dt; if(G.seaAcc>1){ G.seaAcc=0; updateSea(); drawMini(); nabTick(); dolTick(); teethTick(); { const bd=bottomAt(rigX()); if(G.ffR&&bd>G.ffR-6){ G.ffR=Math.ceil((bd+12)/10)*10; ffBg=null; toast(`魚探の深さの目盛りを${G.ffR}mに広げた`,1200); } }
     if(G.trip){ const fr=ffReact(); if(fr!=null){ G.trip.fr.push([G.trip.dn||0,fr]); if(G.trip.fr.length>1200) G.trip.fr.shift(); } }
     if(G.point.real&&!G.bite&&(G.state==='surface'||G.state==='idle'||G.state==='falling')){ const [la,lo]=offsetLL(G.point.spot.lat,G.point.spot.lon,G.hdg,G.drift), d=depthLL(la,lo);
       if(G.lake&&inKinryo(la,lo)) redrift('禁漁区に入るので流し直した');
@@ -2570,7 +2623,7 @@ function frame(now){ const dt=Math.min(.05,(now-last)/1000); last=now; if(innerW
 resize(); buildMenu(); initMapUI(); renderMap(); drawTide(); populate(); initParts(); requestAnimationFrame(frame);
 addEventListener('resize',()=>{ if(G.mode==='menu'){ renderMap(); drawTide(); } });
 // テスト用
-window.G=G; window.SPI=SPI; window.__pts=POINTS; window.__dbg={checkVer,showNewVer,verNewer,startDolphins,endDolphins,dolTick,dolNear,judge,decide:k=>decideCore(k,JUDGE,true),sakuraZone,tunaPeriod,startNabura,chaseNabura,endNabura,nabStock,setSpot,redrift,updateSea,step,populate,resetRig,sasou,bottomAt,startBite,hookFish,landFish,awase,clutch,startGame,drawFish,showCatch,makeFish};
+window.G=G; window.SPI=SPI; window.__pts=POINTS; window.__dbg={bayK,areaW,teethTick,checkVer,showNewVer,verNewer,startDolphins,endDolphins,dolTick,dolNear,judge,decide:k=>decideCore(k,JUDGE,true),sakuraZone,tunaPeriod,startNabura,chaseNabura,endNabura,nabStock,setSpot,redrift,updateSea,step,populate,resetRig,sasou,bottomAt,startBite,hookFish,landFish,awase,clutch,startGame,drawFish,showCatch,makeFish};
 </script>
 </body>
 </html>
