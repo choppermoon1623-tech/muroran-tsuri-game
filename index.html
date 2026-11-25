@@ -308,6 +308,156 @@ body.phone.land #gauge{bottom:calc(60px + env(safe-area-inset-bottom));width:min
   .menu-block .mapbtns{flex-direction:row}
   .menu-block .mapbtns .sbtn{height:36px;margin-top:0}
 }
+
+/* ================================================================
+   C：ポップで明るいゲーム風テーマ（v0.38）。
+   上の配置（位置・大きさ・スマホ用の並び）はそのまま、色・形・文字だけを上書きする。
+   白いふち・丸いかど・下にずれた影の「ぷっくりボタン」、黄・さんご・水色・若草の4色。
+   ================================================================ */
+:root{
+  --ink:#ffffff;--sub:#d4ecff;--line:rgba(255,255,255,.9);
+  --acc:#ffd23f;--acc-d:#c99a00;--coral:#ff6b57;--coral-d:#c4402f;--aqua:#3fb3e0;--aqua-d:#1f7ea6;
+  --lime:#5cc24a;--lime-d:#3a8a2c;--grape:#8f6ae0;--grape-d:#5f43a8;--blue:#2f86e0;--blue-d:#1a5ba3;
+  --navy:#0c4a86;--navy-d:#07335f;--paper:#ffffff;--paper-sh:#9cc4e6;--txt:#16324a;--txt2:#4b6d8c;
+  --f-pop:"Hiragino Maru Gothic ProN","HG丸ｺﾞｼｯｸM-PRO","HGMaruGothicMPRO","BIZ UDPGothic",sans-serif;
+  --f-num:"Arial Rounded MT Bold","Hiragino Maru Gothic ProN","HG丸ｺﾞｼｯｸM-PRO",sans-serif;
+  --outline:0 3px 0 var(--navy-d),2px 2px 0 var(--navy-d),-2px 2px 0 var(--navy-d),2px -2px 0 var(--navy-d),-2px -2px 0 var(--navy-d);
+}
+html,body{font-family:var(--f-pop);background:#0b5a9a}
+
+/* ---- HUD パネル ---- */
+.panel{background:linear-gradient(#1b7ccc,#1162ad);border:3px solid #fff;border-radius:16px;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 5px 0 var(--navy-d),0 10px 22px rgba(0,30,70,.3)}
+.panel .t{color:#fff;font-weight:700}
+#ff,#mm{border-radius:9px}
+#info .muted{color:var(--sub)}
+#info .big{font-family:var(--f-num);color:var(--acc);font-size:27px;text-shadow:0 2px 0 var(--navy-d)}
+#info #iCount{font-family:var(--f-num);color:var(--acc);font-size:1.15em}
+#tide{border-radius:999px;padding:1px 10px;color:#fff;font-weight:700;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.sbtn{font-family:var(--f-pop);background:#fff;color:var(--navy);border:0;border-radius:999px;font-weight:700;box-shadow:0 3px 0 var(--paper-sh);padding:4px 11px;transition:transform .08s,box-shadow .08s,background .15s}
+.sbtn:hover{background:#eaf6ff}
+.sbtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--paper-sh)}
+.sbtn.on,.spotbtns .sbtn.on{background:var(--acc);color:#4a3500;border:0;box-shadow:0 3px 0 var(--acc-d)}
+#rigPop button{background:#fff;color:var(--navy);border:0;border-radius:12px;box-shadow:0 3px 0 var(--paper-sh)}
+#rigPop button span{color:var(--txt2)}
+#rigPop button.on{background:#fff6cc;border:0;box-shadow:0 0 0 3px var(--acc),0 3px 0 var(--acc-d)}
+
+/* ---- 操作ボタン：ぷっくり・色分け ---- */
+.cb{font-family:var(--f-pop);color:#fff;border:3px solid #fff;border-radius:18px;font-weight:800;text-shadow:0 2px 0 rgba(0,0,0,.22);box-shadow:0 5px 0 rgba(0,0,0,.28);transition:transform .07s,box-shadow .07s}
+.cb small{opacity:.85}
+#bDrop{background:var(--aqua);box-shadow:0 5px 0 var(--aqua-d)}
+#bReel{background:var(--blue);box-shadow:0 5px 0 var(--blue-d)}
+#bSasou{background:var(--lime);box-shadow:0 5px 0 var(--lime-d)}
+#bAwase{background:var(--coral);box-shadow:0 5px 0 var(--coral-d);font-size:21px}
+#bKaishu{background:var(--grape);box-shadow:0 5px 0 var(--grape-d)}
+#ctrls .cb:active,#ctrls .cb.on,#ctrls #bReel.down{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.3);filter:none}
+#ctrls #bReel.down{background:#4a9cf0}
+.cb:disabled{opacity:.5;filter:saturate(.25)}
+@keyframes pulse{to{box-shadow:0 5px 0 var(--coral-d),0 0 0 8px rgba(255,210,63,.65);filter:brightness(1.1)}}
+.cb.win{box-shadow:0 0 0 4px var(--acc),0 0 24px 6px rgba(255,210,63,.85)}
+#gauge .bar{height:16px;border-radius:999px;background:rgba(0,30,70,.35);border:2px solid #fff}
+#gauge .fill{background:linear-gradient(90deg,#5cc24a,#ffd23f 70%,#ff6b57) left/100% 100% no-repeat}
+#gauge .drag{width:4px;border-radius:2px;background:#fff;box-shadow:0 0 0 1px var(--navy-d)}
+#gauge .lab b{font-family:var(--f-num);color:var(--acc);font-size:14px}
+#bNab{font-family:var(--f-pop);color:#4a3500;background:var(--acc);border:3px solid #fff;border-radius:999px;box-shadow:0 5px 0 var(--acc-d)}
+@keyframes nabp{0%{box-shadow:0 5px 0 var(--acc-d),0 0 0 0 rgba(255,210,63,.8)}100%{box-shadow:0 5px 0 var(--acc-d),0 0 0 16px rgba(255,210,63,0)}}
+#toast{font-weight:800;letter-spacing:.04em;text-shadow:var(--outline),0 8px 16px rgba(0,20,50,.35)}
+#coach{background:#1162ad;border:3px solid var(--acc);border-radius:16px;box-shadow:0 5px 0 var(--acc-d)}
+#coach b{color:var(--acc)}
+#coach .x{color:#fff}
+@keyframes flash{to{border-color:var(--acc);box-shadow:0 0 0 5px rgba(255,210,63,.75);background:#c98a00}}
+
+/* ---- 重ねて出す画面 ---- */
+.ov{background:rgba(8,50,95,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.card{background:linear-gradient(#1b7ccc,#0f5aa0);border:4px solid #fff;border-radius:22px;box-shadow:0 8px 0 var(--navy-d),0 24px 50px rgba(0,30,70,.4)}
+h1{font-weight:800;color:var(--acc);text-shadow:var(--outline)}
+h2{color:#fff}
+.lead{color:var(--sub)}
+.ch{background:#fff;color:var(--txt);border:0;border-radius:14px;box-shadow:0 4px 0 var(--paper-sh);transition:transform .08s}
+.ch b{color:var(--navy)} .ch span{color:var(--txt2)}
+.ch:hover{transform:translateY(-1px)}
+.ch.sel{background:#fff6cc;border:0;box-shadow:0 0 0 3px var(--acc),0 4px 0 var(--acc-d)}
+.go{font-family:var(--f-pop);font-weight:800;color:#fff;background:var(--coral);border:3px solid #fff;border-radius:999px;box-shadow:0 5px 0 var(--coral-d);text-shadow:0 2px 0 rgba(0,0,0,.2);transition:transform .07s,box-shadow .07s}
+.go:hover{background:#ff7d6b}
+.go:active{transform:translateY(4px);box-shadow:0 1px 0 var(--coral-d)}
+.go.rel,#catchJudge .go.rel{background:#2fb6d8;box-shadow:0 5px 0 #1a7fa0}
+.go.rel:hover,#catchJudge .go.rel:hover{background:#45c3e2}
+kbd{background:#fff;color:var(--navy);border-radius:6px;box-shadow:0 2px 0 var(--paper-sh)}
+#menu :focus-visible,.ov :focus-visible,.cb:focus-visible{outline:3px solid var(--acc);outline-offset:3px}
+
+/* 出船画面 */
+#menu{background:radial-gradient(ellipse at 50% 0%,#4fb6f0,#0b5a9a 75%);counter-reset:plan}
+#menu .card{display:flex;background:linear-gradient(#1b7ccc,#0f5aa0);border-color:#fff}
+.menu-scroll{scrollbar-color:#9cd3ff #1162ad}
+.menu-hero{border-bottom:4px solid #fff;background-image:linear-gradient(90deg,#0b5a9ad0 0%,#0b5a9a80 40%,#0b5a9a00 70%),url("img/muroran-dawn.webp")}
+.menu-hero h1{color:var(--acc);text-shadow:var(--outline),0 6px 14px rgba(0,20,50,.4);letter-spacing:.04em}
+.menu-hero .lead{color:#fff;text-shadow:0 2px 0 var(--navy-d);font-weight:700}
+.menu-credit{color:#fff}
+#verNote{background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.4);border-radius:14px;color:var(--sub)}
+#verNote b{color:var(--acc)}
+#verNote.new{background:#fff6cc;color:#4a3500;border-color:var(--acc)}
+#verNote.new b{color:var(--coral-d)}
+#verNote .sbtn{background:var(--coral);color:#fff;box-shadow:0 3px 0 var(--coral-d)}
+.menu-block{background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.38);border-radius:18px}
+.menu-block h2{color:#fff;font-weight:800;font-size:18px;display:flex;align-items:center;gap:8px}
+.menu-block h2::before{counter-increment:plan;content:counter(plan);display:inline-grid;place-items:center;flex:none;width:26px;height:26px;border-radius:50%;background:var(--acc);color:#4a3500;font-family:var(--f-num);font-size:15px;box-shadow:0 3px 0 var(--acc-d)}
+.menu-block .menu-hint{color:var(--sub)}
+.menu-block .ch{border:0;border-radius:14px}
+.menu-block .ch:hover{background:#f2f9ff}
+.menu-block .ch.sel{background:#fff6cc;border:0}
+.menu-block .ch.sel b{color:var(--navy)}
+.menu-block #map{border-radius:12px;box-shadow:0 0 0 3px #fff}
+#tideCv{border-radius:12px;box-shadow:0 0 0 3px #fff}
+.mapbtns .sbtn{background:#fff;color:var(--navy);border-radius:12px}
+.mapnote,.src{color:var(--sub);opacity:.9}
+#spotInfo .muted{color:var(--sub)}
+.dt input,.dt select{font-family:var(--f-pop);background:#fff;color:var(--txt);border:0;border-radius:10px;color-scheme:light;font-weight:700;box-shadow:0 3px 0 var(--paper-sh)}
+#tripSum{background:#fff6cc;color:#4a3500;border:3px solid var(--acc);border-radius:14px}
+#tripSum b{color:var(--coral-d)}
+.howto{color:var(--sub);border-top:2px dashed rgba(255,255,255,.4)}
+.menu-notes summary{color:#fff}
+#goBar{background:var(--navy);border-top:4px solid #fff}
+#goSpot{color:var(--sub)} #goSpot b{color:#fff} #goSpot .nostore{color:var(--acc)}
+#goBar .go{background:var(--coral);border:3px solid #fff;border-radius:999px;font-size:21px;padding:9px 30px;box-shadow:0 5px 0 var(--coral-d)}
+#goBar .go:hover{background:#ff7d6b}
+
+/* 釣果カード */
+#catch .card{border-color:#fff}
+#catchCv{background:radial-gradient(ellipse at 50% 40%,#7fd4fa,#2f86e0 70%,#1a5ba3);border-radius:16px;box-shadow:0 0 0 3px #fff}
+#catchName{color:var(--acc);font-weight:800;font-size:36px;text-shadow:var(--outline);margin-top:14px}
+#catchName small{color:#fff;text-shadow:0 2px 0 var(--navy-d)}
+#catchSize{font-family:var(--f-num);color:#fff;text-shadow:0 2px 0 var(--navy-d)}
+#catchSize .rec{display:inline-block;white-space:nowrap;font-family:var(--f-pop);font-size:.6em;color:#fff;background:var(--coral);border-radius:999px;padding:3px 11px;vertical-align:.3em;text-shadow:none;box-shadow:0 3px 0 var(--coral-d)}
+#catchPrize{border:3px solid #fff;border-radius:999px}
+#catchDesc,#catchVerdict .why{color:#eaf6ff}
+#catchMeta{color:var(--sub)}
+#catchJudge span{color:#fff}
+#catchVerdict .mk{text-shadow:0 2px 0 var(--navy-d)}
+#catchVerdict .mk.ok{color:#9cf07a} #catchVerdict .mk.ng{color:#ff9a8a} #catchVerdict .mk.so{color:var(--acc)}
+#catchVerdict .src2{color:var(--sub)}
+#catchDish .dt,#zDet .dt{background:var(--acc);color:#4a3500;border-radius:999px;padding:0 10px}
+#bNext{box-shadow:0 -10px 16px #0f5aa0,0 5px 0 var(--coral-d)}
+body.phone.land #bNext{box-shadow:0 -6px 12px #0f5aa0,0 5px 0 var(--coral-d)}
+
+/* 図鑑：白いカード */
+#zTitle{background:var(--acc);color:#4a3500;border-radius:999px;box-shadow:0 3px 0 var(--acc-d)}
+#zStat{color:var(--sub)}
+.zgrid{gap:12px}
+.zc{background:#fff;color:var(--txt2);border-radius:16px;box-shadow:0 4px 0 var(--paper-sh);transition:transform .1s}
+.zc b{color:var(--navy);font-weight:800}
+.zc.got:hover{background:#f2f9ff;transform:translateY(-2px)}
+.zc.no{background:rgba(255,255,255,.16);box-shadow:none;color:var(--sub)}
+.zc.no b{color:rgba(255,255,255,.6)}
+.zc.gold{background:#fffbe6;box-shadow:0 0 0 3px var(--acc),0 4px 0 var(--acc-d)}
+.zc .st{color:#f0a500}
+.zc .zd{color:#e8590c;font-weight:700}
+.zc .ztgt{background:#e6f3ff;box-shadow:0 2px 0 var(--paper-sh)}
+.zc .ztgt.on{background:var(--acc);color:#4a3500}
+.znote{color:#e8590c}
+.zrecent{color:#eaf6ff}
+#zDet h2{color:var(--acc);font-weight:800;text-shadow:var(--outline)}
+#zDet .zrec{color:var(--sub)}
+#zDet .zdesc,#zDet .zdish{color:#eaf6ff}
+#zDet canvas{border-radius:16px;background:radial-gradient(ellipse at 50% 40%,#7fd4fa,#2f86e0 70%,#1a5ba3)}
 </style>
 </head>
 <body>
@@ -358,7 +508,7 @@ body.phone.land #gauge{bottom:calc(60px + env(safe-area-inset-bottom));width:min
           </div>
         </div>
       </header>
-      <div id="verNote" role="status"><b>試作 v0.37</b>　いつも最新版で遊べるよう、ときどきページを再読み込み（更新）してください。新しい版が出たら、ここでお知らせします。</div>
+      <div id="verNote" role="status"><b>試作 v0.38</b>　いつも最新版で遊べるよう、ときどきページを再読み込み（更新）してください。新しい版が出たら、ここでお知らせします。</div>
       <div id="tripSum"></div>
       <div class="menu-main">
         <section class="menu-block">
@@ -400,7 +550,7 @@ body.phone.land #gauge{bottom:calc(60px + env(safe-area-inset-bottom));width:min
           <p>①<kbd>落とす</kbd>で仕掛けを沈める（底に着くと「着底」）　②<kbd>巻く</kbd>でタナ（深さ）を調整。魚探の魚の反応に合わせよう　③<kbd>誘う</kbd>で仕掛けを動かす（ジグは落とすときや巻くときにも食うが、しゃくった直後がいちばん反応が出やすい）　④竿先がグッと入ったら<kbd>合わせ</kbd>　⑤やりとりは<kbd>巻く</kbd>を押し続ける。張りがドラグを超えると糸が出る。張りすぎると切れる、ゆるめるとバレる　⑥大物は水面で<kbd>合わせ</kbd>＝タモ入れ。</p>
           <p>ボートは潮で流され、実際の海底地形（GEBCO）に沿って深さが変わります。浅くなりすぎたら<kbd>流し直し</kbd>。潮がよく動く時間と朝夕のまずめ時は魚の食いが立ちます。ゲームの中では5分で1時間が進みます。岩場で底を引きずると<b>根掛かり</b>。浅くなったら巻き上げ、深くなったら落とし直して「底を取り直す」のが船釣りのコツです。</p>
         </details>
-        <div class="src">試作 v0.37 ／ 海底地形：GEBCO Compilation Group (2025) GEBCO_2025 Grid・(2020) GEBCO_2020 Grid（約400m格子のため根や瀬は表現できず、底質に合わせた起伏を足しています。洞爺湖の水深は湖の形から推定した作り物）／潮位：気象庁 潮位表「室蘭」／洞爺湖の決まり：洞爺湖漁業協同組合「遊漁について」（2026年）</div>
+        <div class="src">試作 v0.38 ／ 海底地形：GEBCO Compilation Group (2025) GEBCO_2025 Grid・(2020) GEBCO_2020 Grid（約400m格子のため根や瀬は表現できず、底質に合わせた起伏を足しています。洞爺湖の水深は湖の形から推定した作り物）／潮位：気象庁 潮位表「室蘭」／洞爺湖の決まり：洞爺湖漁業協同組合「遊漁について」（2026年）</div>
       </div>
     </div>
     <div id="goBar"><div id="goSpot"></div><button class="go" id="bStart">出船！</button></div>
@@ -874,7 +1024,7 @@ function drawFlat(c,L,fish,lk,o){
 // ============ 記録（ブラウザ内） ============
 const STORE='muroran-tsuri-game.v1';
 // ============ 版の確認（公開先の version.json と比べる） ============
-const APP_VER='0.37';
+const APP_VER='0.38';
 function verNewer(a,b){ const p=s=>String(s).split('.').map(n=>parseInt(n,10)||0), x=p(a), y=p(b); for(let i=0;i<Math.max(x.length,y.length);i++){ if((x[i]||0)!==(y[i]||0)) return (x[i]||0)>(y[i]||0); } return false; }
 function checkVer(force){ if(location.protocol==='file:'&&!window.__verTest) return; const now=Date.now(); if(!force&&now-(checkVer.t||0)<6e5) return; checkVer.t=now;
   fetch('version.json?t='+now,{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&j.v&&verNewer(j.v,APP_VER)) showNewVer(String(j.v)); }).catch(()=>{ }); }
@@ -1916,7 +2066,7 @@ function drawFF(){ const c=ffx, w=ffc.width, h=ffc.height; if(!ffBg) return; c.d
 }
 
 // ============ HUD ============
-function toast(msg,ms=1000,cls='',sub=''){ const el=$('#toast'); el.innerHTML=msg+(sub?`<small>${sub}</small>`:''); el.style.color=cls==='hot'?'#ffd36a':'#fff'; el.style.opacity=1; ui.toastT=(ms||1400)/1000; }
+function toast(msg,ms=1000,cls='',sub=''){ const el=$('#toast'); el.innerHTML=msg+(sub?`<small>${sub}</small>`:''); el.style.color=cls==='hot'?'#ffd23f':'#fff'; el.style.opacity=1; ui.toastT=(ms||1400)/1000; }
 // 魚探に映っている反応のおよその深さ（いちばん多い深さ。なければ null）
 function ffReact(){ const rx=rigX(), bins={}; let best=null;
   for(const f of G.fishes){ if(f.gone||f.state==='hooked') continue; const dx=Math.abs(f.x-rx); if(dx>1+f.y*.1) continue; const k=Math.round(f.y/3); bins[k]=(bins[k]||0)+1; }
@@ -1965,7 +2115,7 @@ function updateHUD(){ updateCoach(); rodAuto(); $('#bRig').classList.toggle('dis
   let tana='水面'; if(G.state==='fight'||G.state==='landing'||G.state==='rooted') tana='やりとり中'; else if(G.state==='snag') tana='根掛かり'; else if(G.state==='lost') tana='付け直し中';
   else if(G.state!=='surface'){ const above=bot-r.anchor; tana=(above<.1?'底':`底から ${above.toFixed(1)}m`)+`（${r.y.toFixed(1)}m）`; if(G.state==='falling') tana='落下中 '+r.y.toFixed(1)+'m'; if(r.baitGone) tana+=' ・エサなし?'; }
   $('#iTana').textContent=tana;
-  const a=activity(), tl=a>.78?['時合！','#ff9d3c']:a>.42?['ふつう','#3f8f8a']:['渋い','#556'];
+  const a=activity(), tl=a>.78?['時合！','#ff6b57']:a>.42?['ふつう','#22a6b3']:['渋い','#6b7d8f'];
   const te=$('#tide'); te.textContent=tl[0]; te.style.background=tl[1];
   $('#iCount').textContent=G.count;
   $('#iTime').textContent=G.clock?`${hm(new Date(G.clock))} ${G.band}・${G.tideTxt||''}`:'—';
